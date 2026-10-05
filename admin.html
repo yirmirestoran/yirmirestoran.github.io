@@ -232,6 +232,124 @@ h2{font-size:25px!important}
 .tpl b{display:block;font-size:14px}
 .tpl small{display:block;color:var(--muted);font-size:12px;margin-top:3px;line-height:1.4}
 
+/* Rezervasyon */
+.res-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.res-date{display:flex;gap:6px;align-items:center}
+.res-date input,.res-head select{padding:8px 10px;border:1px solid var(--line);border-radius:9px;font-weight:700;background:#fff}
+.res-day-name{font:600 22px/1.1 'Cormorant Garamond',serif;flex-basis:100%;margin-top:2px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:#faf8f4;gap:2px}
+.seg button{border:0;background:transparent;padding:7px 14px;border-radius:999px;font-weight:700;cursor:pointer;color:var(--muted)}
+.seg button.on{background:#2b2118;color:#ffd894}
+.res-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+.stat{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:12px 14px}
+.stat b{display:block;font:600 28px/1.1 'Cormorant Garamond',serif}
+.stat small{color:var(--muted);font-weight:700;font-size:12px}
+.floor-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.floor{display:block;width:100%;min-width:760px;height:auto;user-select:none;-webkit-user-select:none}
+.fl-bg{fill:#fbf8f2}
+.fl-wall{fill:none;stroke:#2b2118;stroke-width:6;stroke-linecap:round}
+.fl-door{stroke:var(--accent);stroke-width:3;stroke-dasharray:9 7}
+.fl-lbl{font:700 14px 'DM Sans',sans-serif;fill:var(--muted);letter-spacing:.1em}
+.fl-zone{fill:#ece3d4}
+.fl-tree{fill:#e3ead6;stroke:#8aa06d;stroke-width:2}
+.tbl{cursor:pointer}
+.tbl rect{fill:#fff;stroke:#cdbfa8;stroke-width:2;transition:fill .2s,stroke .2s}
+.tbl:hover rect{stroke:var(--accent);stroke-width:3}
+.tbl text{pointer-events:none}
+.tbl .t-id{font:700 20px 'DM Sans',sans-serif;fill:var(--text)}
+.tbl .t-sub{font:600 13px 'DM Sans',sans-serif;fill:var(--muted)}
+.tbl.soon rect{fill:#fdf3df;stroke:#e0b45c}
+.tbl.booked rect{fill:#f1dfbf;stroke:var(--accent)}
+.tbl.booked .t-sub{fill:#6b4c1e}
+.tbl.seated rect{fill:#2b2118;stroke:#2b2118}
+.tbl.seated .t-id,.tbl.seated .t-sub{fill:#ffd894}
+.tbl.dim{opacity:.35}
+.fl-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:12px;color:var(--muted);font-weight:700}
+.fl-legend i{display:inline-block;width:14px;height:14px;border-radius:4px;border:2px solid #cdbfa8;background:#fff;vertical-align:-3px;margin-right:6px}
+.fl-legend i.soon{background:#fdf3df;border-color:#e0b45c}
+.fl-legend i.booked{background:#f1dfbf;border-color:var(--accent)}
+.fl-legend i.seated{background:#2b2118;border-color:#2b2118}
+.gantt-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.gantt{--col:34px;min-width:max-content}
+.g-row{display:flex;border-top:1px solid var(--line);min-height:40px}
+.g-row.head{border-top:0;min-height:22px}
+.g-label{flex:none;width:78px;position:sticky;left:0;z-index:3;background:#fff;padding:7px 8px 7px 0;font-weight:700;font-size:13px;line-height:1.15}
+.g-label small{display:block;color:var(--muted);font-weight:500;font-size:11px}
+.g-track{position:relative;flex:none;cursor:copy;background:repeating-linear-gradient(90deg,transparent 0 calc(var(--col) * 2 - 1px),#efe8dc calc(var(--col) * 2 - 1px) calc(var(--col) * 2))}
+.g-row.head .g-track{cursor:default;background:none}
+.g-hour{position:absolute;top:2px;font-size:11px;font-weight:700;color:var(--muted)}
+.g-bar{position:absolute;top:5px;bottom:5px;border-radius:8px;background:#f1dfbf;border:1px solid var(--accent);padding:4px 7px;font-size:11.5px;font-weight:700;line-height:1.15;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;z-index:1}
+.g-bar small{display:block;font-weight:500;opacity:.8}
+.g-bar.pending{background:#fff;border-style:dashed}
+.g-bar.seated{background:#2b2118;color:#ffd894;border-color:#2b2118}
+.g-bar.done{opacity:.5}
+.g-now{position:absolute;top:0;bottom:0;width:2px;background:#d64545;z-index:2;pointer-events:none}
+.res-card{display:grid;grid-template-columns:70px 1fr auto;gap:12px;align-items:start;padding:12px 0;border-top:1px solid var(--line)}
+.res-card:first-child{border-top:0}
+.res-card.is-off{opacity:.5}
+.res-time b{display:block;font:600 24px/1 'Cormorant Garamond',serif}
+.res-time small{color:var(--muted);font-size:12px;font-weight:700}
+.res-main{min-width:0}
+.res-main b{font-size:15px}
+.res-main a{color:inherit}
+.res-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:#f3efe8;color:#5d5346}
+.pill.po{background:#eaf2e3;color:#3c6b2a}
+.pill.pay-paid{background:#e3f1e4;color:var(--ok)}
+.pill.pay-deposit{background:#fdf3df;color:#8a6417}
+.pill.note{background:#fbeceb;color:#9a3b33;white-space:normal}
+.res-side{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.res-side select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;font-weight:700;font-size:12px;background:#fff}
+.res-side select.st-confirmed{background:#f1dfbf}
+.res-side select.st-seated{background:#2b2118;color:#ffd894}
+.res-side select.st-done{background:#e3f1e4}
+.res-side select.st-cancelled,.res-side select.st-noshow{background:#fbeceb}
+@media(max-width:560px){.res-card{grid-template-columns:58px 1fr}.res-side{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:flex-end}}
+.modal.wide{width:min(880px,100%)}
+.steps{display:flex;gap:8px;margin:2px 0 14px;flex-wrap:wrap}
+.step{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#faf8f4;border-radius:999px;padding:6px 14px 6px 6px;font-weight:700;color:var(--muted);cursor:pointer}
+.step b{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#e8dfcf;color:var(--text);font-size:12px}
+.step.on{background:#2b2118;border-color:#2b2118;color:#ffd894}
+.step.on b{background:#ffd894;color:#2b2118}
+.pick-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:14px 0 6px}
+.pick-head .hint{margin:0;flex:1 1 260px}
+.floor-wrap.pick{border:1px solid var(--line);border-radius:14px;background:#fbf8f2}
+.floor-wrap.pick .floor{min-width:680px}
+#resf-step1 .grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.swipe-hint{display:none;font-size:12px;color:var(--muted);font-weight:700;margin:0 0 6px}
+@media(max-width:700px){.swipe-hint{display:block}}
+.tbl.fit rect{fill:#f2f8ee;stroke:#7fae68;stroke-width:2.5}
+.tbl.sel rect{fill:#2b2118;stroke:#2b2118;stroke-width:3}
+.tbl.sel .t-id,.tbl.sel .t-sub{fill:#ffd894}
+.tbl.busy{cursor:not-allowed}
+.tbl.busy rect{fill:#ece7df;stroke:#d6cdbf;stroke-dasharray:6 5}
+.tbl.busy .t-id,.tbl.busy .t-sub{fill:#a99f91}
+.fl-legend i.fit{background:#f2f8ee;border-color:#7fae68}
+.fl-legend i.sel{background:#2b2118;border-color:#2b2118}
+.fl-legend i.busy{background:#ece7df;border:2px dashed #d6cdbf}
+.pick-summary{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:space-between;padding:12px 14px;border-radius:12px;background:#2b2118;color:#ffd894;font-weight:700}
+.pick-summary .btn{background:transparent;color:#ffd894;border-color:rgba(255,216,148,.5)}
+.po-search{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;margin-top:10px}
+.po-cats{display:flex;gap:6px;overflow-x:auto;padding:8px 0}
+.po-cats button{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 11px;font-weight:700;font-size:12px;cursor:pointer}
+.po-cats button.on{background:#2b2118;color:#ffd894;border-color:#2b2118}
+.po-items{max-height:250px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:#fff}
+.po-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-top:1px solid var(--line)}
+.po-item:first-child{border-top:0}
+.po-item span{flex:1;min-width:0;font-weight:700;font-size:13px}
+.po-item span small{display:block;color:var(--muted);font-weight:500;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.po-item b{font-size:12.5px;white-space:nowrap}
+.po-cart{margin-top:10px}
+.po-line{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-top:1px dashed var(--line)}
+.po-line > span{font-weight:700;font-size:13px}
+.po-line > b{font-size:13px;min-width:70px;text-align:right}
+.po-line input{grid-column:1/-1;padding:5px 8px;border:1px solid var(--line);border-radius:8px;font-size:12.5px}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:#fff}
+.qty button{border:0;background:#faf8f4;width:30px;height:30px;font-weight:700;cursor:pointer;font-size:15px}
+.qty span{min-width:26px;text-align:center;font-weight:700}
+.po-total{display:flex;justify-content:space-between;font-weight:700;padding-top:8px;border-top:1px solid var(--line);margin-top:4px}
+.res-empty{color:var(--muted);padding:10px 0}
+
 /* Giriş ekranı */
 body.locked .topbar,body.locked .tabs,body.locked .page{display:none!important}
 .lock{display:none;min-height:100vh;align-items:center;justify-content:center;padding:24px 16px}
@@ -316,6 +434,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
 
 <div class="tabs">
   <button class="tab active" data-tab="home">Genel Bakış</button>
+  <button class="tab" data-tab="res">Rezervasyon</button>
   <button class="tab" data-tab="menu">Menü</button>
   <button class="tab" data-tab="chef">Şef &amp; İmza</button>
   <button class="tab" data-tab="calendar">Takvim</button>
@@ -333,7 +452,8 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     <div class="panel">
       <h2>Hızlı işlemler</h2>
       <div class="quick">
-        <button class="btn primary" data-quick="event">+ Etkinlik / duyuru</button>
+        <button class="btn primary" data-quick="res">+ Rezervasyon</button>
+        <button class="btn" data-quick="event">+ Etkinlik / duyuru</button>
         <button class="btn" data-quick="campaign">+ Kampanya</button>
         <button class="btn" data-quick="chef">Şef sayfası</button>
         <button class="btn" data-quick="ann">+ Duyuru afişi</button>
@@ -349,6 +469,44 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     <div class="panel"><h2>Şu an menüde</h2><div id="dash-live"></div></div>
   </div>
   <div class="panel"><h2>Önümüzdeki 7 gün</h2><div id="dash-week"></div></div>
+</div>
+
+<!-- REZERVASYON -->
+<div class="page hide" id="tab-res">
+  <div class="panel">
+    <div class="res-head">
+      <div class="res-date">
+        <button class="btn sm" id="res-prev" aria-label="Önceki gün">‹</button>
+        <input type="date" id="res-date">
+        <button class="btn sm" id="res-next" aria-label="Sonraki gün">›</button>
+        <button class="btn sm" id="res-today">Bugün</button>
+      </div>
+      <div class="seg" id="res-area"><button type="button" data-area="ic">İç Mekân</button><button type="button" data-area="dis">Dış Mekân</button></div>
+      <label class="hint" style="margin:0;font-weight:700">Saat <select id="res-time"></select></label>
+      <span style="flex:1"></span>
+      <button class="btn primary" id="res-add">+ Yeni rezervasyon</button>
+      <div class="res-day-name" id="res-day-name"></div>
+    </div>
+  </div>
+  <div class="res-stats" id="res-stats"></div>
+  <div class="panel">
+    <h2 id="res-floor-title">Oturma planı</h2>
+    <p class="hint">Boş masaya tıklayınca o masaya seçili saat için rezervasyon açılır; dolu masaya tıklayınca rezervasyon açılır.</p>
+    <p class="swipe-hint">↔ Krokinin tamamını görmek için yana kaydırın</p>
+    <div class="floor-wrap" id="res-floor"></div>
+    <div class="fl-legend"><span><i></i>Boş</span><span><i class="soon"></i>2 saat içinde rezervasyonu var</span><span><i class="booked"></i>Rezerve</span><span><i class="seated"></i>Müşteri masada</span></div>
+  </div>
+  <div class="panel">
+    <h2>Saat çizelgesi</h2>
+    <p class="hint">Boş bir saate tıklayarak o masa ve saat için hızlıca rezervasyon ekleyebilirsiniz.</p>
+    <div class="gantt-wrap" id="res-gantt"></div>
+  </div>
+  <div class="panel">
+    <h2>Günün rezervasyonları</h2>
+    <div id="res-list"></div>
+    <div class="row-actions"><button class="btn sm" id="res-csv">Bu günü Excel'e indir (CSV)</button><button class="btn sm" id="res-reload">Yenile</button></div>
+    <p class="hint" style="margin-top:10px">Rezervasyonlar müşteri adı ve telefonu içerdiği için şifrelenerek saklanır; yalnızca bu panelden, yönetici şifresiyle okunabilir. Her değişiklik anında kaydedilir (“Kaydet ve Yayınla” gerekmez).</p>
+  </div>
 </div>
 
 <!-- TAKVİM -->
@@ -418,6 +576,79 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       <button type="button" class="btn" id="annf-cancel">Vazgeç</button>
       <span style="flex:1"></span>
       <button type="button" class="btn danger" id="annf-delete">Sil</button>
+    </div>
+  </form>
+</div>
+
+<!-- Rezervasyon penceresi -->
+<div class="modal-veil hide" id="res-modal">
+  <form class="modal wide" id="res-form" autocomplete="off" novalidate>
+    <h2 id="resf-title">Yeni rezervasyon</h2>
+    <div class="steps" role="tablist">
+      <button type="button" class="step on" data-step="1"><b>1</b>Masa seçimi</button>
+      <button type="button" class="step" data-step="2"><b>2</b>Müşteri, menü ve ödeme</button>
+    </div>
+
+    <!-- 1. adım: tarih/saat + krokiden masa -->
+    <div class="res-step" id="resf-step1">
+      <div class="grid">
+        <div class="field"><label>Tarih</label><input id="resf-date" type="date"></div>
+        <div class="field"><label>Geliş saati</label><select id="resf-time"></select></div>
+        <div class="field"><label>Süre</label><select id="resf-duration"></select></div>
+        <div class="field"><label>Kişi sayısı</label><input id="resf-guests" type="number" min="1" max="60" inputmode="numeric"></div>
+      </div>
+      <div class="pick-head">
+        <div class="seg" id="resf-area"><button type="button" data-area="ic">İç Mekân</button><button type="button" data-area="dis">Dış Mekân</button></div>
+        <span class="hint" id="resf-table-hint"></span>
+      </div>
+      <p class="swipe-hint">↔ Krokinin tamamını görmek için yana kaydırın</p>
+      <div class="floor-wrap pick" id="resf-floor"></div>
+      <div class="fl-legend"><span><i class="fit"></i>Boş ve yeterli</span><span><i></i>Boş (küçük)</span><span><i class="sel"></i>Seçili</span><span><i class="busy"></i>Bu saatte dolu</span></div>
+      <div class="row-actions" style="margin-top:16px">
+        <button type="button" class="btn" data-res-close>Vazgeç</button>
+        <span style="flex:1"></span>
+        <button type="button" class="btn primary" id="resf-next">Devam →</button>
+      </div>
+    </div>
+
+    <!-- 2. adım: müşteri, ön sipariş, ödeme -->
+    <div class="res-step hide" id="resf-step2">
+      <div class="pick-summary"><span id="resf-summary"></span><button type="button" class="btn sm" data-step-go="1">Masa / saati değiştir</button></div>
+      <div class="grid" style="margin-top:12px">
+        <div class="field"><label>Ad Soyad</label><input id="resf-name"></div>
+        <div class="field"><label>Telefon</label><input id="resf-phone" type="tel" inputmode="tel" placeholder="05xx xxx xx xx"></div>
+        <div class="field"><label>Durum</label><select id="resf-status"></select></div>
+        <div class="field"><label>Nereden geldi</label><select id="resf-source"></select></div>
+      </div>
+      <div class="field" style="margin-top:10px"><label>Not (alerji, doğum günü, mama sandalyesi…)</label><textarea id="resf-note" rows="2"></textarea></div>
+      <div class="details-box">
+        <h3>Ön sipariş (isteğe bağlı)</h3>
+        <div class="grid">
+          <div class="field"><label>Hazır olma saati</label><select id="resf-ready"></select></div>
+          <div class="field"><label>Mutfak notu</label><input id="resf-onote" placeholder="ör. tatlılar kahveyle birlikte gelsin"></div>
+        </div>
+        <input class="po-search" id="resf-search" placeholder="Menüde ara ve ekle…">
+        <div class="po-cats" id="resf-cats"></div>
+        <div class="po-items" id="resf-items"></div>
+        <div class="po-cart" id="resf-cart"></div>
+      </div>
+      <div class="details-box">
+        <h3>Ödeme</h3>
+        <div class="grid">
+          <div class="field"><label>Ödeme durumu</label><select id="resf-pay"></select></div>
+          <div class="field"><label>Alınan tutar (TL)</label><input id="resf-paid" type="number" min="0" step="1" placeholder="0"></div>
+          <div class="field"><label>Ödeme yöntemi</label><select id="resf-method"></select></div>
+        </div>
+        <p class="hint">Online ödeme, ileride müşterilerin kendi rezervasyonunu yapacağı ekranla birlikte bağlanacak.</p>
+      </div>
+      <div class="row-actions" style="margin-top:16px">
+        <button type="button" class="btn" data-step-go="1">← Geri</button>
+        <button type="submit" class="btn primary" id="resf-save">Kaydet</button>
+        <button type="button" class="btn" id="resf-wa">WhatsApp'tan onay gönder</button>
+        <span style="flex:1"></span>
+        <button type="button" class="btn" data-res-close>Vazgeç</button>
+        <button type="button" class="btn danger" id="resf-delete">Sil</button>
+      </div>
     </div>
   </form>
 </div>
@@ -613,7 +844,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     <div class="row-actions">
       <button class="btn" id="reload-btn">Menüyü GitHub'dan yeniden yükle</button>
     </div>
-    <p class="hint" style="margin-top:14px"><b>Şifreyi unutursanız:</b> GitHub'da repodaki <code>auth.json</code> dosyasını silin; panel yeniden “İlk Kurulum” ekranını açar. Kurulumu yalnızca repoya yazma yetkisi olan geçerli bir token ile tamamlanabilir.</p>
+    <p class="hint" style="margin-top:14px"><b>Şifreyi unutursanız:</b> GitHub'da repodaki <code>auth.json</code> dosyasını silin; panel yeniden “İlk Kurulum” ekranını açar. Kurulumu yalnızca repoya yazma yetkisi olan geçerli bir token ile tamamlanabilir. <b>Dikkat:</b> bu durumda eski rezervasyon kayıtları okunamaz hâle gelir; önce Rezervasyon sekmesinden önemli günleri CSV olarak indirin.</p>
   </div>
 </div>
 
@@ -1872,6 +2103,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   });
   document.querySelectorAll('[data-quick]').forEach(b => b.addEventListener('click', () => {
     const q = b.dataset.quick;
+    if(q === 'res'){ showTab('res'); openResForm(null, {time: resTime}); }
     if(q === 'event') addEvent(Core.now().dayStart);
     if(q === 'campaign'){ showTab('campaigns'); addCampaign('blank'); }
     if(q === 'chef') showTab('chef');
@@ -2086,6 +2318,560 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     a.click();
   });
 
+  /* ---------- Rezervasyonlar ---------- */
+  // Müşteri adı/telefonu içerdiği için reservations.json, rastgele bir anahtarla (AES-GCM) şifrelenip repoda saklanır.
+  // Anahtar (dataKey) auth.json'un şifreli içeriğinde durur; yani rezervasyonlar yalnızca yönetici şifresiyle okunabilir.
+  // Her değişiklik anında kaydedilir; kaydetmeden hemen önce güncel liste okunur, böylece iki cihaz birbirinin kaydını silmez.
+  const RES_PATH = 'reservations.json';
+  const RES_STATUS = [['pending','Beklemede'],['confirmed','Onaylandı'],['seated','Geldi / masada'],['done','Tamamlandı'],['noshow','Gelmedi'],['cancelled','İptal']];
+  const RES_STATUS_LABEL = Object.fromEntries(RES_STATUS);
+  const RES_SOURCES = [['phone','Telefon'],['whatsapp','WhatsApp'],['instagram','Instagram'],['walkin','Kapıdan / masada'],['online','Online']];
+  const PAY_STATUS = [['none','Ödenmedi'],['deposit','Kapora alındı'],['paid','Ödendi']];
+  const PAY_METHODS = [['','—'],['cash','Nakit'],['card','Kredi kartı'],['transfer','Havale / EFT'],['online','Online ödeme']];
+  const DURATIONS = [60, 90, 120, 150, 180, 240, 300];
+  const SLOT = 30;
+  let resList = null, resSha = null, resLoading = null;
+  let resDay = null, resArea = 'ic', resTime = null;
+  let resEdit = null, resPoCat = '';
+
+  const optionsHtml = (list, val) => list.map(([k, l]) => '<option value="' + esc(k) + '"' + (k === val ? ' selected' : '') + '>' + esc(l) + '</option>').join('');
+  const durLabel = m => (m % 60 ? (m / 60).toFixed(1).replace('.', ',') : m / 60) + ' saat';
+  function todayStr(){ return new Date(Core.now().dayStart).toISOString().slice(0, 10); }
+  function shiftDay(d, n){ const t = Core.parseWall(d) + n * 86400000; return new Date(t).toISOString().slice(0, 10); }
+  function dayName(d){ return new Date(Core.parseWall(d)).toLocaleDateString('tr-TR', {weekday:'long', day:'numeric', month:'long', year:'numeric', timeZone:'UTC'}); }
+  function newDataKey(){ return bytesToB64(crypto.getRandomValues(new Uint8Array(32))); }
+
+  async function dataKeyObj(){
+    if(!session || !session.dataKey) throw new Error('Rezervasyon anahtarı yok. Çıkış yapıp yeniden giriş yapın.');
+    return crypto.subtle.importKey('raw', b64ToBytes(session.dataKey), 'AES-GCM', false, ['encrypt','decrypt']);
+  }
+  async function encryptData(obj){
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const data = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM', iv}, await dataKeyObj(), new TextEncoder().encode(JSON.stringify(obj))));
+    return {v:1, enc:'AES-GCM', iv: bytesToB64(iv), data: bytesToB64(data)};
+  }
+  async function decryptData(box){
+    const plain = await crypto.subtle.decrypt({name:'AES-GCM', iv: b64ToBytes(box.iv)}, await dataKeyObj(), b64ToBytes(box.data));
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+  // Repodaki güncel liste → {list, sha}. 1 MB üstü dosyalarda içerik blob API'sinden okunur.
+  async function fetchReservations(){
+    let d;
+    try{ d = await gh(session, 'GET', null, RES_PATH); }
+    catch(e){ if(e.status === 404) return {list: [], sha: null}; throw e; }
+    let b64 = d.content;
+    if(!b64){
+      const r = await fetch('https://api.github.com/repos/' + encodeURIComponent(session.owner) + '/' + encodeURIComponent(session.repo) + '/git/blobs/' + d.sha,
+        {headers: {'Authorization':'Bearer ' + session.token, 'Accept':'application/vnd.github+json'}, cache:'no-store'});
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      b64 = (await r.json()).content;
+    }
+    const obj = await decryptData(JSON.parse(b64decode(b64)));
+    return {list: obj.reservations || [], sha: d.sha};
+  }
+  async function loadReservations(quiet){
+    if(!session) return;
+    if(resLoading) return resLoading;
+    resLoading = (async () => {
+      try{
+        const cur = await fetchReservations();
+        if(resList && cur.sha && cur.sha === resSha) return;
+        resList = cur.list; resSha = cur.sha;
+        refreshResViews();
+      }catch(e){
+        if(!quiet) toast('Rezervasyonlar yüklenemedi: ' + (e.status ? ghErrorText(e) : (e.name === 'OperationError' ? 'şifre çözülemedi' : e.message)), true, 8000);
+        if(!resList){ resList = null; $('#res-list').innerHTML = '<p class="msg err">Rezervasyonlar yüklenemedi. ' + esc(e.message || '') + '</p>'; }
+      }finally{ resLoading = null; }
+    })();
+    return resLoading;
+  }
+  // Güncel listeyi okuyup fn ile değiştirir ve kaydeder; aynı anda başka cihaz kaydettiyse tekrar dener
+  async function mutateReservations(fn){
+    for(let attempt = 0; attempt < 3; attempt++){
+      const cur = await fetchReservations();
+      const out = fn(cur.list);
+      const box = await encryptData({v:1, updatedAt: new Date().toISOString(), reservations: cur.list});
+      try{
+        // Commit mesajında müşteri bilgisi yok (repo herkese açık)
+        const res = await gh(session, 'PUT', {message: 'Rezervasyonlar güncellendi', content: b64encode(JSON.stringify(box) + '\n'),
+          branch: session.branch, sha: cur.sha || undefined}, RES_PATH);
+        resList = cur.list; resSha = res.content.sha;
+        refreshResViews();
+        return out;
+      }catch(e){
+        if(e.status === 409 || e.status === 422) continue;
+        throw e;
+      }
+    }
+    throw new Error('Kayıt başka bir cihazla çakıştı, lütfen tekrar deneyin.');
+  }
+  async function updateRes(id, patch, msg){
+    try{
+      await mutateReservations(list => {
+        const r = list.find(x => x.id === id);
+        if(r) Object.assign(r, patch, {updatedAt: new Date().toISOString()});
+      });
+      if(msg) toast(msg);
+    }catch(e){ toast(e.status ? ghErrorText(e) : e.message, true, 7000); refreshResViews(); }
+  }
+
+  /* Saatler: servis günü açılıştan kapanışa; gece yarısından sonraki saatler aynı servis gününe sayılır */
+  function serviceHours(){
+    const site = (state && state.site) || {};
+    const o = Core.parseHM(site.opening), c = Core.parseHM(site.closing);
+    const open = o != null ? o : 12 * 60;
+    let close = c != null ? c : 24 * 60;
+    if(close <= open) close += 1440;
+    return {open, close};
+  }
+  function resMin(t){
+    const m = Core.parseHM(t);
+    if(m == null) return null;
+    return m < serviceHours().open - 180 ? m + 1440 : m;
+  }
+  function slotList(lastOffset){
+    const h = serviceHours(), out = [];
+    for(let m = h.open; m <= h.close - (lastOffset == null ? 60 : lastOffset); m += SLOT) out.push(Core.hm(m));
+    return out;
+  }
+  function resRange(r){ const s = resMin(r.time); return [s, s + (+r.duration || 120)]; }
+  const blocking = r => r.status !== 'cancelled' && r.status !== 'noshow' && r.status !== 'done';
+  function dayRes(day){ return (resList || []).filter(r => r.date === day).sort((a, b) => resMin(a.time) - resMin(b.time)); }
+  function tableConflict(tableId, day, start, end, exceptId){
+    return (resList || []).find(r => r.id !== exceptId && r.date === day && blocking(r) && (r.tables || []).includes(tableId) &&
+      resRange(r)[0] < end && start < resRange(r)[1]) || null;
+  }
+  function tableLabels(r){ return (r.tables || []).map(id => (Core.tableById(id) || {label: id}).label).join(' + ') || 'Masa seçilmedi'; }
+  function nowMinForDay(day){
+    if(day !== todayStr()){
+      const n = Core.now();
+      // gece yarısından sonra hâlâ önceki servis günündeysek
+      if(day === shiftDay(todayStr(), -1) && n.min < serviceHours().open - 180) return n.min + 1440;
+      return null;
+    }
+    const m = Core.now().min;
+    return m < serviceHours().open - 180 ? m + 1440 : m;
+  }
+
+  /* ---------- Rezervasyon sekmesi ---------- */
+  function refreshResViews(){
+    if(!$('#tab-res').classList.contains('hide')) renderRes();
+  }
+  function ensureResDefaults(){
+    if(!resDay) resDay = todayStr();
+    const slots = slotList(0);
+    if(!resTime || !slots.includes(resTime)){
+      const now = nowMinForDay(resDay), h = serviceHours();
+      let m = now != null ? Math.max(h.open, Math.ceil(now / SLOT) * SLOT) : h.open + 300;
+      m = Math.min(m, h.close - SLOT);
+      resTime = Core.hm(m);
+      if(!slots.includes(resTime)) resTime = slots[0];
+    }
+  }
+  function renderRes(){
+    if(!state) return;
+    ensureResDefaults();
+    $('#res-date').value = resDay;
+    $('#res-day-name').textContent = dayName(resDay) + (resDay === todayStr() ? ' · Bugün' : '');
+    $('#res-time').innerHTML = slotList(0).map(t => '<option' + (t === resTime ? ' selected' : '') + '>' + t + '</option>').join('');
+    document.querySelectorAll('#res-area button').forEach(b => b.classList.toggle('on', b.dataset.area === resArea));
+    if(resList === null){
+      $('#res-list').innerHTML = '<p class="res-empty">Yükleniyor…</p>';
+      loadReservations();
+    }
+    renderResStats();
+    renderFloor();
+    renderGantt();
+    renderResList();
+  }
+  function renderResStats(){
+    const list = dayRes(resDay).filter(r => r.status !== 'cancelled');
+    const guests = list.reduce((s, r) => s + (+r.guests || 0), 0);
+    const seated = list.filter(r => r.status === 'seated').length;
+    const po = list.filter(r => r.preorder && (r.preorder.items || []).length).length;
+    const pending = list.filter(r => r.status === 'pending').length;
+    $('#res-stats').innerHTML = [[list.length, 'Rezervasyon'], [guests, 'Kişi'], [seated, 'Şu an masada'], [pending, 'Onay bekliyor'], [po, 'Ön siparişli']]
+      .map(([n, l]) => '<div class="stat"><b>' + n + '</b><small>' + l + '</small></div>').join('');
+  }
+
+  // Krokiyi çizer; her masanın görünümü decorate(t) → {cls, sub, res, busy} ile belirlenir (ana plan ve seçim adımı ayrı)
+  function floorSvg(floor, decorate){
+    const pad = 46;
+    let s = '<svg class="floor" viewBox="' + (-pad) + ' ' + (-pad) + ' ' + (floor.w + pad * 2) + ' ' + (floor.h + pad * 2) + '" role="img" aria-label="' + esc(floor.name) + ' oturma planı">';
+    s += '<rect class="fl-bg" x="0" y="0" width="' + floor.w + '" height="' + floor.h + '"/>';
+    floor.zones.forEach(z => {
+      s += '<rect class="fl-zone" x="' + z.x + '" y="' + z.y + '" width="' + z.w + '" height="' + z.h + '"/>' +
+        '<text class="fl-lbl" x="' + (z.x + z.w / 2) + '" y="' + (z.y + z.h / 2 + 5) + '" text-anchor="middle">' + esc(z.label.toLocaleUpperCase('tr-TR')) + '</text>';
+    });
+    floor.obstacles.forEach(o => {
+      const cx = o.x + o.w / 2, cy = o.y + o.h / 2;
+      s += '<ellipse class="fl-tree" cx="' + cx + '" cy="' + cy + '" rx="' + (o.w / 2 - 6) + '" ry="' + (o.h / 2 - 4) + '"/>' +
+        '<text class="fl-lbl" x="' + cx + '" y="' + (cy + 5) + '" text-anchor="middle" style="fill:#5d7a3f">🌳 ' + esc(o.label.toLocaleUpperCase('tr-TR')) + '</text>';
+    });
+    s += '<path class="fl-wall" d="' + floor.walls.map(w => 'M' + w[0] + ' ' + w[1] + 'L' + w[2] + ' ' + w[3]).join('') + '"/>';
+    floor.doors.forEach(d => {
+      const ty = d.side === 'top' ? d.y1 - 14 : d.y1 + 28;
+      s += '<line class="fl-door" x1="' + d.x1 + '" y1="' + d.y1 + '" x2="' + d.x2 + '" y2="' + d.y2 + '"/>' +
+        '<text class="fl-lbl" x="' + ((d.x1 + d.x2) / 2) + '" y="' + ty + '" text-anchor="middle" style="fill:var(--accent)">' + esc(d.label.toLocaleUpperCase('tr-TR')) + '</text>';
+    });
+    floor.tables.forEach(t => {
+      const o = decorate(t, t.w < 100);
+      const small = t.w < 100, ins = 5, cx = t.x + t.w / 2, cy = t.y + t.h / 2;
+      const max = Math.floor((t.w - 16) / (small ? 6.5 : 7.4));   // yazı masanın dışına taşmasın
+      if(o.sub && o.sub.length > max) o.sub = o.sub.slice(0, max - 1).trim() + '…';
+      s += '<g class="tbl ' + (o.cls || '') + '" data-table="' + t.id + '"' + (o.res ? ' data-res="' + esc(o.res.id) + '"' : '') +
+        ' tabindex="0" role="button" aria-label="' + esc(t.label + ', ' + t.seats + ' kişilik' + (o.busy ? ', dolu' : ', boş')) + '">' +
+        (o.title ? '<title>' + esc(o.title) + '</title>' : '') +
+        '<rect x="' + (t.x + ins) + '" y="' + (t.y + ins) + '" width="' + (t.w - ins * 2) + '" height="' + (t.h - ins * 2) + '" rx="10"/>' +
+        '<text class="t-id" x="' + cx + '" y="' + (cy + (small ? -1 : 0)) + '" text-anchor="middle">' + esc(t.label) + '</text>' +
+        '<text class="t-sub" x="' + cx + '" y="' + (cy + (small ? 13 : 20)) + '" text-anchor="middle"' + (small ? ' style="font-size:11px"' : '') + '>' + esc(o.sub) + '</text></g>';
+    });
+    return s + '</svg>';
+  }
+  // Ana plan: seçili saatte kim oturuyor, yakında kim gelecek
+  function renderFloor(){
+    const floor = Core.floorById(resArea), minute = resMin(resTime);
+    const day = dayRes(resDay).filter(blocking);
+    $('#res-floor-title').textContent = floor.name + ' · ' + resTime;
+    $('#res-floor').innerHTML = floorSvg(floor, (t, small) => {
+      const mine = day.filter(r => (r.tables || []).includes(t.id));
+      const at = mine.find(r => resRange(r)[0] <= minute && minute < resRange(r)[1]);
+      const next = at ? null : mine.filter(r => resRange(r)[0] > minute).sort((a, b) => resMin(a.time) - resMin(b.time))[0];
+      const soon = next && resMin(next.time) - minute <= 120;
+      let sub = t.seats + ' kişilik';
+      if(at) sub = small ? at.time : at.time + ' · ' + (at.name || '').split(' ')[0] + ' · ' + at.guests + 'k';
+      else if(next) sub = (small ? '' : 'Sonraki ') + next.time;
+      return {cls: at ? (at.status === 'seated' ? 'seated' : 'booked') : (soon ? 'soon' : ''), sub, res: at, busy: !!at};
+    });
+  }
+  $('#res-floor').addEventListener('click', e => {
+    const g = e.target.closest('.tbl');
+    if(!g) return;
+    if(g.dataset.res && resList) return openResForm(resList.find(r => r.id === g.dataset.res));
+    openResForm(null, {tables: [g.dataset.table], time: resTime});
+  });
+  $('#res-floor').addEventListener('keydown', e => { if(e.key === 'Enter' && e.target.closest('.tbl')) e.target.closest('.tbl').dispatchEvent(new MouseEvent('click', {bubbles: true})); });
+
+  function renderGantt(){
+    const floor = Core.floorById(resArea), h = serviceHours();
+    const col = 34, px = m => (m - h.open) / SLOT * col, width = px(h.close);
+    const day = dayRes(resDay).filter(r => r.status !== 'cancelled' && r.status !== 'noshow');
+    let s = '<div class="gantt"><div class="g-row head"><div class="g-label"></div><div class="g-track" style="width:' + width + 'px">';
+    for(let m = Math.ceil(h.open / 60) * 60; m < h.close; m += 60) s += '<span class="g-hour" style="left:' + (px(m) + 3) + 'px">' + Core.hm(m) + '</span>';
+    s += '</div></div>';
+    const now = nowMinForDay(resDay);
+    floor.tables.forEach(t => {
+      s += '<div class="g-row"><div class="g-label">' + esc(t.label) + '<small>' + t.seats + ' kişilik</small></div><div class="g-track" data-table="' + t.id + '" style="width:' + width + 'px">';
+      day.filter(r => (r.tables || []).includes(t.id)).forEach(r => {
+        const [a, b] = resRange(r);
+        s += '<div class="g-bar ' + esc(r.status) + '" data-res="' + esc(r.id) + '" style="left:' + px(a) + 'px;width:' + Math.max(col, px(b) - px(a) - 2) + 'px" title="' + esc(r.time + ' · ' + r.name + ' · ' + r.guests + ' kişi') + '">' +
+          esc(r.name || '') + '<small>' + esc(r.time) + ' · ' + r.guests + ' kişi' + (r.preorder && (r.preorder.items || []).length ? ' · 🍽' : '') + '</small></div>';
+      });
+      if(now != null && now >= h.open && now <= h.close) s += '<span class="g-now" style="left:' + px(now) + 'px"></span>';
+      s += '</div></div>';
+    });
+    $('#res-gantt').innerHTML = s + '</div>';
+  }
+  $('#res-gantt').addEventListener('click', e => {
+    const bar = e.target.closest('.g-bar');
+    if(bar) return openResForm(resList.find(r => r.id === bar.dataset.res));
+    const track = e.target.closest('.g-track[data-table]');
+    if(!track) return;
+    const h = serviceHours();
+    const m = Math.min(h.close - 60, h.open + Math.floor((e.clientX - track.getBoundingClientRect().left) / 34) * SLOT);
+    openResForm(null, {tables: [track.dataset.table], time: Core.hm(m)});
+  });
+
+  function renderResList(){
+    if(resList === null) return;
+    const list = dayRes(resDay);
+    if(!list.length){ $('#res-list').innerHTML = '<p class="res-empty">Bu gün için rezervasyon yok.</p>'; return; }
+    $('#res-list').innerHTML = list.map(r => {
+      const [a, b] = resRange(r);
+      const items = (r.preorder && r.preorder.items) || [];
+      const pay = r.payment || {};
+      const meta = ['<span class="pill">' + esc(tableLabels(r)) + '</span>'];
+      if(items.length) meta.push('<span class="pill po">🍽 ' + items.reduce((s, i) => s + (+i.qty || 1), 0) + ' ürün' + (r.preorder.readyAt ? ' · ' + esc(r.preorder.readyAt) + '\'de hazır' : '') + '</span>');
+      if(pay.status === 'paid' || pay.status === 'deposit') meta.push('<span class="pill pay-' + pay.status + '">' + (pay.status === 'paid' ? 'Ödendi' : 'Kapora') + (+pay.amount ? ' · ' + Core.formatTL(+pay.amount) : '') + '</span>');
+      if(r.note) meta.push('<span class="pill note">✎ ' + esc(r.note) + '</span>');
+      return '<div class="res-card' + (r.status === 'cancelled' || r.status === 'noshow' ? ' is-off' : '') + '">' +
+        '<div class="res-time"><b>' + esc(r.time) + '</b><small>' + Core.hm(b) + '\'e kadar</small></div>' +
+        '<div class="res-main"><b>' + esc(r.name) + '</b> · ' + (+r.guests || 0) + ' kişi' +
+          (r.phone ? ' · <a href="tel:' + esc(String(r.phone).replace(/[^\d+]/g, '')) + '">' + esc(r.phone) + '</a>' : '') +
+          '<div class="res-meta">' + meta.join('') + '</div></div>' +
+        '<div class="res-side"><select data-res-status="' + esc(r.id) + '" class="st-' + esc(r.status) + '" aria-label="Durum">' + optionsHtml(RES_STATUS, r.status) + '</select>' +
+          '<button class="btn sm" data-res-edit="' + esc(r.id) + '">Düzenle</button></div></div>';
+    }).join('');
+  }
+  $('#res-list').addEventListener('change', e => {
+    const id = e.target.dataset.resStatus;
+    if(id) updateRes(id, {status: e.target.value}, 'Durum güncellendi: ' + RES_STATUS_LABEL[e.target.value]);
+  });
+  $('#res-list').addEventListener('click', e => {
+    const id = e.target.dataset && e.target.dataset.resEdit;
+    if(id) openResForm(resList.find(r => r.id === id));
+  });
+
+  $('#res-date').addEventListener('change', e => { if(e.target.value){ resDay = e.target.value; renderRes(); } });
+  $('#res-prev').addEventListener('click', () => { resDay = shiftDay(resDay, -1); renderRes(); });
+  $('#res-next').addEventListener('click', () => { resDay = shiftDay(resDay, 1); renderRes(); });
+  $('#res-today').addEventListener('click', () => { resDay = todayStr(); resTime = null; renderRes(); });
+  $('#res-time').addEventListener('change', e => { resTime = e.target.value; renderFloor(); });
+  $('#res-area').addEventListener('click', e => { const b = e.target.closest('button'); if(b){ resArea = b.dataset.area; renderRes(); } });
+  $('#res-add').addEventListener('click', () => openResForm(null, {time: resTime}));
+  $('#res-reload').addEventListener('click', async () => { resSha = null; await loadReservations(); toast('Rezervasyonlar yenilendi.'); });
+  $('#res-csv').addEventListener('click', () => {
+    const rows = [['Tarih','Saat','Bitiş','Ad Soyad','Telefon','Kişi','Masa','Durum','Kaynak','Not','Ön sipariş','Hazır olma','Ödeme','Tutar']];
+    dayRes(resDay).forEach(r => {
+      const items = (r.preorder && r.preorder.items) || [];
+      rows.push([r.date, r.time, Core.hm(resRange(r)[1]), r.name, r.phone || '', r.guests, tableLabels(r), RES_STATUS_LABEL[r.status] || r.status,
+        (RES_SOURCES.find(s => s[0] === r.source) || ['', ''])[1], r.note || '', items.map(i => i.qty + 'x ' + i.name + (i.note ? ' (' + i.note + ')' : '')).join(', '),
+        (r.preorder && r.preorder.readyAt) || '', (PAY_STATUS.find(p => p[0] === (r.payment || {}).status) || ['', ''])[1], (r.payment || {}).amount || '']);
+    });
+    const csv = '﻿' + rows.map(row => row.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(';')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8'}));
+    a.download = 'rezervasyonlar-' + resDay + '.csv';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  });
+
+  /* ---------- Rezervasyon penceresi ---------- */
+  // Yeni rezervasyon 1. adımdan (krokiden masa), mevcut rezervasyon 2. adımdan (detaylar) açılır
+  function openResForm(r, preset){
+    if(!session || !session.dataKey) return toast('Rezervasyonlar için çıkış yapıp yeniden giriş yapın.', true, 7000);
+    if(resList === null){ loadReservations(); return toast('Rezervasyonlar yükleniyor, birazdan tekrar deneyin.', true); }
+    ensureResDefaults();
+    const isNew = !r;
+    resEdit = isNew ? Object.assign({
+      id: 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), date: resDay || todayStr(), time: resTime, duration: 120,
+      guests: 2, name: '', phone: '', tables: [], area: resArea, status: 'confirmed', source: 'phone', note: '',
+      preorder: {items: [], readyAt: '', note: ''}, payment: {status: 'none', amount: 0, method: ''}
+    }, preset || {}) : JSON.parse(JSON.stringify(r));
+    resEdit.preorder = resEdit.preorder || {items: [], readyAt: '', note: ''};
+    resEdit.payment = resEdit.payment || {status: 'none', amount: 0, method: ''};
+    resEdit.tables = resEdit.tables || [];
+    if(resEdit.tables.length) resEdit.area = (Core.tableById(resEdit.tables[0]) || {}).area || resEdit.area;
+    resEdit._new = isNew;
+    resPoCat = '';
+    $('#resf-title').textContent = isNew ? 'Yeni rezervasyon' : 'Rezervasyon · ' + (r.name || '');
+    $('#resf-name').value = resEdit.name;
+    $('#resf-phone').value = resEdit.phone || '';
+    $('#resf-guests').value = resEdit.guests;
+    $('#resf-date').value = resEdit.date;
+    const slots = slotList();
+    if(resEdit.time && !slots.includes(resEdit.time)) slots.push(resEdit.time);
+    $('#resf-time').innerHTML = slots.map(t => '<option' + (t === resEdit.time ? ' selected' : '') + '>' + t + '</option>').join('');
+    $('#resf-duration').innerHTML = DURATIONS.map(m => '<option value="' + m + '"' + (m === +resEdit.duration ? ' selected' : '') + '>' + durLabel(m) + '</option>').join('');
+    $('#resf-status').innerHTML = optionsHtml(RES_STATUS, resEdit.status);
+    $('#resf-source').innerHTML = optionsHtml(RES_SOURCES, resEdit.source);
+    $('#resf-note').value = resEdit.note || '';
+    $('#resf-ready').innerHTML = '<option value="">Geldiklerinde</option>' + slotList(0).map(t => '<option' + (t === resEdit.preorder.readyAt ? ' selected' : '') + '>' + t + '</option>').join('');
+    $('#resf-onote').value = resEdit.preorder.note || '';
+    $('#resf-search').value = '';
+    $('#resf-pay').innerHTML = optionsHtml(PAY_STATUS, resEdit.payment.status);
+    $('#resf-paid').value = +resEdit.payment.amount || '';
+    $('#resf-method').innerHTML = optionsHtml(PAY_METHODS, resEdit.payment.method || '');
+    $('#resf-delete').classList.toggle('hide', isNew);
+    renderResTables();
+    renderPoCats();
+    renderPoItems();
+    renderPoCart();
+    $('#res-modal').classList.remove('hide');
+    showResStep(isNew ? 1 : 2, true);
+  }
+  function showResStep(n, force){
+    if(n === 2 && !force){
+      readResForm();
+      if(!resEdit.tables.length && !confirm('Krokiden masa seçilmedi. Masasız devam edilsin mi?')) return;
+    }
+    document.querySelectorAll('#res-form .step').forEach(b => b.classList.toggle('on', +b.dataset.step === n));
+    $('#resf-step1').classList.toggle('hide', n !== 1);
+    $('#resf-step2').classList.toggle('hide', n !== 2);
+    if(n === 2){
+      const end = Core.hm(resRange(resEdit)[1]);
+      $('#resf-summary').textContent = dayName(resEdit.date) + ' · ' + resEdit.time + '–' + end + ' · ' + resEdit.guests + ' kişi · ' +
+        (resEdit.tables.length ? Core.floorById(resEdit.area).name + ' ' + tableLabels(resEdit) : 'Masa seçilmedi');
+    }
+    $('#res-modal').scrollTop = 0;
+    setTimeout(() => { if(n === 2 && resEdit && !resEdit.name) $('#resf-name').focus(); }, 50);
+  }
+  document.querySelectorAll('#res-form .step, #res-form [data-step-go]').forEach(b => b.addEventListener('click', () => showResStep(+(b.dataset.step || b.dataset.stepGo))));
+  $('#resf-next').addEventListener('click', () => showResStep(2));
+  function closeResForm(){ $('#res-modal').classList.add('hide'); resEdit = null; }
+  function readResForm(){
+    Object.assign(resEdit, {
+      name: $('#resf-name').value.trim(), phone: $('#resf-phone').value.trim(), guests: Math.max(1, +$('#resf-guests').value || 1),
+      date: $('#resf-date').value || resEdit.date, time: $('#resf-time').value, duration: +$('#resf-duration').value || 120,
+      status: $('#resf-status').value, source: $('#resf-source').value, note: $('#resf-note').value.trim()
+    });
+    resEdit.preorder.readyAt = $('#resf-ready').value;
+    resEdit.preorder.note = $('#resf-onote').value.trim();
+    resEdit.payment = {status: $('#resf-pay').value, amount: +$('#resf-paid').value || 0, method: $('#resf-method').value};
+  }
+  // 1. adım: krokide masa seçimi (seçilen tarih, saat ve süreye göre dolu masalar kapalı görünür)
+  function renderResTables(){
+    if(!resEdit) return;
+    readResForm();
+    const floor = Core.floorById(resEdit.area);
+    document.querySelectorAll('#resf-area button').forEach(b => b.classList.toggle('on', b.dataset.area === resEdit.area));
+    const [a, b] = resRange(resEdit);
+    $('#resf-floor').innerHTML = floorSvg(floor, (t, small) => {
+      const c = tableConflict(t.id, resEdit.date, a, b, resEdit.id);
+      if(resEdit.tables.includes(t.id)) return {cls: 'sel', sub: '✓ Seçildi', busy: false};
+      if(c) return {cls: 'busy', sub: small ? c.time : 'Dolu · ' + c.time, busy: true, title: 'Dolu: ' + c.time + ' · ' + c.name + ' · ' + c.guests + ' kişi'};
+      return {cls: t.seats >= resEdit.guests ? 'fit' : '', sub: t.seats + ' kişilik', busy: false};
+    });
+    const seats = resEdit.tables.reduce((s, id) => s + ((Core.tableById(id) || {}).seats || 0), 0);
+    const conflicts = resEdit.tables.map(id => tableConflict(id, resEdit.date, a, b, resEdit.id)).filter(Boolean);
+    let hint = resEdit.tables.length ? 'Seçilen: ' + tableLabels(resEdit) + ' · toplam ' + seats + ' kişilik.'
+      : 'Krokiden masaya tıklayın. Kalabalık gruplar için birden fazla masa seçebilirsiniz.';
+    if(resEdit.tables.length && seats < resEdit.guests) hint += ' ⚠ Kişi sayısı masa kapasitesinden fazla.';
+    if(conflicts.length) hint += ' ⚠ Seçili masada çakışan rezervasyon var: ' + conflicts.map(c => c.time + ' ' + c.name).join(', ');
+    $('#resf-table-hint').textContent = hint;
+  }
+  $('#resf-floor').addEventListener('click', e => {
+    const g = e.target.closest('.tbl');
+    if(!g || !resEdit) return;
+    const id = g.dataset.table;
+    if(g.classList.contains('busy')){
+      const t = g.querySelector('title');
+      return toast(t ? t.textContent : 'Bu masa seçilen saatte dolu.', true);
+    }
+    resEdit.tables = resEdit.tables.includes(id) ? resEdit.tables.filter(x => x !== id) : resEdit.tables.concat(id);
+    renderResTables();
+  });
+  $('#resf-floor').addEventListener('keydown', e => { if(e.key === 'Enter' && e.target.closest('.tbl')) e.target.closest('.tbl').dispatchEvent(new MouseEvent('click', {bubbles: true})); });
+  $('#resf-area').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if(!b || !resEdit || b.dataset.area === resEdit.area) return;
+    resEdit.area = b.dataset.area;
+    resEdit.tables = [];
+    renderResTables();
+  });
+  ['#resf-guests', '#resf-date', '#resf-time', '#resf-duration'].forEach(s => $(s).addEventListener('change', renderResTables));
+  $('#resf-guests').addEventListener('input', renderResTables);
+
+  /* Ön sipariş: menüden ürün seçimi */
+  function poMenuItems(){
+    const out = [];
+    (state.categories || []).forEach(c => { if(!c.hidden) (c.items || []).forEach(i => { if(!i.hidden && i.name) out.push({cat: c, item: i}); }); });
+    return out;
+  }
+  function renderPoCats(){
+    const cats = (state.categories || []).filter(c => !c.hidden && (c.items || []).some(i => !i.hidden));
+    $('#resf-cats').innerHTML = '<button type="button" data-cat=""' + (resPoCat ? '' : ' class="on"') + '>Tümü</button>' +
+      cats.map(c => '<button type="button" data-cat="' + esc(c.id) + '"' + (resPoCat === c.id ? ' class="on"' : '') + '>' + esc(c.title || c.name || c.id) + '</button>').join('');
+  }
+  function renderPoItems(){
+    const q = Core.slugify($('#resf-search').value);
+    const list = poMenuItems().filter(x => (!resPoCat || x.cat.id === resPoCat) && (!q || Core.slugify(x.item.name + ' ' + (x.item.desc || x.item.description || '')).includes(q)));
+    $('#resf-items').innerHTML = list.length ? list.slice(0, 120).map(x => {
+      const inCart = resEdit.preorder.items.find(i => i.id === x.item.id);
+      return '<div class="po-item"><span>' + esc(x.item.name) + '<small>' + esc(x.cat.title || x.cat.name || '') + '</small></span><b>' + esc(x.item.price || '') + '</b>' +
+        '<button type="button" class="btn sm' + (inCart ? '' : ' primary') + '" data-po-add="' + esc(x.item.id) + '">' + (inCart ? '+1 (' + inCart.qty + ')' : '+ Ekle') + '</button></div>';
+    }).join('') : '<p class="res-empty" style="padding:10px">Ürün bulunamadı.</p>';
+  }
+  function renderPoCart(){
+    const items = resEdit.preorder.items;
+    if(!items.length){ $('#resf-cart').innerHTML = '<p class="hint">Henüz ürün eklenmedi. Müşteri gelmeden hazırlanmasını istediği ürünleri buradan ekleyin.</p>'; return; }
+    const total = items.reduce((s, i) => s + (+i.unit || 0) * (+i.qty || 1), 0);
+    $('#resf-cart').innerHTML = items.map((i, n) =>
+      '<div class="po-line"><span>' + esc(i.name) + '</span>' +
+      '<span class="qty"><button type="button" data-po-dec="' + n + '" aria-label="Azalt">−</button><span>' + i.qty + '</span><button type="button" data-po-inc="' + n + '" aria-label="Artır">+</button></span>' +
+      '<b>' + (+i.unit ? Core.formatTL(i.unit * i.qty) : '—') + '</b>' +
+      '<input data-po-note="' + n + '" value="' + esc(i.note || '') + '" placeholder="Bu ürün için not (ör. az pişmiş, soğansız)"></div>'
+    ).join('') + '<div class="po-total"><span>Ön sipariş toplamı</span><span>' + Core.formatTL(total) + '</span></div>';
+  }
+  $('#resf-search').addEventListener('input', renderPoItems);
+  $('#resf-cats').addEventListener('click', e => { const b = e.target.closest('button'); if(!b) return; resPoCat = b.dataset.cat; renderPoCats(); renderPoItems(); });
+  $('#resf-items').addEventListener('click', e => {
+    const id = e.target.dataset && e.target.dataset.poAdd;
+    if(!id) return;
+    const found = Core.findItem(state, id);
+    if(!found) return;
+    const ex = resEdit.preorder.items.find(i => i.id === id);
+    if(ex) ex.qty++;
+    else resEdit.preorder.items.push({id, name: found.item.name, price: found.item.price || '', unit: Core.parsePrice(found.item.price), qty: 1, note: ''});
+    renderPoItems(); renderPoCart();
+  });
+  $('#resf-cart').addEventListener('click', e => {
+    const d = e.target.dataset || {};
+    const items = resEdit.preorder.items;
+    if(d.poInc != null) items[+d.poInc].qty++;
+    else if(d.poDec != null){ const i = items[+d.poDec]; if(--i.qty < 1) items.splice(+d.poDec, 1); }
+    else return;
+    renderPoItems(); renderPoCart();
+  });
+  $('#resf-cart').addEventListener('input', e => { const n = e.target.dataset.poNote; if(n != null) resEdit.preorder.items[+n].note = e.target.value; });
+
+  $('#res-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    if(!resEdit) return;
+    // 1. adımda Enter'a basılırsa kaydetmek yerine sonraki adıma geç
+    if(!$('#resf-step1').classList.contains('hide')) return showResStep(2);
+    readResForm();
+    const r = resEdit;
+    if(!r.name){ $('#resf-name').focus(); return toast('Müşteri adını girin.', true); }
+    const [a, b] = resRange(r);
+    const conflicts = r.tables.map(id => tableConflict(id, r.date, a, b, r.id)).filter(Boolean);
+    if(conflicts.length && blocking(r) && !confirm('Seçili masada aynı saatte başka rezervasyon var (' + conflicts.map(c => c.time + ' ' + c.name).join(', ') + '). Yine de kaydedilsin mi?')) return;
+    const btn = $('#resf-save');
+    btn.disabled = true; btn.textContent = 'Kaydediliyor…';
+    try{
+      const isNew = r._new;
+      const rec = JSON.parse(JSON.stringify(r));
+      delete rec._new;
+      rec.updatedAt = new Date().toISOString();
+      if(isNew) rec.createdAt = rec.updatedAt;
+      await mutateReservations(list => {
+        const i = list.findIndex(x => x.id === rec.id);
+        if(i >= 0) list[i] = rec; else list.push(rec);
+      });
+      resDay = rec.date;
+      closeResForm();
+      renderRes();
+      toast(isNew ? 'Rezervasyon kaydedildi.' : 'Rezervasyon güncellendi.');
+    }catch(err){
+      toast(err.status ? ghErrorText(err) : err.message, true, 7000);
+    }finally{
+      btn.disabled = false; btn.textContent = 'Kaydet';
+    }
+  });
+  document.querySelectorAll('#res-form [data-res-close]').forEach(b => b.addEventListener('click', closeResForm));
+  $('#res-modal').addEventListener('click', e => { if(e.target.id === 'res-modal') closeResForm(); });
+  $('#resf-delete').addEventListener('click', async () => {
+    if(!resEdit || !confirm('Bu rezervasyon tamamen silinsin mi? (Sadece iptal etmek için durumu “İptal” yapabilirsiniz.)')) return;
+    const id = resEdit.id;
+    try{
+      await mutateReservations(list => { const i = list.findIndex(x => x.id === id); if(i >= 0) list.splice(i, 1); });
+      closeResForm();
+      toast('Rezervasyon silindi.');
+    }catch(err){ toast(err.status ? ghErrorText(err) : err.message, true, 7000); }
+  });
+  // Müşteriye WhatsApp'tan hazır onay mesajı
+  $('#resf-wa').addEventListener('click', () => {
+    readResForm();
+    const r = resEdit;
+    let phone = String(r.phone || '').replace(/\D/g, '');
+    if(phone.startsWith('0')) phone = '9' + phone;
+    else if(phone.length === 10) phone = '90' + phone;
+    if(phone.length < 11) return toast('Geçerli bir telefon numarası girin.', true);
+    const site = state.site || {};
+    const items = r.preorder.items;
+    let msg = 'Merhaba ' + (r.name.split(' ')[0] || '') + ',\n' + dayName(r.date) + ' saat ' + r.time + ' için ' + r.guests + ' kişilik rezervasyonunuz ' +
+      (r.status === 'pending' ? 'alınmıştır' : 'onaylanmıştır') + '.';
+    if(r.tables.length) msg += '\nMasa: ' + tableLabels(r) + ' (' + Core.floorById(r.area).name + ')';
+    if(items.length) msg += '\nÖn siparişiniz: ' + items.map(i => i.qty + 'x ' + i.name).join(', ') + (r.preorder.readyAt ? ' — ' + r.preorder.readyAt + '\'de hazır olacak.' : '');
+    msg += '\nSizi ağırlamayı dört gözle bekliyoruz.\n' + (site.name || 'Yirmi') + (site.city ? ' ' + site.city : '') + (site.phone ? '\n' + site.phone : '');
+    window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank', 'noopener');
+  });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('#res-modal').classList.contains('hide')) closeResForm(); });
+  // Başka cihazdan eklenen rezervasyonlar için her dakika kontrol
+  setInterval(() => {
+    if(session && session.dataKey && !document.hidden && !$('#tab-res').classList.contains('hide') && $('#res-modal').classList.contains('hide')) loadReservations(true);
+  }, 60000);
+
   /* ---------- Giriş ---------- */
   let failedLogins = 0;
   const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -2096,6 +2882,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     document.body.classList.remove('locked');
     $('#login-pw').value = '';
     loadMenu();
+    loadReservations(true);
     touch();
   }
   function logout(){
@@ -2112,8 +2899,18 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     try{
       const auth = await fetchAuth();
       if(!auth){ showSetup(); return; }
-      const cfg = await decryptCfg(auth, $('#login-pw').value);
+      const pw = $('#login-pw').value;
+      const cfg = await decryptCfg(auth, pw);
       failedLogins = 0;
+      // Rezervasyon şifreleme anahtarı yoksa (eski kurulum) bir kez oluşturulup auth.json'a eklenir
+      if(!cfg.dataKey){
+        try{
+          setMsg('#login-msg', 'Rezervasyon sistemi hazırlanıyor…');
+          const withKey = Object.assign({}, cfg, {dataKey: newDataKey()});
+          await putFile(Object.assign({}, withKey, guessRepo() || {}), AUTH_PATH, JSON.stringify(await encryptCfg(withKey, pw), null, 2) + '\n', 'Rezervasyon şifreleme anahtarı eklendi');
+          cfg.dataKey = withKey.dataKey;
+        }catch(e2){ toast('Rezervasyon anahtarı oluşturulamadı: ' + (e2.status ? ghErrorText(e2) : e2.message), true, 8000); }
+      }
       setMsg('#login-msg', '');
       unlock(cfg);
     }catch(err){
@@ -2140,7 +2937,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     if(pw.length < MIN_PW) return setMsg('#setup-msg', 'Şifre en az ' + MIN_PW + ' karakter olmalı.', 'err');
     if(pw !== $('#setup-pw2').value) return setMsg('#setup-msg', 'Şifreler aynı değil.', 'err');
     const cfg = {owner: $('#setup-owner').value.trim(), repo: $('#setup-repo').value.trim(),
-                 branch:'main', path:'menu.json', token: $('#setup-token').value.trim()};
+                 branch:'main', path:'menu.json', token: $('#setup-token').value.trim(), dataKey: newDataKey()};
     const btn = $('#setup-btn');
     btn.disabled = true;
     try{
@@ -2202,6 +2999,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   $('#reload-btn').addEventListener('click', () => {
     if(dirty && !confirm('Kaydedilmemiş değişiklikler kaybolacak. Devam edilsin mi?')) return;
     loadMenu();
+    loadReservations(true);
     toast('Menü GitHub\'dan yeniden yüklendi.');
   });
   $('#logout-btn').addEventListener('click', () => {
@@ -2219,11 +3017,12 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   /* ---------- Sekmeler ---------- */
   function showTab(name){
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-    ['home','menu','chef','calendar','ann','campaigns','site','qr','security'].forEach(n => $('#tab-' + n).classList.toggle('hide', n !== name));
+    ['home','res','menu','chef','calendar','ann','campaigns','site','qr','security'].forEach(n => $('#tab-' + n).classList.toggle('hide', n !== name));
     if(state && name === 'ann') renderAnn();
     if(name === 'qr' && !$('#qr-url').value){ $('#qr-url').value = defaultMenuUrl(); if($('#qr-url').value) makeQr(); }
     if(state && name === 'home') renderDash();
     if(state && name === 'calendar') renderCalendar();
+    if(state && name === 'res') renderRes();
     window.scrollTo(0, 0);
   }
   document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => showTab(t.dataset.tab)));

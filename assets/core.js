@@ -402,7 +402,66 @@
     return {open, opening: hm(o), closing: hm(c)};
   }
 
+  /* ---------- Oturma planı (rezervasyon) ---------- */
+  // Krokilerden çizildi. Koordinatlar plan birimi (≈ px); masa: {id, label, seats, x, y, w, h}
+  // walls: [x1,y1,x2,y2] duvar çizgileri; doors: kapı/geçit (kesikli çizgi + yazı); zones: mutfak gibi alanlar; obstacles: zeytin ağacı vb.
+  const FLOORS = [
+    {id:'ic', name:'İç Mekân', w:1216, h:384,
+      walls:[[0,0,640,0],[768,0,1216,0],[1216,0,1216,384],[1216,384,768,384],[768,384,768,322],[768,322,128,322],[128,322,128,384],[0,0,0,384],[128,0,128,60],[768,0,768,40]],
+      doors:[{x1:0, y1:384, x2:128, y2:384, label:'Giriş', side:'bottom'}, {x1:640, y1:0, x2:768, y2:0, label:'Diğer alanlar', side:'top'}],
+      zones:[{x:0, y:0, w:128, h:60, label:'Mutfak'}],
+      obstacles:[],
+      tables:[
+        {id:'i1', label:'İ1', seats:2, x:192, y:22, w:64, h:40},
+        {id:'i2', label:'İ2', seats:4, x:320, y:8, w:128, h:74},
+        {id:'i3', label:'İ3', seats:6, x:512, y:8, w:128, h:94},
+        {id:'i4', label:'İ4', seats:4, x:832, y:22, w:128, h:80},
+        {id:'i5', label:'İ5', seats:4, x:1024, y:22, w:128, h:80},
+        {id:'i6', label:'İ6', seats:4, x:1024, y:162, w:128, h:80},
+        {id:'i7', label:'İ7', seats:4, x:192, y:202, w:128, h:100},
+        {id:'i8', label:'İ8', seats:8, x:384, y:182, w:128, h:120},
+        {id:'i9', label:'İ9', seats:4, x:640, y:222, w:128, h:80},
+        {id:'i10', label:'İ10', seats:4, x:832, y:282, w:128, h:80},
+        {id:'i11', label:'İ11', seats:4, x:1024, y:282, w:128, h:80}
+      ]},
+    {id:'dis', name:'Dış Mekân', w:1216, h:400,
+      walls:[[0,0,64,0],[192,0,1216,0],[1216,0,1216,400],[1216,400,704,400],[576,400,0,400],[0,400,0,0]],
+      doors:[{x1:64, y1:0, x2:192, y2:0, label:'İç alan girişi', side:'top'}, {x1:576, y1:400, x2:704, y2:400, label:'Dış alan girişi', side:'bottom'}],
+      zones:[],
+      obstacles:[{x:576, y:142, w:128, h:80, label:'Zeytin ağacı', shape:'tree'}],
+      tables:[
+        {id:'d1', label:'D1', seats:4, x:8, y:102, w:120, h:60},
+        {id:'d2', label:'D2', seats:4, x:8, y:222, w:120, h:80},
+        {id:'d3', label:'D3', seats:4, x:256, y:22, w:128, h:80},
+        {id:'d4', label:'D4', seats:4, x:448, y:22, w:128, h:80},
+        {id:'d5', label:'D5', seats:4, x:640, y:22, w:128, h:80},
+        {id:'d6', label:'D6', seats:4, x:832, y:22, w:128, h:80},
+        {id:'d7', label:'D7', seats:2, x:1024, y:42, w:64, h:40},
+        {id:'d8', label:'D8', seats:2, x:192, y:162, w:64, h:40},
+        {id:'d9', label:'D9', seats:2, x:320, y:162, w:64, h:40},
+        {id:'d10', label:'D10', seats:2, x:448, y:162, w:64, h:40},
+        {id:'d11', label:'D11', seats:2, x:768, y:162, w:64, h:40},
+        {id:'d12', label:'D12', seats:6, x:896, y:142, w:192, h:80},
+        {id:'d13', label:'D13', seats:4, x:192, y:282, w:128, h:80},
+        {id:'d14', label:'D14', seats:4, x:384, y:282, w:128, h:80},
+        {id:'d15', label:'D15', seats:4, x:704, y:282, w:128, h:80},
+        {id:'d16', label:'D16', seats:4, x:896, y:282, w:128, h:80},
+        {id:'d17', label:'D17', seats:4, x:1080, y:282, w:128, h:80}
+      ]}
+  ];
+  const TABLES = Object.fromEntries(FLOORS.flatMap(f => f.tables.map(t => [t.id, Object.assign({area: f.id, areaName: f.name}, t)])));
+  function floorById(id){ return FLOORS.find(f => f.id === id) || FLOORS[0]; }
+  function tableById(id){ return TABLES[id] || null; }
+  // "320 TL", "1.400 TL", "50cl / 175 TL" → 320, 1400, 175 (cl/gr gibi miktarlar atlanır, son sayı fiyat kabul edilir)
+  function parsePrice(p){
+    const m = String(p || '').match(/(\d{1,3}(?:\.\d{3})+|\d+)(?:,\d+)?(?![\d.,])(?!\s*(?:cl|ml|gr|g|kg|lt|l|cm|adet)\b)/gi);
+    if(!m) return 0;
+    return parseFloat(m[m.length - 1].replace(/\./g, '').replace(',', '.')) || 0;
+  }
+  function formatTL(n){ return (Math.round(n * 100) / 100).toLocaleString('tr-TR') + ' TL'; }
+
   global.YirmiCore = {
+    FLOORS, floorById, tableById, parsePrice, formatTL,
     ALLERGENS, ALLERGEN_LABELS, DAYS, slugify, prepare, findItem,
     itemPhoto, isDefaultPhoto, coverPhoto, heroPhotos, layoutFor, sized,
     now, setNowOverride, parseWall, parseHM, hm,
