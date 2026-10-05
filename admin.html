@@ -233,19 +233,33 @@ h2{font-size:25px!important}
 .tpl small{display:block;color:var(--muted);font-size:12px;margin-top:3px;line-height:1.4}
 
 /* Rezervasyon */
-.res-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.res-date{display:flex;gap:6px;align-items:center}
-.res-date input,.res-head select{padding:8px 10px;border:1px solid var(--line);border-radius:9px;font-weight:700;background:#fff}
-.res-day-name{font:600 22px/1.1 'Cormorant Garamond',serif;flex-basis:100%;margin-top:2px}
+.res-bar{padding:14px}
+.res-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.res-date{display:flex;gap:6px;align-items:center;flex:1 1 260px;min-width:0}
+.res-date-btn{position:relative;flex:1;min-width:0;display:flex;align-items:center;justify-content:center;padding:6px 12px;min-height:38px;border:1px solid var(--line);border-radius:10px;background:#fff;font:600 19px/1.15 'Cormorant Garamond',serif;cursor:pointer;text-align:center}
+.res-date-btn input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0}
+.res-add{margin-left:auto}
+.res-summary{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.res-summary span{font-size:12.5px;font-weight:700;padding:5px 10px;border-radius:999px;background:#f3efe8;color:#5d5346}
+.res-summary b{color:var(--text)}
+.res-summary .warn{background:#fdf3df;color:#8a6417}
+.res-switch{justify-content:space-between}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:#faf8f4;gap:2px}
-.seg button{border:0;background:transparent;padding:7px 14px;border-radius:999px;font-weight:700;cursor:pointer;color:var(--muted)}
+.seg button{border:0;background:transparent;padding:8px 16px;border-radius:999px;font-weight:700;cursor:pointer;color:var(--muted)}
 .seg button.on{background:#2b2118;color:#ffd894}
-.res-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
-.stat{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:12px 14px}
-.stat b{display:block;font:600 28px/1.1 'Cormorant Garamond',serif}
-.stat small{color:var(--muted);font-weight:700;font-size:12px}
-.floor-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.floor{display:block;width:100%;min-width:760px;height:auto;user-select:none;-webkit-user-select:none}
+.res-pane .res-row h2{margin:0;flex:1}
+.res-time-pick{display:flex;align-items:center;gap:6px;font-weight:700;color:var(--muted);font-size:13px}
+.res-time-pick select{padding:7px 10px;border:1px solid var(--line);border-radius:9px;font-weight:700;background:#fff}
+.res-foot{text-align:center;margin:0 0 20px}
+@media(max-width:600px){
+  .res-add{flex:1 1 100%;margin:0}
+  .res-switch .seg{display:flex;flex:1 1 100%}
+  .res-switch .seg button{flex:1}
+  .res-bar,.res-pane{padding:12px}
+}
+.floor-wrap{margin-top:10px}
+.floor{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.floor.vertical{max-width:440px;margin:0 auto}
 .fl-bg{fill:#fbf8f2}
 .fl-wall{fill:none;stroke:#2b2118;stroke-width:6;stroke-linecap:round}
 .fl-door{stroke:var(--accent);stroke-width:3;stroke-dasharray:9 7}
@@ -314,10 +328,17 @@ h2{font-size:25px!important}
 .pick-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:14px 0 6px}
 .pick-head .hint{margin:0;flex:1 1 260px}
 .floor-wrap.pick{border:1px solid var(--line);border-radius:14px;background:#fbf8f2}
-.floor-wrap.pick .floor{min-width:680px}
+/* Telefonda rezervasyon penceresi tam ekran */
+@media(max-width:600px){
+  #res-modal{padding:0}
+  #res-modal .modal{border-radius:0;min-height:100%;padding:16px 14px 24px}
+  #res-modal .step{font-size:12.5px;padding:5px 10px 5px 5px}
+  #res-modal .row-actions .btn{flex:1}
+  #res-modal .row-actions span[style]{display:none}
+  #resf-area{display:flex;width:100%}
+  #resf-area button{flex:1}
+}
 #resf-step1 .grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
-.swipe-hint{display:none;font-size:12px;color:var(--muted);font-weight:700;margin:0 0 6px}
-@media(max-width:700px){.swipe-hint{display:block}}
 .tbl.fit rect{fill:#f2f8ee;stroke:#7fae68;stroke-width:2.5}
 .tbl.sel rect{fill:#2b2118;stroke:#2b2118;stroke-width:3}
 .tbl.sel .t-id,.tbl.sel .t-sub{fill:#ffd894}
@@ -473,40 +494,44 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
 
 <!-- REZERVASYON -->
 <div class="page hide" id="tab-res">
-  <div class="panel">
-    <div class="res-head">
+  <div class="panel res-bar">
+    <div class="res-row">
       <div class="res-date">
         <button class="btn sm" id="res-prev" aria-label="Önceki gün">‹</button>
-        <input type="date" id="res-date">
+        <label class="res-date-btn"><span id="res-day-name"></span><input type="date" id="res-date" aria-label="Tarih seç"></label>
         <button class="btn sm" id="res-next" aria-label="Sonraki gün">›</button>
-        <button class="btn sm" id="res-today">Bugün</button>
       </div>
-      <div class="seg" id="res-area"><button type="button" data-area="ic">İç Mekân</button><button type="button" data-area="dis">Dış Mekân</button></div>
-      <label class="hint" style="margin:0;font-weight:700">Saat <select id="res-time"></select></label>
-      <span style="flex:1"></span>
-      <button class="btn primary" id="res-add">+ Yeni rezervasyon</button>
-      <div class="res-day-name" id="res-day-name"></div>
+      <button class="btn sm" id="res-today">Bugün</button>
+      <button class="btn primary res-add" id="res-add">+ Yeni rezervasyon</button>
+    </div>
+    <div class="res-summary" id="res-stats"></div>
+    <div class="res-row res-switch">
+      <div class="seg" id="res-view" role="tablist"><button type="button" data-view="floor">Kroki</button><button type="button" data-view="list">Liste</button><button type="button" data-view="gantt">Çizelge</button></div>
+      <div class="seg" id="res-area"><button type="button" data-area="ic">İç</button><button type="button" data-area="dis">Dış</button></div>
     </div>
   </div>
-  <div class="res-stats" id="res-stats"></div>
-  <div class="panel">
-    <h2 id="res-floor-title">Oturma planı</h2>
-    <p class="hint">Boş masaya tıklayınca o masaya seçili saat için rezervasyon açılır; dolu masaya tıklayınca rezervasyon açılır.</p>
-    <p class="swipe-hint">↔ Krokinin tamamını görmek için yana kaydırın</p>
+
+  <div class="panel res-pane" id="res-pane-floor">
+    <div class="res-row">
+      <h2 id="res-floor-title">İç Mekân</h2>
+      <label class="res-time-pick">Saat <select id="res-time"></select></label>
+    </div>
     <div class="floor-wrap" id="res-floor"></div>
-    <div class="fl-legend"><span><i></i>Boş</span><span><i class="soon"></i>2 saat içinde rezervasyonu var</span><span><i class="booked"></i>Rezerve</span><span><i class="seated"></i>Müşteri masada</span></div>
+    <div class="fl-legend"><span><i></i>Boş</span><span><i class="soon"></i>Yakında dolacak</span><span><i class="booked"></i>Rezerve</span><span><i class="seated"></i>Masada</span></div>
+    <p class="hint">Boş masaya dokunun → rezervasyon ekleyin. Dolu masaya dokunun → rezervasyonu açın.</p>
   </div>
-  <div class="panel">
-    <h2>Saat çizelgesi</h2>
-    <p class="hint">Boş bir saate tıklayarak o masa ve saat için hızlıca rezervasyon ekleyebilirsiniz.</p>
+
+  <div class="panel res-pane hide" id="res-pane-list">
+    <div id="res-list"></div>
+    <div class="row-actions"><button class="btn sm" id="res-csv">Excel'e indir (CSV)</button><button class="btn sm" id="res-reload">Yenile</button></div>
+  </div>
+
+  <div class="panel res-pane hide" id="res-pane-gantt">
+    <p class="hint" style="margin:0 0 8px">Boş bir saate dokunarak o masaya rezervasyon ekleyin.</p>
     <div class="gantt-wrap" id="res-gantt"></div>
   </div>
-  <div class="panel">
-    <h2>Günün rezervasyonları</h2>
-    <div id="res-list"></div>
-    <div class="row-actions"><button class="btn sm" id="res-csv">Bu günü Excel'e indir (CSV)</button><button class="btn sm" id="res-reload">Yenile</button></div>
-    <p class="hint" style="margin-top:10px">Rezervasyonlar müşteri adı ve telefonu içerdiği için şifrelenerek saklanır; yalnızca bu panelden, yönetici şifresiyle okunabilir. Her değişiklik anında kaydedilir (“Kaydet ve Yayınla” gerekmez).</p>
-  </div>
+
+  <p class="hint res-foot">Rezervasyonlar şifreli saklanır ve yalnızca bu panelden okunabilir. Her değişiklik anında kaydedilir.</p>
 </div>
 
 <!-- TAKVİM -->
@@ -601,7 +626,6 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
         <div class="seg" id="resf-area"><button type="button" data-area="ic">İç Mekân</button><button type="button" data-area="dis">Dış Mekân</button></div>
         <span class="hint" id="resf-table-hint"></span>
       </div>
-      <p class="swipe-hint">↔ Krokinin tamamını görmek için yana kaydırın</p>
       <div class="floor-wrap pick" id="resf-floor"></div>
       <div class="fl-legend"><span><i class="fit"></i>Boş ve yeterli</span><span><i></i>Boş (küçük)</span><span><i class="sel"></i>Seçili</span><span><i class="busy"></i>Bu saatte dolu</span></div>
       <div class="row-actions" style="margin-top:16px">
@@ -2468,63 +2492,94 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       if(!slots.includes(resTime)) resTime = slots[0];
     }
   }
+  // Kroki / Liste / Çizelge: aynı anda tek görünüm (telefonda karışık görünmesin); seçim bu cihazda hatırlanır
+  let resView = 'floor';
+  try{ resView = localStorage.getItem('yirmi-res-view') || 'floor'; }catch(e){}
   function renderRes(){
     if(!state) return;
     ensureResDefaults();
     $('#res-date').value = resDay;
-    $('#res-day-name').textContent = dayName(resDay) + (resDay === todayStr() ? ' · Bugün' : '');
+    const d = new Date(Core.parseWall(resDay));
+    $('#res-day-name').textContent = (resDay === todayStr() ? 'Bugün · ' : '') +
+      d.toLocaleDateString('tr-TR', {weekday: narrowMq.matches ? 'short' : 'long', day: 'numeric', month: 'long', timeZone: 'UTC'});
     $('#res-time').innerHTML = slotList(0).map(t => '<option' + (t === resTime ? ' selected' : '') + '>' + t + '</option>').join('');
     document.querySelectorAll('#res-area button').forEach(b => b.classList.toggle('on', b.dataset.area === resArea));
+    document.querySelectorAll('#res-view button').forEach(b => b.classList.toggle('on', b.dataset.view === resView));
+    ['floor', 'list', 'gantt'].forEach(v => $('#res-pane-' + v).classList.toggle('hide', v !== resView));
+    $('#res-area').classList.toggle('hide', resView === 'list');
     if(resList === null){
       $('#res-list').innerHTML = '<p class="res-empty">Yükleniyor…</p>';
       loadReservations();
     }
     renderResStats();
-    renderFloor();
-    renderGantt();
-    renderResList();
+    if(resView === 'floor') renderFloor();
+    if(resView === 'gantt') renderGantt();
+    if(resView === 'list') renderResList();
   }
   function renderResStats(){
-    const list = dayRes(resDay).filter(r => r.status !== 'cancelled');
+    const list = dayRes(resDay).filter(r => r.status !== 'cancelled' && r.status !== 'noshow');
     const guests = list.reduce((s, r) => s + (+r.guests || 0), 0);
     const seated = list.filter(r => r.status === 'seated').length;
     const po = list.filter(r => r.preorder && (r.preorder.items || []).length).length;
     const pending = list.filter(r => r.status === 'pending').length;
-    $('#res-stats').innerHTML = [[list.length, 'Rezervasyon'], [guests, 'Kişi'], [seated, 'Şu an masada'], [pending, 'Onay bekliyor'], [po, 'Ön siparişli']]
-      .map(([n, l]) => '<div class="stat"><b>' + n + '</b><small>' + l + '</small></div>').join('');
+    const out = ['<span><b>' + list.length + '</b> rezervasyon</span>', '<span><b>' + guests + '</b> kişi</span>'];
+    if(seated) out.push('<span><b>' + seated + '</b> masada</span>');
+    if(pending) out.push('<span class="warn"><b>' + pending + '</b> onay bekliyor</span>');
+    if(po) out.push('<span><b>' + po + '</b> ön siparişli</span>');
+    $('#res-stats').innerHTML = out.join('');
   }
 
-  // Krokiyi çizer; her masanın görünümü decorate(t) → {cls, sub, res, busy} ile belirlenir (ana plan ve seçim adımı ayrı)
+  // Telefonda kroki 90° döndürülüp dikey çizilir (ekrana tam sığsın, kaydırma gerekmesin); yazılar düz kalır
+  const narrowMq = window.matchMedia('(max-width: 600px)');
+  // Krokiyi çizer; her masanın görünümü decorate(t, small) → {cls, sub, res, busy, title} ile belirlenir (ana plan ve seçim adımı ayrı)
   function floorSvg(floor, decorate){
-    const pad = 46;
-    let s = '<svg class="floor" viewBox="' + (-pad) + ' ' + (-pad) + ' ' + (floor.w + pad * 2) + ' ' + (floor.h + pad * 2) + '" role="img" aria-label="' + esc(floor.name) + ' oturma planı">';
-    s += '<rect class="fl-bg" x="0" y="0" width="' + floor.w + '" height="' + floor.h + '"/>';
+    const vert = narrowMq.matches, pad = 46;
+    const W = vert ? floor.h : floor.w, H = vert ? floor.w : floor.h;
+    const pt = (x, y) => vert ? [floor.h - y, x] : [x, y];
+    const box = r => vert ? {x: floor.h - (r.y + r.h), y: r.x, w: r.h, h: r.w} : r;
+    const up = s => esc(String(s).toLocaleUpperCase('tr-TR'));
+    let s = '<svg class="floor' + (vert ? ' vertical' : '') + '" viewBox="' + (-pad) + ' ' + (-pad) + ' ' + (W + pad * 2) + ' ' + (H + pad * 2) + '" role="img" aria-label="' + esc(floor.name) + ' oturma planı">';
+    s += '<rect class="fl-bg" x="0" y="0" width="' + W + '" height="' + H + '"/>';
     floor.zones.forEach(z => {
-      s += '<rect class="fl-zone" x="' + z.x + '" y="' + z.y + '" width="' + z.w + '" height="' + z.h + '"/>' +
-        '<text class="fl-lbl" x="' + (z.x + z.w / 2) + '" y="' + (z.y + z.h / 2 + 5) + '" text-anchor="middle">' + esc(z.label.toLocaleUpperCase('tr-TR')) + '</text>';
+      const b = box(z);
+      s += '<rect class="fl-zone" x="' + b.x + '" y="' + b.y + '" width="' + b.w + '" height="' + b.h + '"/>' +
+        '<text class="fl-lbl" x="' + (b.x + b.w / 2) + '" y="' + (b.y + b.h / 2 + 5) + '" text-anchor="middle"' + (vert ? ' style="font-size:12px;letter-spacing:0"' : '') + '>' + up(z.label) + '</text>';
     });
     floor.obstacles.forEach(o => {
-      const cx = o.x + o.w / 2, cy = o.y + o.h / 2;
-      s += '<ellipse class="fl-tree" cx="' + cx + '" cy="' + cy + '" rx="' + (o.w / 2 - 6) + '" ry="' + (o.h / 2 - 4) + '"/>' +
-        '<text class="fl-lbl" x="' + cx + '" y="' + (cy + 5) + '" text-anchor="middle" style="fill:#5d7a3f">🌳 ' + esc(o.label.toLocaleUpperCase('tr-TR')) + '</text>';
+      const b = box(o), cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+      s += '<ellipse class="fl-tree" cx="' + cx + '" cy="' + cy + '" rx="' + (b.w / 2 - 5) + '" ry="' + (b.h / 2 - 5) + '"/>' +
+        (vert ? '<text x="' + cx + '" y="' + (cy - 4) + '" text-anchor="middle" style="font-size:26px">🌳</text>' +
+                '<text class="fl-lbl" x="' + cx + '" y="' + (cy + 20) + '" text-anchor="middle" style="fill:#5d7a3f;font-size:11px;letter-spacing:0">ZEYTİN</text>'
+              : '<text class="fl-lbl" x="' + cx + '" y="' + (cy + 5) + '" text-anchor="middle" style="fill:#5d7a3f">🌳 ' + up(o.label) + '</text>');
     });
-    s += '<path class="fl-wall" d="' + floor.walls.map(w => 'M' + w[0] + ' ' + w[1] + 'L' + w[2] + ' ' + w[3]).join('') + '"/>';
+    s += '<path class="fl-wall" d="' + floor.walls.map(w => { const a = pt(w[0], w[1]), b = pt(w[2], w[3]); return 'M' + a[0] + ' ' + a[1] + 'L' + b[0] + ' ' + b[1]; }).join('') + '"/>';
     floor.doors.forEach(d => {
-      const ty = d.side === 'top' ? d.y1 - 14 : d.y1 + 28;
-      s += '<line class="fl-door" x1="' + d.x1 + '" y1="' + d.y1 + '" x2="' + d.x2 + '" y2="' + d.y2 + '"/>' +
-        '<text class="fl-lbl" x="' + ((d.x1 + d.x2) / 2) + '" y="' + ty + '" text-anchor="middle" style="fill:var(--accent)">' + esc(d.label.toLocaleUpperCase('tr-TR')) + '</text>';
+      const a = pt(d.x1, d.y1), b = pt(d.x2, d.y2), mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+      s += '<line class="fl-door" x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '"/>';
+      if(vert){
+        // üst duvar sağa, alt duvar sola döner: yazı duvarın dışında, duvar boyunca
+        const tx = d.side === 'top' ? mx + 20 : mx - 20;
+        s += '<text class="fl-lbl" x="' + tx + '" y="' + my + '" text-anchor="middle" dominant-baseline="middle" transform="rotate(' + (d.side === 'top' ? 90 : -90) + ' ' + tx + ' ' + my + ')" style="fill:var(--accent);font-size:12px;letter-spacing:.06em">' + up(d.label) + '</text>';
+      }else{
+        s += '<text class="fl-lbl" x="' + mx + '" y="' + (d.side === 'top' ? my - 14 : my + 28) + '" text-anchor="middle" style="fill:var(--accent)">' + up(d.label) + '</text>';
+      }
     });
     floor.tables.forEach(t => {
-      const o = decorate(t, t.w < 100);
-      const small = t.w < 100, ins = 5, cx = t.x + t.w / 2, cy = t.y + t.h / 2;
-      const max = Math.floor((t.w - 16) / (small ? 6.5 : 7.4));   // yazı masanın dışına taşmasın
-      if(o.sub && o.sub.length > max) o.sub = o.sub.slice(0, max - 1).trim() + '…';
+      const b = box(t), small = b.w < 100;
+      const o = decorate(t, small);
+      const ins = small ? 4 : 5, cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+      const max = Math.floor((b.w - 10) / (small ? 6 : 7.4));   // yazı masanın dışına taşmasın
+      let sub = o.sub || '';
+      if(sub.length > max){
+        const n = /^(\d+) kişi/.exec(sub);
+        sub = n ? n[1] + 'k' : (max >= 3 ? sub.slice(0, max - 1).trim() + '…' : '');
+      }
       s += '<g class="tbl ' + (o.cls || '') + '" data-table="' + t.id + '"' + (o.res ? ' data-res="' + esc(o.res.id) + '"' : '') +
         ' tabindex="0" role="button" aria-label="' + esc(t.label + ', ' + t.seats + ' kişilik' + (o.busy ? ', dolu' : ', boş')) + '">' +
         (o.title ? '<title>' + esc(o.title) + '</title>' : '') +
-        '<rect x="' + (t.x + ins) + '" y="' + (t.y + ins) + '" width="' + (t.w - ins * 2) + '" height="' + (t.h - ins * 2) + '" rx="10"/>' +
-        '<text class="t-id" x="' + cx + '" y="' + (cy + (small ? -1 : 0)) + '" text-anchor="middle">' + esc(t.label) + '</text>' +
-        '<text class="t-sub" x="' + cx + '" y="' + (cy + (small ? 13 : 20)) + '" text-anchor="middle"' + (small ? ' style="font-size:11px"' : '') + '>' + esc(o.sub) + '</text></g>';
+        '<rect x="' + (b.x + ins) + '" y="' + (b.y + ins) + '" width="' + (b.w - ins * 2) + '" height="' + (b.h - ins * 2) + '" rx="10"/>' +
+        '<text class="t-id" x="' + cx + '" y="' + (cy + (sub ? (small ? -1 : 0) : 7)) + '" text-anchor="middle">' + esc(t.label) + '</text>' +
+        (sub ? '<text class="t-sub" x="' + cx + '" y="' + (cy + (small ? 14 : 20)) + '" text-anchor="middle"' + (small ? ' style="font-size:11px"' : '') + '>' + esc(sub) + '</text>' : '') + '</g>';
     });
     return s + '</svg>';
   }
@@ -2532,18 +2587,24 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   function renderFloor(){
     const floor = Core.floorById(resArea), minute = resMin(resTime);
     const day = dayRes(resDay).filter(blocking);
-    $('#res-floor-title').textContent = floor.name + ' · ' + resTime;
+    $('#res-floor-title').textContent = floor.name;
     $('#res-floor').innerHTML = floorSvg(floor, (t, small) => {
       const mine = day.filter(r => (r.tables || []).includes(t.id));
       const at = mine.find(r => resRange(r)[0] <= minute && minute < resRange(r)[1]);
       const next = at ? null : mine.filter(r => resRange(r)[0] > minute).sort((a, b) => resMin(a.time) - resMin(b.time))[0];
       const soon = next && resMin(next.time) - minute <= 120;
-      let sub = t.seats + ' kişilik';
+      let sub = small ? t.seats + ' kişi' : t.seats + ' kişilik';
       if(at) sub = small ? at.time : at.time + ' · ' + (at.name || '').split(' ')[0] + ' · ' + at.guests + 'k';
       else if(next) sub = (small ? '' : 'Sonraki ') + next.time;
-      return {cls: at ? (at.status === 'seated' ? 'seated' : 'booked') : (soon ? 'soon' : ''), sub, res: at, busy: !!at};
+      return {cls: at ? (at.status === 'seated' ? 'seated' : 'booked') : (soon ? 'soon' : ''), sub, res: at, busy: !!at,
+        title: at ? at.time + ' · ' + at.name + ' · ' + at.guests + ' kişi' : (next ? 'Sonraki: ' + next.time + ' · ' + next.name : '')};
     });
   }
+  // Ekran telefon/masaüstü arasında değişirse (ör. telefon yan çevrilirse) krokiler yeniden çizilir
+  narrowMq.addEventListener('change', () => {
+    if(!$('#tab-res').classList.contains('hide') && state) renderFloor();
+    if(resEdit) renderResTables();
+  });
   $('#res-floor').addEventListener('click', e => {
     const g = e.target.closest('.tbl');
     if(!g) return;
@@ -2618,6 +2679,15 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   $('#res-today').addEventListener('click', () => { resDay = todayStr(); resTime = null; renderRes(); });
   $('#res-time').addEventListener('change', e => { resTime = e.target.value; renderFloor(); });
   $('#res-area').addEventListener('click', e => { const b = e.target.closest('button'); if(b){ resArea = b.dataset.area; renderRes(); } });
+  $('#res-view').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if(!b) return;
+    resView = b.dataset.view;
+    try{ localStorage.setItem('yirmi-res-view', resView); }catch(err){}
+    renderRes();
+  });
+  // Tarih yazısına dokununca takvim açılsın (masaüstü Chrome'da görünmez tarih alanı kendiliğinden açılmıyor)
+  $('#res-date').addEventListener('click', e => { try{ e.target.showPicker(); }catch(err){} });
   $('#res-add').addEventListener('click', () => openResForm(null, {time: resTime}));
   $('#res-reload').addEventListener('click', async () => { resSha = null; await loadReservations(); toast('Rezervasyonlar yenilendi.'); });
   $('#res-csv').addEventListener('click', () => {
@@ -2718,9 +2788,9 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     const [a, b] = resRange(resEdit);
     $('#resf-floor').innerHTML = floorSvg(floor, (t, small) => {
       const c = tableConflict(t.id, resEdit.date, a, b, resEdit.id);
-      if(resEdit.tables.includes(t.id)) return {cls: 'sel', sub: '✓ Seçildi', busy: false};
+      if(resEdit.tables.includes(t.id)) return {cls: 'sel', sub: small ? '✓' : '✓ Seçildi', busy: false};
       if(c) return {cls: 'busy', sub: small ? c.time : 'Dolu · ' + c.time, busy: true, title: 'Dolu: ' + c.time + ' · ' + c.name + ' · ' + c.guests + ' kişi'};
-      return {cls: t.seats >= resEdit.guests ? 'fit' : '', sub: t.seats + ' kişilik', busy: false};
+      return {cls: t.seats >= resEdit.guests ? 'fit' : '', sub: t.seats + (small ? ' kişi' : ' kişilik'), busy: false};
     });
     const seats = resEdit.tables.reduce((s, id) => s + ((Core.tableById(id) || {}).seats || 0), 0);
     const conflicts = resEdit.tables.map(id => tableConflict(id, resEdit.date, a, b, resEdit.id)).filter(Boolean);
