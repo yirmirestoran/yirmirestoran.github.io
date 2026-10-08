@@ -1029,18 +1029,6 @@
           "id": "saraplar--hanchalar-cabernet-merlot-ficili-2019-75-cl"
         },
         {
-          "name": "Hanchalar Çal Karası Kırmızı Fıçılı 2020 75 cl",
-          "price": "2.400 TL",
-          "description": "",
-          "calories": "15 cl: 135",
-          "calorieEstimated": true,
-          "allergens": [
-            "sulfites"
-          ],
-          "traceWarning": "",
-          "id": "saraplar--hanchalar-cal-karasi-kirmizi-ficili-2020-75-cl"
-        },
-        {
           "name": "Hanchalar Syrah Fıçılı 75 cl",
           "price": "2.400 TL",
           "description": "",
@@ -1053,8 +1041,20 @@
           "id": "saraplar--hanchalar-syrah-ficili-75-cl"
         },
         {
+          "name": "Hanchalar Çal Karası Kırmızı Fıçılı 2020 75 cl",
+          "price": "2.400 TL",
+          "description": "",
+          "calories": "15 cl: 135",
+          "calorieEstimated": true,
+          "allergens": [
+            "sulfites"
+          ],
+          "traceWarning": "",
+          "id": "saraplar--hanchalar-cal-karasi-kirmizi-ficili-2020-75-cl"
+        },
+        {
           "name": "Hanchalar Öküzgözü & Syrah 75 cl",
-          "price": "1.300 TL",
+          "price": "1.500 TL",
           "description": "",
           "calories": "15 cl: 135",
           "calorieEstimated": true,
@@ -1066,7 +1066,7 @@
         },
         {
           "name": "Hanchalar Cabernet-Merlot 75 cl",
-          "price": "1.300 TL",
+          "price": "1.500 TL",
           "description": "",
           "calories": "15 cl: 135",
           "calorieEstimated": true,
@@ -1078,7 +1078,7 @@
         },
         {
           "name": "Hanchalar Çal Karası Kırmızı 75 cl",
-          "price": "1.200 TL",
+          "price": "1.500 TL",
           "description": "",
           "calories": "15 cl: 135",
           "calorieEstimated": true,
@@ -1102,7 +1102,7 @@
         },
         {
           "name": "Hanchalar Clairet 75 cl",
-          "price": "1.200 TL",
+          "price": "1.500 TL",
           "description": "",
           "calories": "15 cl: 135",
           "calorieEstimated": true,
@@ -1114,7 +1114,7 @@
         },
         {
           "name": "Hanchalar Chardonnay 75 cl",
-          "price": "1.400 TL",
+          "price": "1.500 TL",
           "description": "",
           "calories": "15 cl: 135",
           "calorieEstimated": true,
@@ -1126,7 +1126,7 @@
         },
         {
           "name": "Hanchalar Sauvignon Blanc 75 cl",
-          "price": "1.400 TL",
+          "price": "1.500 TL",
           "description": "",
           "calories": "15 cl: 135",
           "calorieEstimated": true,
@@ -1138,7 +1138,7 @@
         },
         {
           "name": "Hanchalar Narince 75 cl",
-          "price": "1.400 TL",
+          "price": "1.500 TL",
           "description": "",
           "calories": "15 cl: 135",
           "calorieEstimated": true,
