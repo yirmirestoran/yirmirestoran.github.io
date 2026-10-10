@@ -260,6 +260,101 @@ h2{font-size:25px!important}
 .floor-wrap{margin-top:10px}
 .floor{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none;touch-action:manipulation}
 .floor.vertical{max-width:440px;margin:0 auto}
+/* Masa düzenleme modu */
+.lay-btn{white-space:nowrap}
+.lay-btn.on{background:#2b2118;border-color:#2b2118;color:#ffd894}
+.lay-bar{margin-top:10px;padding:10px 12px;border-radius:12px;background:#fdf3df;border:1px solid #f0d9a8}
+.lay-tip{margin:0 0 8px;font-size:13px;color:#6b4c1e}
+.lay-actions{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.lay-actions .grow{flex:1}
+.floor.editing .tbl{cursor:grab;touch-action:none}
+.floor.editing .tbl.dragging{cursor:grabbing}
+.floor.editing .tbl rect{fill:#fff;stroke:#b9a27a;stroke-dasharray:7 5}
+.floor.editing .tbl.picked rect{fill:#fdf3df;stroke:var(--accent);stroke-width:4;stroke-dasharray:none}
+.floor.editing .fl-bg{fill:#fbf8f2;stroke:#efe6d6;stroke-width:1}
+.lay-insp{margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:var(--shadow)}
+.insp-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.insp-head b{font:600 22px/1 'Cormorant Garamond',serif;flex:1}
+.insp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.insp-grid label,.insp-grid .lbl{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:4px}
+.insp-grid input{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:10px;font-weight:700}
+.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.stepper button{border:0;background:#faf8f4;width:44px;height:42px;font-size:20px;font-weight:700;cursor:pointer}
+.stepper span{flex:1;text-align:center;font-weight:700}
+/* Masaya dokununca açılan alt pencere */
+.sheet-veil{align-items:center}
+.modal.sheet{width:min(460px,100%)}
+.sheet h2{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+.sheet h2 small{font:700 12px 'DM Sans',sans-serif;color:var(--muted)}
+.sheet-card{border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px;background:#faf8f4}
+.sheet-card b{font-size:16px}
+.sheet-card .res-meta{margin-top:6px}
+.sheet-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.sheet-acts .btn{padding:12px;font-size:14px;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center}
+.sheet-acts .wide{grid-column:1/-1}
+.sheet-next{margin-top:12px;font-size:13px}
+.sheet-next div{display:flex;justify-content:space-between;padding:6px 0;border-top:1px dashed var(--line)}
+.walkin{margin-top:12px;padding:12px;border-radius:14px;background:#f2f8ee;border:1px solid #cfe3c3}
+.walkin .grid{grid-template-columns:1fr 1fr}
+@media(max-width:600px){
+  .sheet-veil{align-items:flex-end;padding:0}
+  .modal.sheet{border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
+  .lay-btn span{display:none}
+}
+/* Telefonda sekmeler tek satırda kaysın */
+@media(max-width:600px){
+  .tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:4px;margin-top:10px}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:none}
+}
+/* Satış & Kâr */
+.sl-range-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.sl-range{overflow-x:auto;max-width:100%;scrollbar-width:none}
+.sl-range::-webkit-scrollbar{display:none}
+.sl-range button{flex:none;padding:7px 12px}
+.sl-custom{display:flex;align-items:center;gap:6px}
+.sl-custom input{padding:7px 8px;border:1px solid var(--line);border-radius:9px;font-weight:700;background:#fff}
+@media(max-width:600px){.sl-tabs{display:flex;width:100%;overflow-x:auto}.sl-tabs button{flex:1 0 auto}.sl-custom{width:100%}.sl-custom input{flex:1}}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:14px}
+.kpi small{display:block;font-size:12px;font-weight:700;color:var(--muted)}
+.kpi b{display:block;font:600 30px/1.1 'Cormorant Garamond',serif;margin-top:4px;color:var(--text)}
+.kpi em{display:block;font-style:normal;font-size:12px;font-weight:700;color:var(--muted);margin-top:2px}
+.kpi.main{background:#2b2118}
+.kpi.main small,.kpi.main em{color:#cbb48b}
+.kpi.main b{color:#ffd894}
+.kpi .neg{color:var(--danger)}
+.bars{display:flex;align-items:flex-end;gap:2px;height:180px;padding-top:8px;border-bottom:1px solid var(--line);position:relative}
+.bar{flex:1;min-width:3px;height:100%;display:flex;align-items:flex-end;cursor:pointer;position:relative}
+.bar i{display:block;width:100%;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px;transition:background .15s}
+.bar:hover i,.bar.on i{background:#2b2118}
+.bar-x{display:flex;gap:2px;margin-top:4px}
+.bar-x span{flex:1;min-width:3px;font-size:10.5px;color:var(--muted);text-align:center;white-space:nowrap;overflow:visible}
+.chart-tip{position:absolute;z-index:5;pointer-events:none;background:#2b2118;color:#fff;border-radius:10px;padding:8px 10px;font-size:12px;line-height:1.45;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.2);transform:translate(-50%,-100%);margin-top:-8px}
+.chart-tip b{color:#ffd894}
+.chart-wrap{position:relative}
+.sl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.sl-grid .panel{margin:0}
+.tbl-list{width:100%;border-collapse:collapse;font-size:13px}
+.tbl-list th{text-align:left;font-size:11.5px;color:var(--muted);font-weight:700;padding:6px 6px;border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer}
+.tbl-list th.num,.tbl-list td.num{text-align:right;white-space:nowrap}
+.tbl-list td:first-child{min-width:130px}
+.tbl-list td{padding:8px 6px;border-bottom:1px solid #f1ebe0;vertical-align:top}
+.tbl-list td small{display:block;color:var(--muted);font-size:11px}
+.tbl-list tr.est td.num:nth-child(4){color:var(--muted);font-style:italic}
+.tbl-scroll{overflow-x:auto}
+.sl-steps{margin:0 0 12px;padding-left:20px;color:var(--muted);font-size:13.5px;line-height:1.6}
+.sl-file{display:inline-flex}
+.sl-sub{font-family:'DM Sans',sans-serif;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 0 6px}
+.map-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:12px 0}
+.map-grid label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:4px}
+.map-grid select,.map-grid input{width:100%;padding:8px;border:1px solid var(--line);border-radius:9px;background:#fff}
+.cost-row{display:grid;grid-template-columns:1fr 110px 120px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #f1ebe0}
+.cost-row input{width:100%;padding:8px;border:1px solid var(--line);border-radius:9px;text-align:right;font-weight:700}
+.cost-row small{display:block;color:var(--muted);font-size:11.5px}
+.cost-row .m{font-size:12px;font-weight:700;text-align:right}
+.cost-cat{font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:16px 0 2px}
+@media(max-width:600px){.cost-row{grid-template-columns:1fr 96px}.cost-row .m{grid-column:1/-1;text-align:left}}
 .fl-bg{fill:#fbf8f2}
 .fl-wall{fill:none;stroke:#2b2118;stroke-width:6;stroke-linecap:round}
 .fl-door{stroke:var(--accent);stroke-width:3;stroke-dasharray:9 7}
@@ -456,6 +551,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
 <div class="tabs">
   <button class="tab active" data-tab="home">Genel Bakış</button>
   <button class="tab" data-tab="res">Rezervasyon</button>
+  <button class="tab" data-tab="sales">Satış &amp; Kâr</button>
   <button class="tab" data-tab="menu">Menü</button>
   <button class="tab" data-tab="chef">Şef &amp; İmza</button>
   <button class="tab" data-tab="calendar">Takvim</button>
@@ -514,11 +610,24 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   <div class="panel res-pane" id="res-pane-floor">
     <div class="res-row">
       <h2 id="res-floor-title">İç Mekân</h2>
-      <label class="res-time-pick">Saat <select id="res-time"></select></label>
+      <label class="res-time-pick" id="res-time-wrap">Saat <select id="res-time"></select></label>
+      <button class="btn sm lay-btn" id="lay-toggle" type="button" title="Masa düzenini değiştir" aria-label="Masa düzenini değiştir">⚙ <span>Masaları düzenle</span></button>
+    </div>
+    <!-- Masa düzenleme modu (yalnızca panel) -->
+    <div class="lay-bar hide" id="lay-bar">
+      <p class="lay-tip"><b>Düzenleme modu:</b> masayı sürükleyerek taşıyın, dokunarak seçip adını, kişi sayısını ve boyutunu değiştirin.</p>
+      <div class="lay-actions">
+        <button class="btn sm" type="button" id="lay-add">+ Masa ekle</button>
+        <button class="btn sm" type="button" id="lay-reset">Krokideki hâline dön</button>
+        <span class="grow"></span>
+        <button class="btn sm" type="button" id="lay-cancel">Vazgeç</button>
+        <button class="btn sm primary" type="button" id="lay-save">Kaydet</button>
+      </div>
     </div>
     <div class="floor-wrap" id="res-floor"></div>
-    <div class="fl-legend"><span><i></i>Boş</span><span><i class="soon"></i>Yakında dolacak</span><span><i class="booked"></i>Rezerve</span><span><i class="seated"></i>Masada</span></div>
-    <p class="hint">Boş masaya dokunun → rezervasyon ekleyin. Dolu masaya dokunun → rezervasyonu açın.</p>
+    <div class="lay-insp hide" id="lay-insp"></div>
+    <div class="fl-legend" id="res-legend"><span><i></i>Boş</span><span><i class="soon"></i>Yakında dolacak</span><span><i class="booked"></i>Rezerve</span><span><i class="seated"></i>Masada</span></div>
+    <p class="hint" id="res-floor-hint">Masaya dokunun: boşsa müşteri oturtun veya rezervasyon ekleyin, doluysa durumunu değiştirin.</p>
   </div>
 
   <div class="panel res-pane hide" id="res-pane-list">
@@ -603,6 +712,11 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       <button type="button" class="btn danger" id="annf-delete">Sil</button>
     </div>
   </form>
+</div>
+
+<!-- Masaya dokununca açılan hızlı işlemler -->
+<div class="modal-veil sheet-veil hide" id="tbl-sheet">
+  <div class="modal sheet" id="tbl-sheet-body" role="dialog" aria-modal="true"></div>
 </div>
 
 <!-- Rezervasyon penceresi -->
@@ -817,6 +931,40 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       <label class="btn">Yedek yükle<input type="file" id="import-json" accept=".json,application/json" hidden></label>
     </div>
   </div>
+</div>
+
+<!-- SATIŞ & KÂR -->
+<div class="page hide" id="tab-sales">
+  <div class="panel res-bar">
+    <div class="res-row">
+      <h2 style="margin:0;flex:1">Satış &amp; Kâr</h2>
+      <div class="seg sl-tabs" id="sl-view"><button type="button" data-v="report">Rapor</button><button type="button" data-v="import">Veri yükle</button><button type="button" data-v="costs">Maliyetler</button><button type="button" data-v="expenses">Giderler</button></div>
+    </div>
+    <div class="sl-range-row" id="sl-range-row">
+      <div class="seg sl-range" id="sl-range"><button type="button" data-r="today">Bugün</button><button type="button" data-r="7">7 gün</button><button type="button" data-r="30">30 gün</button><button type="button" data-r="month">Bu ay</button><button type="button" data-r="prev">Geçen ay</button><button type="button" data-r="all">Tümü</button></div>
+      <div class="sl-custom"><input type="date" id="sl-from" aria-label="Başlangıç"><span>–</span><input type="date" id="sl-to" aria-label="Bitiş"></div>
+    </div>
+  </div>
+
+  <div class="sl-pane" id="sl-report"></div>
+
+  <div class="sl-pane panel hide" id="sl-import">
+    <h2>Flag'den satış verisi yükle</h2>
+    <ol class="sl-steps">
+      <li>Flag'de <b>Raporlar</b> bölümünden ürün satış / satış detay raporunu <b>Excel</b> veya <b>CSV</b> olarak indirin.</li>
+      <li>Dosyayı aşağıdan seçin; sütunlar otomatik eşleştirilir, gerekirse düzeltin.</li>
+      <li><b>İçe aktar</b>'a basın. Ürünler menüdeki adlarıyla eşleşir, maliyetler buna göre hesaplanır.</li>
+    </ol>
+    <label class="btn primary sl-file">📄 Dosya seç (Excel / CSV)<input type="file" id="sl-file" accept=".csv,.xlsx,.xls,.txt" hidden></label>
+    <div id="sl-map"></div>
+    <h3 class="sl-sub">Yüklenen dosyalar</h3>
+    <div id="sl-imports"></div>
+    <p class="hint">Flag'in doğrudan bağlantı (API) imkânı sunması durumunda satışlar otomatik çekilecek şekilde bağlanabilir; o zamana kadar rapor dosyası yüklemek yeterli.</p>
+  </div>
+
+  <div class="sl-pane panel hide" id="sl-costs"></div>
+  <div class="sl-pane panel hide" id="sl-expenses"></div>
+  <p class="hint res-foot">Satış, maliyet ve gider bilgileri şifreli saklanır; yalnızca bu panelden okunabilir.</p>
 </div>
 
 <!-- QR -->
@@ -2583,12 +2731,25 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     });
     return s + '</svg>';
   }
-  // Ana plan: seçili saatte kim oturuyor, yakında kim gelecek
+  // Ana plan: seçili saatte kim oturuyor, yakında kim gelecek (düzenleme modunda taslak masalar çizilir)
   function renderFloor(){
-    const floor = Core.floorById(resArea), minute = resMin(resTime);
+    const base = Core.floorById(resArea), minute = resMin(resTime);
     const day = dayRes(resDay).filter(blocking);
-    $('#res-floor-title').textContent = floor.name;
-    $('#res-floor').innerHTML = floorSvg(floor, (t, small) => {
+    $('#res-floor-title').textContent = base.name;
+    $('#lay-toggle').classList.toggle('on', !!layDraft);
+    $('#lay-bar').classList.toggle('hide', !layDraft);
+    $('#res-time-wrap').classList.toggle('hide', !!layDraft);
+    $('#res-legend').classList.toggle('hide', !!layDraft);
+    $('#res-floor-hint').classList.toggle('hide', !!layDraft);
+    if(layDraft){
+      const floor = Object.assign({}, base, {tables: layDraft[resArea]});
+      $('#res-floor').innerHTML = floorSvg(floor, (t, small) => ({cls: t.id === laySel ? 'picked' : '', sub: t.seats + (small ? ' kişi' : ' kişilik')}));
+      $('#res-floor svg').classList.add('editing');
+      renderLayInspector();
+      return;
+    }
+    $('#lay-insp').classList.add('hide');
+    $('#res-floor').innerHTML = floorSvg(base, (t, small) => {
       const mine = day.filter(r => (r.tables || []).includes(t.id));
       const at = mine.find(r => resRange(r)[0] <= minute && minute < resRange(r)[1]);
       const next = at ? null : mine.filter(r => resRange(r)[0] > minute).sort((a, b) => resMin(a.time) - resMin(b.time))[0];
@@ -2605,13 +2766,258 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     if(!$('#tab-res').classList.contains('hide') && state) renderFloor();
     if(resEdit) renderResTables();
   });
-  $('#res-floor').addEventListener('click', e => {
+
+  /* ---------- Masa düzeni (floors.json) ---------- */
+  // Masaların yeri, boyutu, adı ve kişi sayısı panelden değiştirilebilir. Müşteri bilgisi içermediği için şifresiz saklanır.
+  const FLOORS_PATH = 'floors.json';
+  let layDraft = null, laySel = null, layDirty = false, layDrag = null;
+  const SNAP = 4, MIN_T = 40, MAX_T = 420;
+  async function loadFloorLayout(){
+    try{
+      const d = await gh(session, 'GET', null, FLOORS_PATH);
+      const obj = JSON.parse(b64decode(d.content));
+      Core.setFloorTables(obj.floors);
+      refreshResViews();
+    }catch(e){ if(e.status !== 404) console.warn('Masa düzeni okunamadı', e); }
+  }
+  function startLayout(){
+    layDraft = Object.fromEntries(Core.FLOORS.map(f => [f.id, JSON.parse(JSON.stringify(f.tables))]));
+    laySel = null; layDirty = false;
+    renderFloor();
+  }
+  function stopLayout(){ layDraft = null; laySel = null; layDirty = false; renderFloor(); }
+  function layTable(id){ return layDraft && layDraft[resArea].find(t => t.id === id); }
+  function clampTable(t){
+    const f = Core.floorById(resArea);
+    t.w = Math.max(MIN_T, Math.min(MAX_T, Math.round(t.w / SNAP) * SNAP));
+    t.h = Math.max(MIN_T, Math.min(MAX_T, Math.round(t.h / SNAP) * SNAP));
+    t.x = Math.max(0, Math.min(f.w - t.w, Math.round(t.x / SNAP) * SNAP));
+    t.y = Math.max(0, Math.min(f.h - t.h, Math.round(t.y / SNAP) * SNAP));
+  }
+  // Seçili masanın ayarları. Boyut düğmeleri ekranda görünen yöne göre çalışır (telefonda kroki dikey çizildiği için en/boy yer değiştirir).
+  function renderLayInspector(){
+    const t = laySel && layTable(laySel);
+    const box = $('#lay-insp');
+    if(!t){ box.classList.add('hide'); return; }
+    const vert = narrowMq.matches, wKey = vert ? 'h' : 'w', hKey = vert ? 'w' : 'h';
+    box.classList.remove('hide');
+    box.innerHTML =
+      '<div class="insp-head"><b>' + esc(t.label) + '</b><button class="btn sm" type="button" data-li="close">Bitti</button></div>' +
+      '<div class="insp-grid">' +
+        '<div><label for="li-label">Masa adı</label><input id="li-label" maxlength="12" value="' + esc(t.label) + '"></div>' +
+        '<div><span class="lbl">Kişi sayısı</span><div class="stepper"><button type="button" data-li="seats-">−</button><span>' + t.seats + '</span><button type="button" data-li="seats+">+</button></div></div>' +
+        '<div><span class="lbl">Genişlik ↔</span><div class="stepper"><button type="button" data-li="' + wKey + '-">−</button><span>' + t[wKey] + '</span><button type="button" data-li="' + wKey + '+">+</button></div></div>' +
+        '<div><span class="lbl">Yükseklik ↕</span><div class="stepper"><button type="button" data-li="' + hKey + '-">−</button><span>' + t[hKey] + '</span><button type="button" data-li="' + hKey + '+">+</button></div></div>' +
+      '</div>' +
+      '<div class="row-actions"><button class="btn sm" type="button" data-li="rotate">⟲ Döndür</button><button class="btn sm" type="button" data-li="dup">Kopyala</button><span style="flex:1"></span><button class="btn sm danger" type="button" data-li="del">Masayı sil</button></div>';
+  }
+  $('#lay-insp').addEventListener('click', e => {
+    const b = e.target.closest('[data-li]');
+    if(!b) return;
+    const t = layTable(laySel);
+    if(!t) return;
+    const a = b.dataset.li;
+    if(a === 'close'){ laySel = null; return renderFloor(); }
+    if(a === 'seats+') t.seats = Math.min(30, t.seats + 1);
+    else if(a === 'seats-') t.seats = Math.max(1, t.seats - 1);
+    else if(/^[wh][+-]$/.test(a)) t[a[0]] += a[1] === '+' ? 16 : -16;
+    else if(a === 'rotate'){ const w = t.w; t.w = t.h; t.h = w; }
+    else if(a === 'dup'){
+      const c = Object.assign({}, t, {id: newTableId(), label: nextTableLabel(), x: t.x + 24, y: t.y + 24});
+      clampTable(c);
+      layDraft[resArea].push(c);
+      laySel = c.id;
+    }else if(a === 'del'){
+      const future = (resList || []).filter(r => (r.tables || []).includes(t.id) && r.date >= todayStr() && blocking(r)).length;
+      if(!confirm(t.label + ' silinsin mi?' + (future ? '\n\nDikkat: bu masada ' + future + ' gelecek rezervasyon var; bu rezervasyonlar masasız kalır.' : ''))) return;
+      layDraft[resArea] = layDraft[resArea].filter(x => x.id !== t.id);
+      laySel = null;
+    }
+    clampTable(t);
+    layDirty = true;
+    renderFloor();
+  });
+  $('#lay-insp').addEventListener('input', e => {
+    if(e.target.id !== 'li-label') return;
+    const t = layTable(laySel);
+    if(!t) return;
+    t.label = e.target.value.trim() || t.label;
+    layDirty = true;
+    $('#lay-insp .insp-head b').textContent = t.label;
+    const g = $('#res-floor .tbl[data-table="' + t.id + '"] .t-id');
+    if(g) g.textContent = t.label;
+  });
+  function newTableId(){
+    const all = new Set(Object.values(layDraft).flat().map(t => t.id).concat(Object.keys(Object.fromEntries((resList || []).flatMap(r => (r.tables || []).map(id => [id, 1]))))));
+    let n = 1, id;
+    do{ id = resArea + '-' + Date.now().toString(36) + (n++); }while(all.has(id));
+    return id;
+  }
+  function nextTableLabel(){
+    const prefix = resArea === 'ic' ? 'İ' : 'D';
+    const used = new Set(layDraft[resArea].map(t => t.label));
+    let n = layDraft[resArea].length + 1;
+    while(used.has(prefix + n)) n++;
+    return prefix + n;
+  }
+  $('#lay-toggle').addEventListener('click', () => {
+    if(layDraft){ if(layDirty && !confirm('Kaydedilmemiş masa değişiklikleri silinsin mi?')) return; return stopLayout(); }
+    if(resView !== 'floor'){ resView = 'floor'; renderRes(); }
+    startLayout();
+  });
+  $('#lay-cancel').addEventListener('click', () => { if(layDirty && !confirm('Değişiklikler silinsin mi?')) return; stopLayout(); });
+  $('#lay-add').addEventListener('click', () => {
+    const f = Core.floorById(resArea);
+    const t = {id: newTableId(), label: nextTableLabel(), seats: 4, x: f.w / 2 - 64, y: f.h / 2 - 40, w: 128, h: 80};
+    clampTable(t);
+    layDraft[resArea].push(t);
+    laySel = t.id; layDirty = true;
+    renderFloor();
+    toast('Yeni masa ortaya eklendi. Sürükleyerek yerine taşıyın.');
+  });
+  $('#lay-reset').addEventListener('click', () => {
+    if(!confirm(Core.floorById(resArea).name + ' masaları krokideki ilk hâline dönsün mü? (Kaydet\'e basana kadar kalıcı olmaz.)')) return;
+    layDraft[resArea] = Core.defaultFloorTables(resArea);
+    laySel = null; layDirty = true;
+    renderFloor();
+  });
+  $('#lay-save').addEventListener('click', async () => {
+    const labels = Object.values(layDraft).flat().map(t => t.label);
+    const dup = labels.find((l, i) => labels.indexOf(l) !== i);
+    if(dup) return toast('Aynı adla iki masa var: ' + dup + '. Lütfen birini değiştirin.', true, 6000);
+    const btn = $('#lay-save');
+    btn.disabled = true; btn.textContent = 'Kaydediliyor…';
+    try{
+      await putFile(session, FLOORS_PATH, JSON.stringify({v: 1, updatedAt: new Date().toISOString(), floors: layDraft}, null, 1) + '\n', 'Masa düzeni güncellendi');
+      Core.setFloorTables(layDraft);
+      stopLayout();
+      toast('Masa düzeni kaydedildi.');
+    }catch(err){
+      toast(err.status ? ghErrorText(err) : err.message, true, 7000);
+    }finally{ btn.disabled = false; btn.textContent = 'Kaydet'; }
+  });
+
+  // Sürükle-bırak (fare ve dokunmatik). Ekrandaki nokta krokinin kendi koordinatına çevrilir (dikey çizimde döndürülmüş).
+  function floorPoint(svg, ev){
+    const p = svg.createSVGPoint();
+    p.x = ev.clientX; p.y = ev.clientY;
+    const q = p.matrixTransform(svg.getScreenCTM().inverse());
+    const f = Core.floorById(resArea);
+    return narrowMq.matches ? {x: q.y, y: f.h - q.x} : {x: q.x, y: q.y};
+  }
+  $('#res-floor').addEventListener('pointerdown', e => {
+    if(!layDraft) return;
     const g = e.target.closest('.tbl');
     if(!g) return;
-    if(g.dataset.res && resList) return openResForm(resList.find(r => r.id === g.dataset.res));
-    openResForm(null, {tables: [g.dataset.table], time: resTime});
+    const t = layTable(g.dataset.table);
+    if(!t) return;
+    e.preventDefault();
+    const svg = g.ownerSVGElement;
+    const p = floorPoint(svg, e);
+    layDrag = {id: t.id, g, svg, sx: p.x, sy: p.y, ox: t.x, oy: t.y, moved: false, cx: e.clientX, cy: e.clientY};
+    try{ g.setPointerCapture(e.pointerId); }catch(err){}
+    g.classList.add('dragging');
   });
-  $('#res-floor').addEventListener('keydown', e => { if(e.key === 'Enter' && e.target.closest('.tbl')) e.target.closest('.tbl').dispatchEvent(new MouseEvent('click', {bubbles: true})); });
+  $('#res-floor').addEventListener('pointermove', e => {
+    if(!layDrag) return;
+    if(!layDrag.moved && Math.hypot(e.clientX - layDrag.cx, e.clientY - layDrag.cy) < 5) return;
+    layDrag.moved = true;
+    const t = layTable(layDrag.id), p = floorPoint(layDrag.svg, e);
+    t.x = layDrag.ox + (p.x - layDrag.sx);
+    t.y = layDrag.oy + (p.y - layDrag.sy);
+    clampTable(t);
+    // görüntüyü sadece kaydır (her harekette yeniden çizmeden)
+    const dx = t.x - layDrag.ox, dy = t.y - layDrag.oy;
+    layDrag.g.setAttribute('transform', narrowMq.matches ? 'translate(' + (-dy) + ' ' + dx + ')' : 'translate(' + dx + ' ' + dy + ')');
+  });
+  function endDrag(){
+    if(!layDrag) return;
+    const d = layDrag;
+    layDrag = null;
+    if(d.moved) layDirty = true;
+    laySel = d.id;
+    renderFloor();
+  }
+  $('#res-floor').addEventListener('pointerup', endDrag);
+  $('#res-floor').addEventListener('pointercancel', endDrag);
+
+  /* ---------- Masaya dokununca: hızlı işlemler ---------- */
+  $('#res-floor').addEventListener('click', e => {
+    if(layDraft) return;
+    const g = e.target.closest('.tbl');
+    if(g) openTableSheet(g.dataset.table);
+  });
+  $('#res-floor').addEventListener('keydown', e => { if(e.key === 'Enter' && !layDraft && e.target.closest('.tbl')) openTableSheet(e.target.closest('.tbl').dataset.table); });
+
+  function openTableSheet(tableId){
+    const t = Core.tableById(tableId);
+    if(!t) return;
+    const minute = resMin(resTime);
+    const mine = dayRes(resDay).filter(r => blocking(r) && (r.tables || []).includes(tableId));
+    const at = mine.find(r => resRange(r)[0] <= minute && minute < resRange(r)[1]);
+    const later = mine.filter(r => r !== at && resRange(r)[0] >= minute);
+    const isToday = resDay === todayStr();
+    let h = '<h2>' + esc(t.label) + ' <small>' + esc(t.areaName) + ' · ' + t.seats + ' kişilik · ' + esc(resTime) + '</small></h2>';
+    if(at){
+      const items = (at.preorder && at.preorder.items) || [];
+      h += '<div class="sheet-card"><b>' + esc(at.name) + '</b> · ' + at.guests + ' kişi<br><span class="hint" style="margin:0">' + esc(at.time) + '–' + Core.hm(resRange(at)[1]) + ' · ' + esc(RES_STATUS_LABEL[at.status] || at.status) + '</span>' +
+        '<div class="res-meta">' + (items.length ? '<span class="pill po">🍽 ' + items.reduce((s, i) => s + (+i.qty || 1), 0) + ' ürün' + (at.preorder.readyAt ? ' · ' + esc(at.preorder.readyAt) : '') + '</span>' : '') +
+        (at.note ? '<span class="pill note">✎ ' + esc(at.note) + '</span>' : '') + '</div></div><div class="sheet-acts">' +
+        (at.status !== 'seated' ? '<button class="btn primary wide" type="button" data-sa="seat" data-id="' + esc(at.id) + '">✓ Geldi, masaya oturdu</button>'
+                                : '<button class="btn primary wide" type="button" data-sa="done" data-id="' + esc(at.id) + '">Hesap kapandı, masa boşaldı</button>') +
+        (at.phone ? '<a class="btn" href="tel:' + esc(String(at.phone).replace(/[^\d+]/g, '')) + '">📞 Ara</a>' : '') +
+        '<button class="btn" type="button" data-sa="edit" data-id="' + esc(at.id) + '">Düzenle</button>' +
+        (at.status !== 'seated' ? '<button class="btn" type="button" data-sa="noshow" data-id="' + esc(at.id) + '">Gelmedi</button>' : '') +
+        '</div>';
+    }else{
+      h += '<div class="sheet-acts">' +
+        (isToday ? '<button class="btn primary wide" type="button" data-sa="walkin-open">👥 Şimdi masaya oturt</button>' : '') +
+        '<button class="btn' + (isToday ? '' : ' primary') + ' wide" type="button" data-sa="new">+ Bu masaya rezervasyon ekle</button></div>' +
+        '<div class="walkin hide" id="walkin"><div class="grid">' +
+          '<div class="field"><label>Kişi sayısı</label><div class="stepper"><button type="button" data-sa="g-">−</button><span id="walkin-g">' + Math.min(2, t.seats) + '</span><button type="button" data-sa="g+">+</button></div></div>' +
+          '<div class="field"><label>Ad (isteğe bağlı)</label><input id="walkin-name" placeholder="Misafir"></div></div>' +
+          '<div class="sheet-acts"><button class="btn primary wide" type="button" data-sa="walkin" data-table="' + esc(tableId) + '">Oturt</button></div></div>';
+    }
+    if(later.length) h += '<div class="sheet-next"><b>Bu masanın sonraki rezervasyonları</b>' + later.map(r => '<div><span>' + esc(r.time) + ' · ' + esc(r.name) + ' · ' + r.guests + ' kişi</span><a href="#" data-sa="edit" data-id="' + esc(r.id) + '">Aç</a></div>').join('') + '</div>';
+    h += '<div class="sheet-acts"><button class="btn wide" type="button" data-sa="close">Kapat</button></div>';
+    const body = $('#tbl-sheet-body');
+    body.innerHTML = h;
+    body.dataset.table = tableId;
+    $('#tbl-sheet').classList.remove('hide');
+  }
+  function closeSheet(){ $('#tbl-sheet').classList.add('hide'); }
+  $('#tbl-sheet').addEventListener('click', async e => {
+    if(e.target.id === 'tbl-sheet') return closeSheet();
+    const b = e.target.closest('[data-sa]');
+    if(!b) return;
+    e.preventDefault();
+    const a = b.dataset.sa, id = b.dataset.id, tableId = $('#tbl-sheet-body').dataset.table;
+    if(a === 'close') return closeSheet();
+    if(a === 'edit'){ closeSheet(); return openResForm(resList.find(r => r.id === id)); }
+    if(a === 'new'){ closeSheet(); return openResForm(null, {tables: [tableId], time: resTime, area: (Core.tableById(tableId) || {}).area}); }
+    if(a === 'walkin-open'){ $('#walkin').classList.remove('hide'); b.classList.add('hide'); return; }
+    if(a === 'g+' || a === 'g-'){ const s = $('#walkin-g'); s.textContent = Math.max(1, Math.min(60, +s.textContent + (a === 'g+' ? 1 : -1))); return; }
+    if(a === 'seat' || a === 'done' || a === 'noshow'){
+      closeSheet();
+      const status = a === 'seat' ? 'seated' : a;
+      return updateRes(id, {status}, a === 'seat' ? 'Müşteri masaya oturdu.' : a === 'done' ? 'Masa boşaldı.' : 'Gelmedi olarak işaretlendi.');
+    }
+    if(a === 'walkin'){
+      const n = Core.now(), m = Math.floor(n.min / 5) * 5;
+      const rec = {id: 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), date: todayStr(), time: Core.hm(m), duration: 120,
+        guests: +$('#walkin-g').textContent || 2, name: $('#walkin-name').value.trim() || 'Misafir', phone: '', tables: [tableId],
+        area: (Core.tableById(tableId) || {}).area, status: 'seated', source: 'walkin', note: '',
+        preorder: {items: [], readyAt: '', note: ''}, payment: {status: 'none', amount: 0, method: ''}};
+      rec.createdAt = rec.updatedAt = new Date().toISOString();
+      b.disabled = true; b.textContent = 'Kaydediliyor…';
+      try{
+        await mutateReservations(list => { list.push(rec); });
+        closeSheet();
+        toast(Core.tableById(tableId).label + ' masasına ' + rec.guests + ' kişi oturtuldu.');
+      }catch(err){ toast(err.status ? ghErrorText(err) : err.message, true, 7000); b.disabled = false; b.textContent = 'Oturt'; }
+    }
+  });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('#tbl-sheet').classList.contains('hide')) closeSheet(); });
 
   function renderGantt(){
     const floor = Core.floorById(resArea), h = serviceHours();
@@ -2942,6 +3348,485 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     if(session && session.dataKey && !document.hidden && !$('#tab-res').classList.contains('hide') && $('#res-modal').classList.contains('hide')) loadReservations(true);
   }, 60000);
 
+  /* ---------- Satış & Kâr ---------- */
+  // Flag'den indirilen satış raporu (Excel/CSV) içe aktarılır; ürün maliyetleri ve giderlerle ciro, maliyet ve kâr hesaplanır.
+  // İşletmeye özel bilgiler olduğu için business.json da rezervasyonlar gibi şifreli saklanır.
+  // Satış satırı: {b: içe aktarma no, d: 'YYYY-MM-DD', t: 'HH:MM', n: ürün, q: adet, a: tutar, tb: masa, c: kategori}
+  const BIZ_PATH = 'business.json';
+  const EXP_CATS = ['Personel', 'Kira', 'Fatura (elektrik, su, doğalgaz)', 'Malzeme / tedarik', 'Bakım / onarım', 'Reklam', 'Vergi / muhasebe', 'Diğer'];
+  let biz = null, bizSha = null, bizLoading = null;
+  let slView = 'report', slRange = 'month', slFrom = '', slTo = '', slSort = 'a', slAllProducts = false, slParsed = null;
+  try{ slView = localStorage.getItem('yirmi-sl-view') || 'report'; }catch(e){}
+
+  function emptyBiz(){ return {v: 1, sales: [], imports: [], costs: {}, expenses: [], settings: {costPct: 35}}; }
+  async function ghReadText(path){
+    const d = await gh(session, 'GET', null, path);
+    let b64 = d.content;
+    if(!b64){
+      const r = await fetch('https://api.github.com/repos/' + encodeURIComponent(session.owner) + '/' + encodeURIComponent(session.repo) + '/git/blobs/' + d.sha,
+        {headers: {'Authorization': 'Bearer ' + session.token, 'Accept': 'application/vnd.github+json'}, cache: 'no-store'});
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      b64 = (await r.json()).content;
+    }
+    return {sha: d.sha, text: b64decode(b64)};
+  }
+  async function fetchBiz(){
+    try{
+      const f = await ghReadText(BIZ_PATH);
+      return {data: Object.assign(emptyBiz(), await decryptData(JSON.parse(f.text))), sha: f.sha};
+    }catch(e){ if(e.status === 404) return {data: emptyBiz(), sha: null}; throw e; }
+  }
+  async function loadBiz(){
+    if(bizLoading) return bizLoading;
+    bizLoading = (async () => {
+      try{ const cur = await fetchBiz(); biz = cur.data; bizSha = cur.sha; renderSales(); }
+      catch(e){ $('#sl-report').innerHTML = '<div class="panel"><p class="msg err">Satış verileri yüklenemedi: ' + esc(e.status ? ghErrorText(e) : e.message) + '</p></div>'; }
+      finally{ bizLoading = null; }
+    })();
+    return bizLoading;
+  }
+  async function mutateBiz(fn){
+    for(let attempt = 0; attempt < 3; attempt++){
+      const cur = await fetchBiz();
+      const out = fn(cur.data);
+      const box = await encryptData(cur.data);
+      try{
+        const res = await gh(session, 'PUT', {message: 'İşletme verileri güncellendi', content: b64encode(JSON.stringify(box) + '\n'), branch: session.branch, sha: cur.sha || undefined}, BIZ_PATH);
+        biz = cur.data; bizSha = res.content.sha;
+        renderSales();
+        return out;
+      }catch(e){ if(e.status === 409 || e.status === 422) continue; throw e; }
+    }
+    throw new Error('Kayıt başka bir cihazla çakıştı, lütfen tekrar deneyin.');
+  }
+
+  /* Tarih aralığı */
+  function monthStart(d){ return d.slice(0, 8) + '01'; }
+  function monthEnd(d){ const [y, m] = d.split('-').map(Number); return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10); }
+  function rangeDates(){
+    const t = todayStr();
+    if(slRange === 'today') return [t, t];
+    if(slRange === '7') return [shiftDay(t, -6), t];
+    if(slRange === '30') return [shiftDay(t, -29), t];
+    if(slRange === 'month') return [monthStart(t), t];
+    if(slRange === 'prev'){ const p = shiftDay(monthStart(t), -1); return [monthStart(p), p]; }
+    if(slRange === 'custom') return [slFrom || t, slTo || t];
+    const ds = ((biz && biz.sales) || []).map(s => s.d).concat(((biz && biz.expenses) || []).map(x => x.d)).sort();
+    return [ds[0] || t, ds[ds.length - 1] || t];
+  }
+  const slDay = (d, opt) => new Date(Core.parseWall(d)).toLocaleDateString('tr-TR', Object.assign({day: 'numeric', month: 'short', timeZone: 'UTC'}, opt || {}));
+  const tl = n => Math.round(n).toLocaleString('tr-TR') + ' TL';
+  const pct = n => isFinite(n) ? '%' + (Math.round(n * 1000) / 10).toLocaleString('tr-TR') : '—';
+
+  /* Ürün eşleştirme: satış raporundaki ad → menüdeki ürün (maliyet, fiyat, kategori için) */
+  function menuIndex(){
+    const idx = {};
+    (state.categories || []).forEach(c => (c.items || []).forEach(i => { if(i.name) idx[Core.slugify(i.name)] = {item: i, cat: c}; }));
+    return idx;
+  }
+  function unitCost(name, idx){
+    const k = Core.slugify(name);
+    if(biz.costs[k] != null && biz.costs[k] !== '') return +biz.costs[k];
+    return null;
+  }
+
+  function computeReport(from, to){
+    const idx = menuIndex(), pctDef = (+biz.settings.costPct || 0) / 100;
+    const rows = biz.sales.filter(s => s.d >= from && s.d <= to);
+    const prod = {}, days = {}, hours = {}, cats = {}, tables = {};
+    let revenue = 0, cost = 0, qty = 0, estRevenue = 0;
+    rows.forEach(s => {
+      const a = +s.a || 0, q = +s.q || 0, uc = unitCost(s.n, idx);
+      const c = uc != null ? uc * q : a * pctDef;
+      if(uc == null) estRevenue += a;
+      revenue += a; cost += c; qty += q;
+      const k = Core.slugify(s.n);
+      const p = prod[k] || (prod[k] = {n: s.n, q: 0, a: 0, c: 0, est: uc == null, cat: (idx[k] && (idx[k].cat.title || idx[k].cat.name)) || s.c || 'Diğer'});
+      p.q += q; p.a += a; p.c += c;
+      const d = days[s.d] || (days[s.d] = {a: 0, c: 0}); d.a += a; d.c += c;
+      if(s.t){ const h = +s.t.slice(0, 2); const x = hours[h] || (hours[h] = {a: 0, c: 0, q: 0}); x.a += a; x.c += c; x.q += q; }
+      const cn = p.cat; const ct = cats[cn] || (cats[cn] = {a: 0, c: 0, q: 0}); ct.a += a; ct.c += c; ct.q += q;
+      if(s.tb){ const tb = tables[s.tb] || (tables[s.tb] = {a: 0, q: 0}); tb.a += a; tb.q += q; }
+    });
+    const expenses = biz.expenses.filter(x => x.d >= from && x.d <= to);
+    const exp = expenses.reduce((s, x) => s + (+x.amount || 0), 0);
+    return {rows, prod, days, hours, cats, tables, revenue, cost, qty, estRevenue, exp, expenses, gross: revenue - cost, net: revenue - cost - exp};
+  }
+
+  /* Basit çubuk grafik (tek seri, üzerine gelince/dokununca ayrıntı) */
+  function barsHtml(items){
+    const max = Math.max(1, ...items.map(i => i.v));
+    const k = Math.ceil(items.length / 8);
+    return '<div class="chart-wrap"><div class="bars">' +
+      items.map((i, n) => '<div class="bar" data-tip="' + esc(i.tip) + '"><i style="height:' + Math.max(0, i.v) / max * 100 + '%"></i></div>').join('') +
+      '</div><div class="bar-x">' + items.map((i, n) => '<span>' + (n % k === 0 ? esc(i.l) : '') + '</span>').join('') + '</div></div>';
+  }
+  function showTip(bar){
+    const wrap = bar.closest('.chart-wrap');
+    wrap.querySelectorAll('.bar.on').forEach(b => b.classList.remove('on'));
+    let tip = wrap.querySelector('.chart-tip');
+    if(!tip){ tip = document.createElement('div'); tip.className = 'chart-tip'; wrap.appendChild(tip); }
+    tip.innerHTML = bar.dataset.tip;
+    bar.classList.add('on');
+    const wr = wrap.getBoundingClientRect(), br = bar.getBoundingClientRect();
+    const x = Math.max(70, Math.min(wr.width - 70, br.left - wr.left + br.width / 2));
+    tip.style.left = x + 'px';
+    tip.style.top = Math.max(40, br.top - wr.top + (br.height - bar.firstChild.getBoundingClientRect().height)) + 'px';
+  }
+  $('#tab-sales').addEventListener('mouseover', e => { const b = e.target.closest('.bar'); if(b) showTip(b); });
+  $('#tab-sales').addEventListener('click', e => { const b = e.target.closest('.bar'); if(b) showTip(b); });
+  $('#tab-sales').addEventListener('mouseout', e => {
+    if(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.chart-wrap')) return;
+    document.querySelectorAll('#tab-sales .chart-tip').forEach(t => t.remove());
+    document.querySelectorAll('#tab-sales .bar.on').forEach(b => b.classList.remove('on'));
+  });
+
+  function renderSales(){
+    if(!state || $('#tab-sales').classList.contains('hide')) return;
+    document.querySelectorAll('#sl-view button').forEach(b => b.classList.toggle('on', b.dataset.v === slView));
+    document.querySelectorAll('#sl-range button').forEach(b => b.classList.toggle('on', b.dataset.r === slRange));
+    ['report', 'import', 'costs', 'expenses'].forEach(v => $('#sl-' + v).classList.toggle('hide', v !== slView));
+    $('#sl-range-row').classList.toggle('hide', slView === 'import' || slView === 'costs');
+    const [from, to] = rangeDates();
+    $('#sl-from').value = from; $('#sl-to').value = to;
+    if(!biz){ $('#sl-report').innerHTML = '<div class="panel"><p class="res-empty">Yükleniyor…</p></div>'; loadBiz(); return; }
+    if(slView === 'report') renderSalesReport(from, to);
+    if(slView === 'import') renderImports();
+    if(slView === 'costs') renderCosts();
+    if(slView === 'expenses') renderExpenses(from, to);
+  }
+
+  function renderSalesReport(from, to){
+    const R = computeReport(from, to);
+    if(!biz.sales.length && !biz.expenses.length){
+      $('#sl-report').innerHTML = '<div class="panel"><h2>Henüz satış verisi yok</h2><p class="hint">Flag\'den satış raporunu indirip <b>Veri yükle</b> sekmesinden ekleyin. Ardından <b>Maliyetler</b> sekmesinde ürün maliyetlerini girin; ciro, maliyet ve kâr burada görünür.</p><div class="row-actions"><button class="btn primary" type="button" data-slgo="import">Veri yükle</button></div></div>';
+      return;
+    }
+    const dayKeys = [];
+    for(let d = from; d <= to && dayKeys.length < 400; d = shiftDay(d, 1)) dayKeys.push(d);
+    const dayCount = Object.keys(R.days).length || 1;
+    const margin = R.revenue ? R.gross / R.revenue : NaN;
+    let h = '<div class="kpis">' +
+      '<div class="kpi main"><small>Ciro</small><b>' + tl(R.revenue) + '</b><em>' + slDay(from) + ' – ' + slDay(to) + '</em></div>' +
+      '<div class="kpi"><small>Ürün maliyeti</small><b>' + tl(R.cost) + '</b><em>' + (R.estRevenue ? pct(R.estRevenue / (R.revenue || 1)) + ' ciro tahmini maliyetle' : 'tüm ürünlerin maliyeti girili') + '</em></div>' +
+      '<div class="kpi"><small>Brüt kâr</small><b' + (R.gross < 0 ? ' class="neg"' : '') + '>' + tl(R.gross) + '</b><em>Kâr marjı ' + pct(margin) + '</em></div>' +
+      '<div class="kpi"><small>Giderler</small><b>' + tl(R.exp) + '</b><em>' + R.expenses.length + ' kayıt</em></div>' +
+      '<div class="kpi"><small>Net kâr</small><b' + (R.net < 0 ? ' class="neg"' : '') + '>' + tl(R.net) + '</b><em>ciro − maliyet − gider</em></div>' +
+      '<div class="kpi"><small>Satılan ürün</small><b>' + Math.round(R.qty).toLocaleString('tr-TR') + '</b><em>Günlük ort. ciro ' + tl(R.revenue / dayCount) + '</em></div>' +
+      '</div>';
+    // Günlük ciro (aralık uzunsa aylık)
+    let items;
+    if(dayKeys.length > 92){
+      const months = {};
+      Object.entries(R.days).forEach(([d, v]) => { const m = d.slice(0, 7); const x = months[m] || (months[m] = {a: 0, c: 0}); x.a += v.a; x.c += v.c; });
+      items = Object.keys(months).sort().map(m => ({l: new Date(m + '-01T12:00:00Z').toLocaleDateString('tr-TR', {month: 'short', year: '2-digit', timeZone: 'UTC'}), v: months[m].a,
+        tip: '<b>' + m + '</b><br>Ciro: ' + tl(months[m].a) + '<br>Maliyet: ' + tl(months[m].c) + '<br>Brüt kâr: ' + tl(months[m].a - months[m].c)}));
+    }else{
+      items = dayKeys.map(d => { const v = R.days[d] || {a: 0, c: 0};
+        return {l: slDay(d), v: v.a, tip: '<b>' + slDay(d, {weekday: 'short'}) + '</b><br>Ciro: ' + tl(v.a) + '<br>Maliyet: ' + tl(v.c) + '<br>Brüt kâr: ' + tl(v.a - v.c)}; });
+    }
+    h += '<div class="sl-grid"><div class="panel"><h2>' + (dayKeys.length > 92 ? 'Aylık ciro' : 'Günlük ciro') + '</h2>' + barsHtml(items) + '</div>';
+    const hs = Object.keys(R.hours).map(Number);
+    if(hs.length){
+      const open = 6;   // gün 06:00'da başlar sayılır; gece yarısından sonraki satışlar aynı günün sonunda görünür
+      const order = Array.from({length: 24}, (_, i) => (open + i) % 24).filter(x => R.hours[x]);
+      const first = order[0], last = order[order.length - 1];
+      const span = []; for(let i = 0, x = first; i < 24; i++, x = (x + 1) % 24){ span.push(x); if(x === last) break; }
+      h += '<div class="panel"><h2>Saatlere göre ciro</h2>' + barsHtml(span.map(x => { const v = R.hours[x] || {a: 0, q: 0};
+        return {l: String(x).padStart(2, '0'), v: v.a, tip: '<b>' + String(x).padStart(2, '0') + ':00–' + String((x + 1) % 24).padStart(2, '0') + ':00</b><br>Ciro: ' + tl(v.a) + '<br>' + Math.round(v.q) + ' ürün'}; })) + '</div>';
+    }
+    h += '</div>';
+    // Ürünler
+    const plist = Object.values(R.prod).map(p => Object.assign(p, {g: p.a - p.c, m: p.a ? (p.a - p.c) / p.a : 0}));
+    const key = {a: 'a', g: 'g', q: 'q', m: 'm'}[slSort] || 'a';
+    plist.sort((x, y) => y[key] - x[key]);
+    const shown = slAllProducts ? plist : plist.slice(0, 15);
+    const th = (k, l) => '<th class="num" data-slsort="' + k + '">' + l + (slSort === k ? ' ↓' : '') + '</th>';
+    h += '<div class="panel"><h2>Ürünler</h2><div class="tbl-scroll"><table class="tbl-list"><thead><tr><th>Ürün</th>' + th('q', 'Adet') + th('a', 'Ciro') + '<th class="num">Maliyet</th>' + th('g', 'Kâr') + th('m', 'Marj') + '</tr></thead><tbody>' +
+      shown.map(p => '<tr class="' + (p.est ? 'est' : '') + '"><td>' + esc(p.n) + '<small>' + esc(p.cat) + '</small></td><td class="num">' + Math.round(p.q) + '</td><td class="num">' + tl(p.a) + '</td><td class="num">' + tl(p.c) + (p.est ? '<small>tahmini</small>' : '') + '</td><td class="num">' + tl(p.g) + '</td><td class="num">' + pct(p.m) + '</td></tr>').join('') +
+      '</tbody></table></div>' + (plist.length > 15 ? '<div class="row-actions"><button class="btn sm" type="button" data-slall>' + (slAllProducts ? 'İlk 15\'i göster' : 'Tümünü göster (' + plist.length + ')') + '</button></div>' : '') +
+      (R.estRevenue ? '<p class="hint">“tahmini”: maliyeti girilmemiş ürünlerde maliyet, cironun %' + (+biz.settings.costPct || 0) + '\'i varsayılır. <a href="#" data-slgo="costs">Maliyetleri girin</a>.</p>' : '') + '</div>';
+    // Kategoriler ve masalar
+    const cl = Object.entries(R.cats).sort((x, y) => y[1].a - x[1].a);
+    h += '<div class="sl-grid"><div class="panel"><h2>Kategoriler</h2><table class="tbl-list"><thead><tr><th>Kategori</th><th class="num">Ciro</th><th class="num">Pay</th><th class="num">Marj</th></tr></thead><tbody>' +
+      cl.map(([n, v]) => '<tr><td>' + esc(n) + '</td><td class="num">' + tl(v.a) + '</td><td class="num">' + pct(v.a / (R.revenue || 1)) + '</td><td class="num">' + pct(v.a ? (v.a - v.c) / v.a : NaN) + '</td></tr>').join('') + '</tbody></table></div>';
+    const tlst = Object.entries(R.tables).sort((x, y) => y[1].a - x[1].a).slice(0, 15);
+    if(tlst.length) h += '<div class="panel"><h2>Masalar</h2><table class="tbl-list"><thead><tr><th>Masa</th><th class="num">Ürün</th><th class="num">Ciro</th></tr></thead><tbody>' +
+      tlst.map(([n, v]) => '<tr><td>' + esc(n) + '</td><td class="num">' + Math.round(v.q) + '</td><td class="num">' + tl(v.a) + '</td></tr>').join('') + '</tbody></table></div>';
+    h += '</div>';
+    $('#sl-report').innerHTML = h;
+  }
+
+  /* Dosya okuma: CSV (; , veya sekme) ve Excel (SheetJS gerektiğinde yüklenir) */
+  function parseCsv(text){
+    const first = text.split(/\r?\n/).slice(0, 5).join('\n');
+    const delim = [';', '\t', ','].map(d => [d, first.split(d).length]).sort((a, b) => b[1] - a[1])[0][0];
+    const rows = []; let row = [], cell = '', q = false;
+    for(let i = 0; i < text.length; i++){
+      const ch = text[i];
+      if(q){ if(ch === '"'){ if(text[i + 1] === '"'){ cell += '"'; i++; } else q = false; } else cell += ch; continue; }
+      if(ch === '"') q = true;
+      else if(ch === delim){ row.push(cell); cell = ''; }
+      else if(ch === '\n' || ch === '\r'){ if(ch === '\r' && text[i + 1] === '\n') i++; row.push(cell); rows.push(row); row = []; cell = ''; }
+      else cell += ch;
+    }
+    if(cell || row.length){ row.push(cell); rows.push(row); }
+    return rows;
+  }
+  function loadSheetJs(){
+    if(window.XLSX) return Promise.resolve();
+    return new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      s.onload = res; s.onerror = () => rej(new Error('Excel okuyucu yüklenemedi (internet bağlantısını kontrol edin).'));
+      document.head.appendChild(s);
+    });
+  }
+  async function readSalesFile(file){
+    if(/\.xlsx?$/i.test(file.name)){
+      await loadSheetJs();
+      const wb = XLSX.read(await file.arrayBuffer(), {type: 'array', cellDates: true});
+      return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1, raw: true, defval: ''});
+    }
+    const buf = await file.arrayBuffer();
+    let text = new TextDecoder('utf-8').decode(buf);
+    if(text.includes('�')) text = new TextDecoder('windows-1254').decode(buf);   // eski Türkçe Excel CSV'leri
+    return parseCsv(text.replace(/^﻿/, ''));
+  }
+  const FIELDS = [
+    ['date', 'Tarih', /tarih|date|g[üu]n\b/i], ['time', 'Saat', /saat|time|zaman/i], ['name', 'Ürün adı', /[üu]r[üu]n|stok|product|item|men[üu]|a[çc][ıi]klama|^ad[ıi]?$/i],
+    ['qty', 'Adet', /adet|miktar|qty|quantity|say[ıi]/i], ['amount', 'Satır tutarı (toplam)', /tutar|toplam|ciro|net|amount|total|sat[ıi][şs]/i],
+    ['unit', 'Birim fiyat', /birim|fiyat|price/i], ['table', 'Masa', /masa|table/i], ['cat', 'Kategori', /kategori|grup|category|group/i]
+  ];
+  function detectHeader(rows){
+    let best = 0, bestScore = -1;
+    rows.slice(0, 15).forEach((r, i) => {
+      const score = r.filter(c => typeof c === 'string' && FIELDS.some(f => f[2].test(c))).length;
+      if(score > bestScore){ best = i; bestScore = score; }
+    });
+    return best;
+  }
+  function autoMap(header){
+    const map = {}, used = new Set();
+    FIELDS.forEach(([k, , re]) => {
+      const i = header.findIndex((h, n) => !used.has(n) && re.test(String(h)));
+      if(i >= 0){ map[k] = i; used.add(i); }
+    });
+    return map;
+  }
+  function parseNum(v){
+    if(typeof v === 'number') return v;
+    let s = String(v || '').replace(/[^\d,.\-]/g, '');
+    if(!s) return NaN;
+    const lc = s.lastIndexOf(','), ld = s.lastIndexOf('.');
+    if(lc > -1 && ld > -1) s = lc > ld ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
+    else if(lc > -1) s = s.replace(',', '.');
+    else if(/^\-?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+    return parseFloat(s);
+  }
+  // Hücredeki tarih/saat → ['YYYY-MM-DD', 'HH:MM']
+  function parseDateCell(v){
+    if(v instanceof Date && !isNaN(v)){
+      const p = n => String(n).padStart(2, '0');
+      return [v.getFullYear() + '-' + p(v.getMonth() + 1) + '-' + p(v.getDate()), (v.getHours() || v.getMinutes()) ? p(v.getHours()) + ':' + p(v.getMinutes()) : ''];
+    }
+    if(typeof v === 'number' && v > 20000 && v < 80000){
+      const ms = Math.round((v - 25569) * 86400000), d = new Date(ms);
+      return [d.toISOString().slice(0, 10), v % 1 ? d.toISOString().slice(11, 16) : ''];
+    }
+    const s = String(v || '').trim();
+    let m = /^(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})(?:[ T]+(\d{1,2})[:.](\d{2}))?/.exec(s);
+    if(m){ const y = m[3].length === 2 ? '20' + m[3] : m[3]; return [y + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0'), m[4] ? m[4].padStart(2, '0') + ':' + m[5] : '']; }
+    m = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/.exec(s);
+    if(m) return [m[1] + '-' + m[2] + '-' + m[3], m[4] ? m[4] + ':' + m[5] : ''];
+    return ['', ''];
+  }
+  function parseTimeCell(v){
+    if(v instanceof Date) return parseDateCell(v)[1];
+    if(typeof v === 'number' && v < 1){ const mins = Math.round(v * 1440); return String(Math.floor(mins / 60) % 24).padStart(2, '0') + ':' + String(mins % 60).padStart(2, '0'); }
+    const m = /(\d{1,2})[:.](\d{2})/.exec(String(v || ''));
+    return m ? m[1].padStart(2, '0') + ':' + m[2] : '';
+  }
+  function buildSalesRows(p){
+    const map = p.map, out = [], fileDate = $('#map-filedate') ? $('#map-filedate').value : todayStr();
+    p.rows.slice(p.header + 1).forEach(r => {
+      const name = String(map.name != null ? r[map.name] : '').trim();
+      if(!name || /^(genel\s*)?toplam|^total|^ara\s*toplam/i.test(name)) return;
+      const q = map.qty != null ? parseNum(r[map.qty]) : 1;
+      let a = map.amount != null ? parseNum(r[map.amount]) : NaN;
+      if(isNaN(a) && map.unit != null) a = parseNum(r[map.unit]) * (isNaN(q) ? 1 : q);
+      if(isNaN(a)) return;
+      let [d, t] = map.date != null ? parseDateCell(r[map.date]) : ['', ''];
+      if(map.time != null) t = parseTimeCell(r[map.time]) || t;
+      out.push({d: d || fileDate, t, n: name, q: isNaN(q) ? 1 : q, a: Math.round(a * 100) / 100,
+        tb: map.table != null ? String(r[map.table] || '').trim() : '', c: map.cat != null ? String(r[map.cat] || '').trim() : ''});
+    });
+    return out;
+  }
+  function renderMapping(){
+    const p = slParsed;
+    if(!p){ $('#sl-map').innerHTML = ''; return; }
+    const header = p.rows[p.header] || [];
+    const opt = sel => '<option value="">— yok —</option>' + header.map((h, i) => '<option value="' + i + '"' + (sel === i ? ' selected' : '') + '>' + esc(String(h || ('Sütun ' + (i + 1)))) + '</option>').join('');
+    const rows = buildSalesRows(p);
+    const total = rows.reduce((s, r) => s + r.a, 0);
+    const ds = rows.map(r => r.d).sort();
+    $('#sl-map').innerHTML = '<div class="details-box"><h3>' + esc(p.file) + ' · sütun eşleştirme</h3><div class="map-grid">' +
+      FIELDS.map(([k, l]) => '<div><label>' + l + (k === 'name' || k === 'amount' ? ' *' : '') + '</label><select data-map="' + k + '">' + opt(p.map[k]) + '</select></div>').join('') +
+      (p.map.date == null ? '<div><label>Bu dosyanın tarihi (tarih sütunu yoksa)</label><input type="date" id="map-filedate" value="' + esc(p.fileDate || todayStr()) + '"></div>' : '') +
+      '</div><div class="tbl-scroll"><table class="tbl-list"><thead><tr><th>Tarih</th><th>Saat</th><th>Ürün</th><th class="num">Adet</th><th class="num">Tutar</th><th>Masa</th></tr></thead><tbody>' +
+      rows.slice(0, 6).map(r => '<tr><td>' + esc(r.d) + '</td><td>' + esc(r.t) + '</td><td>' + esc(r.n) + '</td><td class="num">' + r.q + '</td><td class="num">' + tl(r.a) + '</td><td>' + esc(r.tb) + '</td></tr>').join('') +
+      '</tbody></table></div><p class="hint"><b>' + rows.length + ' satış satırı</b> · toplam ' + tl(total) + (ds.length ? ' · ' + slDay(ds[0], {year: 'numeric'}) + ' – ' + slDay(ds[ds.length - 1], {year: 'numeric'}) : '') + '</p>' +
+      '<div class="row-actions"><button class="btn primary" type="button" id="map-import"' + (rows.length ? '' : ' disabled') + '>İçe aktar</button><button class="btn" type="button" id="map-cancel">Vazgeç</button></div></div>';
+  }
+  $('#sl-file').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if(!file) return;
+    try{
+      toast('Dosya okunuyor…');
+      const rows = (await readSalesFile(file)).filter(r => r.some(c => String(c).trim() !== ''));
+      if(rows.length < 2) throw new Error('Dosyada satır bulunamadı.');
+      const header = detectHeader(rows);
+      slParsed = {file: file.name, rows, header, map: autoMap(rows[header].map(String)), fileDate: todayStr()};
+      renderMapping();
+      if(biz && biz.imports.some(i => i.file === file.name)) toast('Bu adla bir dosya daha önce yüklenmiş. Aynı satışları iki kez eklememeye dikkat edin.', true, 7000);
+    }catch(err){ toast(err.message, true, 7000); }
+  });
+  $('#sl-map').addEventListener('change', e => {
+    const k = e.target.dataset.map;
+    if(k){ slParsed.map[k] = e.target.value === '' ? undefined : +e.target.value; renderMapping(); }
+    if(e.target.id === 'map-filedate'){ slParsed.fileDate = e.target.value; renderMapping(); }
+  });
+  $('#sl-map').addEventListener('click', async e => {
+    if(e.target.id === 'map-cancel'){ slParsed = null; return renderMapping(); }
+    if(e.target.id !== 'map-import') return;
+    const rows = buildSalesRows(slParsed);
+    const btn = e.target;
+    btn.disabled = true; btn.textContent = 'Aktarılıyor…';
+    try{
+      const id = 'i' + Date.now().toString(36);
+      const ds = rows.map(r => r.d).sort();
+      await mutateBiz(b => {
+        rows.forEach(r => { r.b = id; b.sales.push(r); });
+        b.imports.push({id, file: slParsed.file, at: new Date().toISOString(), rows: rows.length, total: rows.reduce((s, r) => s + r.a, 0), from: ds[0], to: ds[ds.length - 1]});
+      });
+      slParsed = null;
+      toast(rows.length + ' satış satırı eklendi.');
+      renderMapping();
+    }catch(err){ toast(err.status ? ghErrorText(err) : err.message, true, 7000); btn.disabled = false; btn.textContent = 'İçe aktar'; }
+  });
+  function renderImports(){
+    renderMapping();
+    const list = (biz.imports || []).slice().reverse();
+    $('#sl-imports').innerHTML = list.length ? '<table class="tbl-list"><tbody>' + list.map(i =>
+      '<tr><td>' + esc(i.file) + '<small>' + new Date(i.at).toLocaleString('tr-TR') + '</small></td><td>' + (i.from ? slDay(i.from) + (i.to !== i.from ? ' – ' + slDay(i.to) : '') : '') + '<small>' + i.rows + ' satır</small></td><td class="num">' + tl(i.total || 0) + '</td>' +
+      '<td class="num"><button class="btn sm danger" type="button" data-imp-del="' + esc(i.id) + '">Sil</button></td></tr>').join('') + '</tbody></table>'
+      : '<p class="res-empty">Henüz dosya yüklenmedi.</p>';
+  }
+  $('#sl-imports').addEventListener('click', async e => {
+    const id = e.target.dataset && e.target.dataset.impDel;
+    if(!id || !confirm('Bu dosyadan gelen tüm satışlar silinsin mi?')) return;
+    try{
+      await mutateBiz(b => { b.sales = b.sales.filter(s => s.b !== id); b.imports = b.imports.filter(i => i.id !== id); });
+      toast('Dosyanın satışları silindi.');
+    }catch(err){ toast(err.status ? ghErrorText(err) : err.message, true, 7000); }
+  });
+
+  /* Maliyetler: menüdeki her ürünün birim maliyeti */
+  let costDraft = null;
+  function renderCosts(){
+    if(!costDraft) costDraft = Object.assign({}, biz.costs);
+    const idx = menuIndex();
+    const sold = {};
+    biz.sales.forEach(s => { const k = Core.slugify(s.n); if(!idx[k]) sold[k] = s.n; });
+    const row = (k, name, price, inMenu) => {
+      const p = Core.parsePrice(price), c = costDraft[k];
+      const m = p && c !== undefined && c !== '' ? (p - c) / p : NaN;
+      return '<div class="cost-row"><div>' + esc(name) + '<small>' + (price ? 'Satış: ' + esc(price) : inMenu ? 'Menüde fiyatı yok' : 'Menüde yok (satış raporundan)') + '</small></div>' +
+        '<input type="number" min="0" step="0.5" inputmode="decimal" placeholder="Maliyet" data-cost="' + esc(k) + '" value="' + (c !== undefined && c !== '' ? c : '') + '">' +
+        '<div class="m">' + (isNaN(m) ? '' : 'Marj ' + pct(m)) + '</div></div>';
+    };
+    let h = '<h2>Ürün maliyetleri</h2><p class="hint">Her ürünün <b>bir porsiyon/adet maliyetini</b> (TL) girin. Boş bırakılan ürünlerde maliyet, satış tutarının yüzdesi olarak tahmin edilir.</p>' +
+      '<div class="map-grid"><div><label>Maliyeti girilmemiş ürünler için varsayılan maliyet oranı (%)</label><input type="number" min="0" max="100" id="cost-pct" value="' + (+biz.settings.costPct || 0) + '"></div></div>';
+    (state.categories || []).forEach(c => {
+      const items = (c.items || []).filter(i => i.name);
+      if(!items.length) return;
+      h += '<h3 class="cost-cat">' + esc(c.title || c.name || '') + '</h3>' + items.map(i => row(Core.slugify(i.name), i.name, i.price, true)).join('');
+    });
+    const extra = Object.entries(sold);
+    if(extra.length) h += '<h3 class="cost-cat">Satış raporunda olup menüde olmayanlar</h3>' + extra.map(([k, n]) => row(k, n, '')).join('');
+    h += '<div class="row-actions" style="position:sticky;bottom:0;background:#fff;padding:10px 0"><button class="btn primary" type="button" id="cost-save">Maliyetleri kaydet</button></div>';
+    $('#sl-costs').innerHTML = h;
+  }
+  $('#sl-costs').addEventListener('input', e => {
+    const k = e.target.dataset.cost;
+    if(k == null) return;
+    costDraft[k] = e.target.value === '' ? '' : +e.target.value;
+    const row = e.target.closest('.cost-row'), p = Core.parsePrice((row.querySelector('small').textContent.match(/Satış: (.*)/) || [])[1]);
+    const c = costDraft[k];
+    row.querySelector('.m').textContent = p && c !== '' ? 'Marj ' + pct((p - c) / p) : '';
+  });
+  $('#sl-costs').addEventListener('click', async e => {
+    if(e.target.id !== 'cost-save') return;
+    const btn = e.target, costs = {};
+    Object.entries(costDraft).forEach(([k, v]) => { if(v !== '' && v != null && !isNaN(v)) costs[k] = +v; });
+    const costPct = Math.max(0, Math.min(100, +$('#cost-pct').value || 0));
+    btn.disabled = true; btn.textContent = 'Kaydediliyor…';
+    try{
+      await mutateBiz(b => { b.costs = costs; b.settings.costPct = costPct; });
+      costDraft = null;
+      toast('Maliyetler kaydedildi.');
+    }catch(err){ toast(err.status ? ghErrorText(err) : err.message, true, 7000); }
+    finally{ btn.disabled = false; btn.textContent = 'Maliyetleri kaydet'; }
+  });
+
+  /* Giderler */
+  function renderExpenses(from, to){
+    const list = biz.expenses.filter(x => x.d >= from && x.d <= to).sort((a, b) => b.d.localeCompare(a.d));
+    const total = list.reduce((s, x) => s + (+x.amount || 0), 0);
+    $('#sl-expenses').innerHTML = '<h2>Giderler</h2><form id="exp-form" class="map-grid" autocomplete="off">' +
+      '<div><label>Tarih</label><input type="date" id="exp-d" value="' + todayStr() + '" required></div>' +
+      '<div><label>Açıklama</label><input id="exp-title" placeholder="ör. Ekim kirası" required></div>' +
+      '<div><label>Kategori</label><select id="exp-cat">' + EXP_CATS.map(c => '<option>' + esc(c) + '</option>').join('') + '</select></div>' +
+      '<div><label>Tutar (TL)</label><input type="number" min="0" step="0.01" inputmode="decimal" id="exp-amount" required></div>' +
+      '<div style="align-self:end"><button class="btn primary" type="submit" style="width:100%">+ Gider ekle</button></div></form>' +
+      '<h3 class="sl-sub">' + slDay(from) + ' – ' + slDay(to) + ' · toplam ' + tl(total) + '</h3>' +
+      (list.length ? '<table class="tbl-list"><tbody>' + list.map(x => '<tr><td>' + esc(x.title) + '<small>' + esc(x.cat) + ' · ' + slDay(x.d, {year: 'numeric'}) + '</small></td><td class="num">' + tl(+x.amount || 0) + '</td><td class="num"><button class="btn sm danger" type="button" data-exp-del="' + esc(x.id) + '">Sil</button></td></tr>').join('') + '</tbody></table>'
+        : '<p class="res-empty">Bu aralıkta gider yok.</p>');
+  }
+  $('#sl-expenses').addEventListener('submit', async e => {
+    e.preventDefault();
+    const x = {id: 'x' + Date.now().toString(36), d: $('#exp-d').value, title: $('#exp-title').value.trim(), cat: $('#exp-cat').value, amount: +$('#exp-amount').value || 0};
+    if(!x.title || !x.amount) return toast('Açıklama ve tutar girin.', true);
+    try{ await mutateBiz(b => { b.expenses.push(x); }); toast('Gider eklendi.'); }
+    catch(err){ toast(err.status ? ghErrorText(err) : err.message, true, 7000); }
+  });
+  $('#sl-expenses').addEventListener('click', async e => {
+    const id = e.target.dataset && e.target.dataset.expDel;
+    if(!id || !confirm('Bu gider silinsin mi?')) return;
+    try{ await mutateBiz(b => { b.expenses = b.expenses.filter(x => x.id !== id); }); toast('Gider silindi.'); }
+    catch(err){ toast(err.status ? ghErrorText(err) : err.message, true, 7000); }
+  });
+
+  /* Sekme içi gezinme */
+  $('#sl-view').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if(!b) return;
+    slView = b.dataset.v;
+    try{ localStorage.setItem('yirmi-sl-view', slView); }catch(err){}
+    renderSales();
+  });
+  $('#sl-range').addEventListener('click', e => { const b = e.target.closest('button'); if(b){ slRange = b.dataset.r; renderSales(); } });
+  ['#sl-from', '#sl-to'].forEach(s => $(s).addEventListener('change', () => { slRange = 'custom'; slFrom = $('#sl-from').value; slTo = $('#sl-to').value; if(slFrom > slTo) [slFrom, slTo] = [slTo, slFrom]; renderSales(); }));
+  $('#tab-sales').addEventListener('click', e => {
+    const go = e.target.closest('[data-slgo]');
+    if(go){ e.preventDefault(); slView = go.dataset.slgo; return renderSales(); }
+    const s = e.target.closest('[data-slsort]');
+    if(s){ slSort = s.dataset.slsort; return renderSales(); }
+    if(e.target.closest('[data-slall]')){ slAllProducts = !slAllProducts; renderSales(); }
+  });
+
   /* ---------- Giriş ---------- */
   let failedLogins = 0;
   const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -2953,6 +3838,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     $('#login-pw').value = '';
     loadMenu();
     loadReservations(true);
+    loadFloorLayout();
     touch();
   }
   function logout(){
@@ -3087,12 +3973,15 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   /* ---------- Sekmeler ---------- */
   function showTab(name){
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-    ['home','res','menu','chef','calendar','ann','campaigns','site','qr','security'].forEach(n => $('#tab-' + n).classList.toggle('hide', n !== name));
+    ['home','res','sales','menu','chef','calendar','ann','campaigns','site','qr','security'].forEach(n => $('#tab-' + n).classList.toggle('hide', n !== name));
     if(state && name === 'ann') renderAnn();
     if(name === 'qr' && !$('#qr-url').value){ $('#qr-url').value = defaultMenuUrl(); if($('#qr-url').value) makeQr(); }
     if(state && name === 'home') renderDash();
     if(state && name === 'calendar') renderCalendar();
     if(state && name === 'res') renderRes();
+    if(state && name === 'sales') renderSales();
+    const act = document.querySelector('.tab.active');
+    if(act && act.scrollIntoView) act.scrollIntoView({block: 'nearest', inline: 'center'});
     window.scrollTo(0, 0);
   }
   document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => showTab(t.dataset.tab)));

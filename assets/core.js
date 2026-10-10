@@ -449,7 +449,19 @@
         {id:'d17', label:'D17', seats:4, x:1080, y:282, w:128, h:80}
       ]}
   ];
-  const TABLES = Object.fromEntries(FLOORS.flatMap(f => f.tables.map(t => [t.id, Object.assign({area: f.id, areaName: f.name}, t)])));
+  const DEFAULT_FLOORS = JSON.parse(JSON.stringify(FLOORS));
+  let TABLES = {};
+  function indexTables(){ TABLES = Object.fromEntries(FLOORS.flatMap(f => f.tables.map(t => [t.id, Object.assign({area: f.id, areaName: f.name}, t)]))); }
+  indexTables();
+  // Panelden düzenlenen masa düzeni (floors.json) varsayılan krokinin yerine geçer; duvarlar ve kapılar krokiden gelir
+  function setFloorTables(saved){
+    FLOORS.forEach(f => {
+      const s = saved && saved[f.id];
+      f.tables = Array.isArray(s) ? JSON.parse(JSON.stringify(s)) : JSON.parse(JSON.stringify(DEFAULT_FLOORS.find(d => d.id === f.id).tables));
+    });
+    indexTables();
+  }
+  function defaultFloorTables(id){ return JSON.parse(JSON.stringify(DEFAULT_FLOORS.find(d => d.id === id).tables)); }
   function floorById(id){ return FLOORS.find(f => f.id === id) || FLOORS[0]; }
   function tableById(id){ return TABLES[id] || null; }
   // "320 TL", "1.400 TL", "50cl / 175 TL" → 320, 1400, 175 (cl/gr gibi miktarlar atlanır, son sayı fiyat kabul edilir)
@@ -461,7 +473,7 @@
   function formatTL(n){ return (Math.round(n * 100) / 100).toLocaleString('tr-TR') + ' TL'; }
 
   global.YirmiCore = {
-    FLOORS, floorById, tableById, parsePrice, formatTL,
+    FLOORS, floorById, tableById, setFloorTables, defaultFloorTables, parsePrice, formatTL,
     ALLERGENS, ALLERGEN_LABELS, DAYS, slugify, prepare, findItem,
     itemPhoto, isDefaultPhoto, coverPhoto, heroPhotos, layoutFor, sized,
     now, setNowOverride, parseWall, parseHM, hm,
