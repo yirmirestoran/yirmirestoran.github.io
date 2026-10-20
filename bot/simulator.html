@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bot Simülatörü</title>
+<meta name="robots" content="noindex">
+<style>
+:root{
+  --bg:#f4f1ec; --card:#fff; --ink:#2b2620; --muted:#7a7166; --line:#e4ddd2;
+  --wa-bg:#efeae2; --wa-me:#d9fdd3; --wa-bot:#fff; --wa-head:#075e54; --accent:#1f7a4a;
+  --ig-me:#3b82f6; --ig-bot:#efefef; --warn:#9a3b33; --warn-bg:#fbeceb; --ok-bg:#e4f3ea;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{max-width:1180px;margin:0 auto;padding:20px 16px 4px}
+h1{margin:0 0 4px;font-size:22px}
+header p{margin:0;color:var(--muted)}
+code{background:#ebe5db;padding:1px 5px;border-radius:5px;font-size:13px}
+main{max-width:1180px;margin:0 auto;padding:14px 16px 40px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:860px){ main{grid-template-columns:minmax(0,1fr)} }
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.card + .card{margin-top:14px}
+.card h2{margin:0 0 8px;font-size:16px}
+.hint{color:var(--muted);font-size:13px;margin:6px 0 0}
+.hide{display:none!important}
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 12px;font-weight:600}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.danger{color:var(--warn)}
+.btn.sm{padding:4px 9px;font-size:13px}
+select,input[type=datetime-local]{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;max-width:100%}
+
+/* Kişi seçimi */
+.who{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.who button{position:relative;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600}
+.who button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.who .badge{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;border-radius:9px;background:#e53935;color:#fff;font-size:11px;line-height:18px;text-align:center;padding:0 4px}
+
+/* Telefon */
+.phone{border-radius:18px;overflow:hidden;border:1px solid var(--line);display:flex;flex-direction:column;height:min(680px,calc(100vh - 160px));min-height:440px}
+.phead{display:flex;align-items:center;gap:10px;padding:10px 14px;color:#fff;background:var(--wa-head)}
+.phead.ig{background:linear-gradient(90deg,#833ab4,#e1306c,#f77737)}
+.phead .av{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.25);display:grid;place-items:center;font-weight:700}
+.phead small{display:block;opacity:.85;font-size:12px}
+.chat{flex:1;overflow-y:auto;padding:12px;background:var(--wa-bg);display:flex;flex-direction:column;gap:6px}
+.chat.ig{background:#fff}
+.empty{margin:auto;text-align:center;color:var(--muted);font-size:14px;max-width:280px}
+.b{max-width:85%;padding:7px 10px;border-radius:10px;white-space:normal;word-wrap:break-word;box-shadow:0 1px 1px rgba(0,0,0,.06)}
+.b.me{align-self:flex-end;background:var(--wa-me)}
+.b.bot{align-self:flex-start;background:var(--wa-bot)}
+.chat.ig .b{box-shadow:none;border-radius:18px;padding:8px 13px}
+.chat.ig .b.me{background:var(--ig-me);color:#fff}
+.chat.ig .b.bot{background:var(--ig-bot)}
+.b a{color:#027eb5}
+.b .tm{display:block;text-align:right;font-size:11px;color:var(--muted);margin-top:2px}
+.chat.ig .b.me .tm{color:rgba(255,255,255,.75)}
+.b.sys{align-self:center;background:#fff7d6;color:#6b5a00;font-size:12.5px;max-width:92%;text-align:center}
+.wbtns{align-self:flex-start;display:flex;flex-direction:column;gap:4px;max-width:85%;min-width:220px}
+.wbtns button{background:#fff;border:0;border-radius:10px;padding:8px;color:#027eb5;font-weight:600;box-shadow:0 1px 1px rgba(0,0,0,.06)}
+.wlist{background:#fff;border-radius:10px;box-shadow:0 1px 1px rgba(0,0,0,.06);overflow:hidden}
+.wlist > button{width:100%;background:#fff;border:0;padding:8px;color:#027eb5;font-weight:600}
+.wlist .rows{border-top:1px solid #eee}
+.wlist .rows button{display:block;width:100%;text-align:left;background:#fff;border:0;border-bottom:1px solid #f1f1f1;padding:8px 12px;color:var(--ink)}
+.wlist .rows button small{display:block;color:var(--muted);font-size:12px}
+.qr{align-self:flex-end;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;max-width:92%}
+.qr button{background:#fff;border:1px solid #3b82f6;color:#3b82f6;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600}
+details.raw{align-self:flex-start;max-width:85%;font-size:11.5px;color:var(--muted)}
+details.raw pre{white-space:pre-wrap;word-break:break-all;background:#fff;border-radius:8px;padding:6px;margin:4px 0 0;max-height:220px;overflow:auto}
+form.send{display:flex;gap:8px;padding:10px;background:#f0f0f0;border-top:1px solid var(--line)}
+form.send input{flex:1;min-width:0;border:0;border-radius:20px;padding:10px 14px;font:inherit}
+form.send button{border:0;border-radius:20px;background:var(--accent);color:#fff;padding:0 16px;font-weight:700}
+.quick{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;font-size:13px;color:var(--muted)}
+
+/* Panel */
+.req{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px;font-size:14px}
+.req .top{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:#f3efe8;color:#5d5346}
+.pill.ok{background:var(--ok-bg);color:var(--accent)}
+.pill.no{background:var(--warn-bg);color:var(--warn)}
+.req .acts{display:flex;gap:6px;margin-top:8px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.err{color:var(--warn);font-size:13px;margin-top:6px}
+ol{margin:6px 0 0;padding-left:20px}
+ol li{margin:3px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>Yirmi · Bot Simülatörü</h1>
+  <p>Bu sayfa <code>bot/worker.js</code> içindeki gerçek bot kodunu tarayıcınızda çalıştırır. Hiçbir müşteriye mesaj gitmez; Meta veya Cloudflare kurulumu gerekmez. Sayfa yenilenince her şey sıfırlanır.</p>
+</header>
+
+<main>
+  <div>
+    <div class="card hide" id="loadbox">
+      <h2>Bot kodunu seçin</h2>
+      <p class="hint" style="margin-top:0">Sayfayı bilgisayardan çift tıklayarak açtığınız için tarayıcı <code>worker.js</code> dosyasını kendisi okuyamıyor. Aşağıdan <b>bot/worker.js</b> dosyasını seçin. Siteden açarsanız (<code>…github.io/bot/simulator.html</code>) bu adım gerekmez.</p>
+      <p><input type="file" id="pick" accept=".js,text/javascript"></p>
+      <p class="err" id="loaderr"></p>
+    </div>
+
+    <div id="app" class="hide">
+      <div class="who" id="who"></div>
+      <div class="phone">
+        <div class="phead" id="phead"></div>
+        <div class="chat" id="chat"></div>
+        <form class="send" id="send" autocomplete="off">
+          <input id="msg" placeholder="Mesaj yazın…" aria-label="Mesaj">
+          <button type="submit">Gönder</button>
+        </form>
+      </div>
+      <div class="quick">Hızlı yaz:
+        <button class="btn sm" data-q="Merhaba">Merhaba</button>
+        <button class="btn sm" data-q="menü">menü</button>
+        <button class="btn sm" data-q="yetkili">yetkili</button>
+        <button class="btn sm" data-q="iptal">iptal</button>
+        <span id="staffq" class="row hide">
+          <button class="btn sm" data-q="durum">durum</button>
+          <button class="btn sm" data-q="dış kapat">dış kapat</button>
+          <button class="btn sm" data-q="dış aç">dış aç</button>
+          <button class="btn sm" data-q="test">test</button>
+        </span>
+      </div>
+    </div>
+    <p class="hint" id="status">Yükleniyor…</p>
+  </div>
+
+  <div>
+    <div class="card">
+      <h2>Yönetim paneli (simülasyon)</h2>
+      <div class="row">
+        <label for="outdoor"><b>Dış alan</b></label>
+        <select id="outdoor">
+          <option value="open">Açık</option>
+          <option value="today">Bugün kapalı</option>
+          <option value="tomorrow">Bugün + yarın kapalı</option>
+          <option value="always">Ben açana kadar kapalı</option>
+        </select>
+      </div>
+      <p class="hint">Gelen talepler. Gerçek panelde bunlar boş bir masaya "Beklemede" olarak düşer. Onaylayınca ya da iptal edince müşteriye otomatik mesaj gider.</p>
+      <div id="reqs"></div>
+    </div>
+
+    <div class="card">
+      <h2>Nasıl denenir?</h2>
+      <ol>
+        <li>Soldan <b>Müşteri (WhatsApp)</b> seçiliyken <b>Merhaba</b> yazın.</li>
+        <li>Düğmelere basarak ya da yazarak ilerleyin ("yarın", "8 buçuk", "dışarısı", "4 kişiyiz"…).</li>
+        <li>Onaylayınca <b>Personel</b> sekmesinde kırmızı rozet çıkar; bildirimi oradan görün.</li>
+        <li>Sağdaki talepte <b>Onayla</b>'ya basın → müşteri sohbetine onay mesajı düşer.</li>
+        <li>Personel sekmesinde <b>dış kapat</b> yazın, sonra müşteri olarak tekrar deneyin: alan sorusu atlanır.</li>
+        <li><b>yetkili</b> yazın: bot susar; <b>menü</b> yazınca geri döner.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>Simülasyon saati</h2>
+      <div class="row">
+        <input type="datetime-local" id="clock" step="60">
+        <button class="btn sm" id="clock-now" type="button">Gerçek saate dön</button>
+      </div>
+      <p class="hint">Örneğin saati 23:40 yapıp "bugün" için rezervasyon denemeyi, ya da 31 dakika ileri alıp yarım kalan sohbetin sıfırlandığını görebilirsiniz.</p>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <button class="btn danger" id="reset" type="button">Her şeyi sıfırla</button>
+        <label class="row" style="gap:6px;font-size:14px"><input type="checkbox" id="raw"> Teknik ayrıntıları göster</label>
+      </div>
+      <p class="hint">Teknik ayrıntılar: bot Meta'ya hangi veriyi gönderirdi (JSON).</p>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+<script type="module">
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[c]);
+const status = t => { $('#status').textContent = t || ''; };
+
+const PEOPLE = [
+  {key: 'wa:905321234567', ch: 'wa', uid: '905321234567', name: 'Ahmet Yılmaz', label: '👤 Müşteri (WhatsApp)'},
+  {key: 'ig:IG_MUSTERI', ch: 'ig', uid: 'IG_MUSTERI', name: '', label: '📸 Müşteri (Instagram)'},
+  {key: 'wa:905339998877', ch: 'wa', uid: '905339998877', name: 'Ayşe Kaya', label: '👤 2. müşteri (WhatsApp)'},
+  {key: 'wa:905551112233', ch: 'wa', uid: '905551112233', name: 'Batu', label: '🧑‍🍳 Personel', staff: true}
+];
+const SECRET = 'simulator';
+const threads = Object.fromEntries(PEOPLE.map(p => [p.key, []]));
+const unread = Object.fromEntries(PEOPLE.map(p => [p.key, 0]));
+let active = PEOPLE[0].key, W = null, sdb = null, env = null, mid = 0, busy = false;
+
+/* ---------- Saat ---------- */
+const realNow = Date.now.bind(Date);
+let offset = 0;
+Date.now = () => realNow() + offset;
+function clockValue(){
+  const d = new Date(Date.now()), p = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+$('#clock').addEventListener('change', e => { if(e.target.value){ offset = new Date(e.target.value).getTime() - realNow(); renderPanel(); } });
+$('#clock-now').addEventListener('click', () => { offset = 0; $('#clock').value = clockValue(); renderPanel(); });
+
+/* ---------- Bot kodu ---------- */
+async function loadWorker(){
+  try{ return (await import('./worker.js?v=' + realNow())).default; }catch(e){ return null; }
+}
+async function fromText(code){
+  const url = URL.createObjectURL(new Blob([code], {type: 'text/javascript'}));
+  try{ return (await import(url)).default; }finally{ URL.revokeObjectURL(url); }
+}
+$('#pick').addEventListener('change', async e => {
+  const f = e.target.files[0];
+  if(!f) return;
+  try{ start(await fromText(await f.text())); }
+  catch(err){ $('#loaderr').textContent = 'Dosya yüklenemedi: ' + err.message; }
+});
+
+/* ---------- Sahte Cloudflare D1 (tarayıcıda SQLite) ---------- */
+function mk(q, p){
+  const rows = () => { const st = sdb.prepare(q); st.bind(p); const r = []; while(st.step()) r.push(st.getAsObject()); st.free(); return r; };
+  return {bind: (...a) => mk(q, a), run: async () => { sdb.run(q, p); return {meta: {changes: sdb.getRowsModified()}}; },
+    first: async () => rows()[0] || null, all: async () => ({results: rows()})};
+}
+const DB = {prepare: q => mk(q, []), batch: async list => { const r = []; for(const s of list) r.push(await s.run()); return r; }};
+if(!crypto.subtle.timingSafeEqual) crypto.subtle.timingSafeEqual = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+
+/* ---------- Sahte Meta API: botun gönderdiği mesajlar sohbete düşer ---------- */
+let site = null;
+const realFetch = window.fetch.bind(window);
+window.fetch = async (url, opts = {}) => {
+  url = String(url);
+  if(url.endsWith('/menu.json')){
+    if(!site){
+      try{ const r = await realFetch('../menu.json', {cache: 'no-store'}); site = (await r.json()).site; }
+      catch(e){ site = {name: 'Yirmi', opening: '18:00', closing: '00:00', address: 'Denizli', phone: '+90 530 338 31 20'}; }
+    }
+    return new Response(JSON.stringify({site}));
+  }
+  if(/graph\.(facebook|instagram)\.com/.test(url)){
+    if(opts.method === 'POST'){ deliver(url, JSON.parse(opts.body)); return new Response(JSON.stringify({messages: [{id: 'sim'}], message_id: 'sim'})); }
+    if(/refresh_access_token/.test(url)) return new Response(JSON.stringify({access_token: 'simtoken', expires_in: 5184000}));
+    return new Response(JSON.stringify({username: 'musteri_deneme', name: 'Instagram Müşterisi'}));
+  }
+  return realFetch(url, opts);
+};
+function deliver(url, b){
+  const ig = /graph\.instagram/.test(url);
+  const key = (ig ? 'ig:' : 'wa:') + (ig ? b.recipient.id : b.to);
+  if(!threads[key]) threads[key] = [];
+  const m = {from: 'bot', raw: b, at: Date.now()};
+  if(ig){
+    m.text = b.message.text;
+    if(b.message.quick_replies) m.opts = b.message.quick_replies.map(q => ({id: q.payload, title: q.title})), m.kind = 'quick';
+  }else if(b.type === 'text') m.text = b.text.body;
+  else if(b.type === 'interactive'){
+    const i = b.interactive;
+    m.text = i.body.text;
+    if(i.type === 'button'){ m.kind = 'button'; m.opts = i.action.buttons.map(x => ({id: x.reply.id, title: x.reply.title})); }
+    else{ m.kind = 'list'; m.listBtn = i.action.button; m.opts = i.action.sections[0].rows.map(r => ({id: r.id, title: r.title, desc: r.description})); }
+  }else if(b.type === 'template'){
+    m.text = '📄 Şablon mesaj: *' + b.template.name + '*\n' + ((b.template.components[0] || {}).parameters || []).map(p => p.text).join(' / ');
+  }else m.text = JSON.stringify(b);
+  threads[key].push(m);
+  if(key !== active) unread[key] = (unread[key] || 0) + 1;
+}
+
+/* ---------- Webhook çağrısı (Meta'nın göndereceği veri biçiminde) ---------- */
+async function callWorker(req){
+  const waits = [];
+  const res = await W.fetch(req, env, {waitUntil: p => waits.push(p)});
+  await Promise.all(waits);
+  return res;
+}
+async function hook(body){
+  const raw = JSON.stringify(body);
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(SECRET), {name: 'HMAC', hash: 'SHA-256'}, false, ['sign']);
+  const sig = [...new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(raw)))].map(b => b.toString(16).padStart(2, '0')).join('');
+  return callWorker(new Request('https://bot.sim/webhook', {method: 'POST', headers: {'x-hub-signature-256': 'sha256=' + sig}, body: raw}));
+}
+async function api(method, path, body){
+  const r = await callWorker(new Request('https://bot.sim' + path, {method, headers: {'Authorization': 'Bearer sim', 'Content-Type': 'application/json'}, body: body ? JSON.stringify(body) : undefined}));
+  return [r.status, await r.json()];
+}
+async function userSend(text, choice){
+  if(busy || !W) return;
+  const p = PEOPLE.find(x => x.key === active);
+  threads[active].push({from: 'me', text: text || (choice && choice.title), at: Date.now()});
+  render();
+  busy = true;
+  try{
+    if(p.ch === 'wa'){
+      const m = {from: p.uid, id: 'sim' + (++mid), timestamp: String(Math.floor(Date.now() / 1000))};
+      if(choice){
+        m.type = 'interactive';
+        m.interactive = choice.kind === 'list' ? {type: 'list_reply', list_reply: {id: choice.id, title: choice.title}} : {type: 'button_reply', button_reply: {id: choice.id, title: choice.title}};
+      }else{ m.type = 'text'; m.text = {body: text}; }
+      await hook({object: 'whatsapp_business_account', entry: [{id: 'WABA', changes: [{field: 'messages', value: {messaging_product: 'whatsapp',
+        metadata: {phone_number_id: env.WA_PHONE_ID}, contacts: [{wa_id: p.uid, profile: {name: p.name}}], messages: [m]}}]}]});
+    }else{
+      const message = {mid: 'sim' + (++mid), text: text || choice.title};
+      if(choice) message.quick_reply = {payload: choice.id};
+      await hook({object: 'instagram', entry: [{id: 'IG_RESTORAN', time: Date.now(), messaging: [{sender: {id: p.uid}, recipient: {id: 'IG_RESTORAN'}, timestamp: Date.now(), message}]}]});
+    }
+  }catch(e){
+    threads[active].push({from: 'sys', text: 'Bot hata verdi: ' + e.message});
+    console.error(e);
+  }finally{
+    busy = false;
+  }
+  if(!threads[active].length || threads[active][threads[active].length - 1].from === 'me')
+    threads[active].push({from: 'sys', text: 'Bot cevap vermedi (yetkili modunda susması normaldir; "menü" yazarak geri döndürebilirsiniz).'});
+  render();
+  renderPanel();
+}
+
+/* ---------- Görünüm ---------- */
+function fmt(text, ch){
+  let h = esc(text).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+  if(ch === 'wa') h = h.replace(/\*([^*\n]+)\*/g, '<b>$1</b>').replace(/(^|\s)_([^_\n]+)_/g, '$1<i>$2</i>');
+  return h.replace(/\n/g, '<br>');
+}
+const hhmm = t => { const d = new Date(t); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+function render(){
+  $('#who').innerHTML = PEOPLE.map(p => '<button type="button" data-k="' + esc(p.key) + '"' + (p.key === active ? ' class="on"' : '') + '>' + esc(p.label) +
+    (unread[p.key] ? '<span class="badge">' + unread[p.key] + '</span>' : '') + '</button>').join('');
+  const p = PEOPLE.find(x => x.key === active), ig = p.ch === 'ig';
+  $('#phead').className = 'phead' + (ig ? ' ig' : '');
+  $('#phead').innerHTML = '<div class="av">' + (ig ? '📸' : '20') + '</div><div><b>' + (ig ? 'yirmirestoran' : 'Yirmi Restoran') + '</b><small>' +
+    (p.staff ? 'Personel olarak restoran numarasına yazıyorsunuz' : esc(p.label.replace(/^\S+\s/, '')) + ' olarak yazıyorsunuz') + '</small></div>';
+  $('#staffq').classList.toggle('hide', !p.staff);
+  const chat = $('#chat'), list = threads[active], raw = $('#raw').checked;
+  chat.className = 'chat' + (ig ? ' ig' : '');
+  if(!list.length){
+    chat.innerHTML = '<div class="empty">' + (p.staff ? 'Personel numarasından bota komut yazabilirsiniz: <b>durum</b>, <b>dış kapat</b>, <b>test</b>…<br><br>Yeni rezervasyon bildirimleri de buraya düşer.' : 'Sohbeti başlatmak için <b>Merhaba</b> yazın.') + '</div>';
+    return;
+  }
+  chat.innerHTML = list.map((m, i) => {
+    if(m.from === 'sys') return '<div class="b sys">' + esc(m.text) + '</div>';
+    let h = '<div class="b ' + m.from + '">' + fmt(m.text, p.ch) + (m.at ? '<span class="tm">' + hhmm(m.at) + '</span>' : '') + '</div>';
+    if(m.opts && m.kind === 'button') h += '<div class="wbtns">' + m.opts.map((o, j) => '<button type="button" data-m="' + i + '" data-o="' + j + '">' + esc(o.title) + '</button>').join('') + '</div>';
+    if(m.opts && m.kind === 'list') h += '<div class="wbtns"><div class="wlist"><button type="button" data-open="' + i + '">☰ ' + esc(m.listBtn || 'Seçenekler') + '</button>' +
+      '<div class="rows' + (m.open ? '' : ' hide') + '">' + m.opts.map((o, j) => '<button type="button" data-m="' + i + '" data-o="' + j + '">' + esc(o.title) + (o.desc ? '<small>' + esc(o.desc) + '</small>' : '') + '</button>').join('') + '</div></div></div>';
+    if(m.opts && m.kind === 'quick' && i === list.length - 1) h += '<div class="qr">' + m.opts.map((o, j) => '<button type="button" data-m="' + i + '" data-o="' + j + '">' + esc(o.title) + '</button>').join('') + '</div>';
+    if(raw && m.raw) h += '<details class="raw"><summary>Meta\'ya giden veri</summary><pre>' + esc(JSON.stringify(m.raw, null, 2)) + '</pre></details>';
+    return h;
+  }).join('');
+  chat.scrollTop = chat.scrollHeight;
+}
+$('#who').addEventListener('click', e => {
+  const b = e.target.closest('button[data-k]');
+  if(!b) return;
+  active = b.dataset.k; unread[active] = 0;
+  render();
+  $('#msg').focus();
+});
+$('#chat').addEventListener('click', e => {
+  const open = e.target.closest('[data-open]');
+  if(open){ const m = threads[active][+open.dataset.open]; m.open = !m.open; return render(); }
+  const b = e.target.closest('button[data-m]');
+  if(!b) return;
+  const m = threads[active][+b.dataset.m], o = m.opts[+b.dataset.o];
+  m.open = false;
+  userSend(null, {id: o.id, title: o.title, kind: m.kind});
+});
+$('#send').addEventListener('submit', e => {
+  e.preventDefault();
+  const t = $('#msg').value.trim();
+  if(!t) return;
+  $('#msg').value = '';
+  userSend(t);
+});
+document.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => userSend(b.dataset.q)));
+$('#raw').addEventListener('change', render);
+
+/* ---------- Panel ---------- */
+const AREA = {ic: 'İç alan', dis: 'Dış alan', any: 'Fark etmez'};
+const AREA_FLOOR = {ic: 'İç Mekân', dis: 'Dış Mekân', any: 'İç Mekân'};
+function todayStr(){ return new Date(Date.now() + 180 * 60e3).toISOString().slice(0, 10); }
+function plusDay(d){ return new Date(Date.parse(d + 'T00:00:00Z') + 864e5).toISOString().slice(0, 10); }
+async function renderPanel(){
+  if(!W) return;
+  const [, s] = await api('GET', '/api/settings');
+  const u = s.outdoor && s.outdoor.closedUntil, t = todayStr();
+  $('#outdoor').value = !u || (u !== 'always' && u < t) ? 'open' : u === 'always' ? 'always' : u === t ? 'today' : 'tomorrow';
+  const res = sdb.exec('SELECT data, notified FROM requests ORDER BY created DESC');
+  const rows = res.length ? res[0].values : [];
+  if(!rows.length){ $('#reqs').innerHTML = '<p class="hint">Henüz talep yok. Müşteri olarak bir rezervasyonu sonuna kadar götürün.</p>'; return; }
+  $('#reqs').innerHTML = rows.map(([data, notified]) => {
+    const q = JSON.parse(data);
+    const st = notified === 'confirmed' ? '<span class="pill ok">Onaylandı</span>' : notified === 'cancelled' ? '<span class="pill no">İptal</span>' : '<span class="pill">Beklemede</span>';
+    return '<div class="req"><div class="top"><b>' + esc(q.name) + ' · ' + q.guests + ' kişi</b>' + st + '</div>' +
+      '<div>' + esc(q.date.split('-').reverse().join('.')) + ' ' + esc(q.time) + ' · ' + AREA[q.area] + ' · ' + (q.smoking === 'yes' ? 'Sigaralı' : 'Sigarasız') + '</div>' +
+      (q.occasion ? '<div>🎉 ' + esc(q.occasion) + '</div>' : '') + (q.request ? '<div>🍽 ' + esc(q.request) + '</div>' : '') +
+      '<div class="hint" style="margin:2px 0 0">' + (q.channel === 'instagram' ? 'Instagram' : 'WhatsApp') + ' · kod ' + esc(q.ref) + ' · ' + esc(q.phone) + (q.test ? ' · TEST' : '') + '</div>' +
+      '<div class="acts"><button class="btn sm primary" data-act="confirmed" data-ref="' + esc(q.ref) + '">Onayla</button><button class="btn sm danger" data-act="cancelled" data-ref="' + esc(q.ref) + '">İptal et</button></div>' +
+      '<div class="err" data-err="' + esc(q.ref) + '"></div></div>';
+  }).join('');
+}
+$('#reqs').addEventListener('click', async e => {
+  const b = e.target.closest('button[data-act]');
+  if(!b) return;
+  const row = sdb.exec('SELECT data FROM requests WHERE ref = ?', [b.dataset.ref]);
+  const q = JSON.parse(row[0].values[0][0]);
+  const [code, j] = await api('POST', '/api/notify', {ref: q.ref, status: b.dataset.act, name: q.name, date: q.date, time: q.time, guests: q.guests, area: AREA_FLOOR[q.area], tables: ''});
+  await renderPanel();
+  const err = document.querySelector('[data-err="' + q.ref + '"]');
+  if(code !== 200 && err) err.textContent = j.error;
+  else if(j.skipped && err) err.textContent = 'Bu durum zaten bildirilmişti, tekrar gönderilmedi.';
+  render();
+});
+$('#outdoor').addEventListener('change', async e => {
+  const v = e.target.value, t = todayStr();
+  await api('POST', '/api/settings', {outdoor: {closedUntil: v === 'open' ? null : v === 'always' ? 'always' : v === 'today' ? t : plusDay(t)}});
+  renderPanel();
+});
+$('#reset').addEventListener('click', () => {
+  if(!confirm('Tüm sohbetler ve talepler silinsin mi?')) return;
+  ['sessions', 'contacts', 'requests', 'settings', 'seen'].forEach(t => { try{ sdb.run('DELETE FROM ' + t); }catch(e){} });
+  Object.keys(threads).forEach(k => { threads[k] = []; unread[k] = 0; });
+  render(); renderPanel();
+});
+
+/* ---------- Başlat ---------- */
+async function start(worker){
+  W = worker;
+  if(!W || typeof W.fetch !== 'function') throw new Error('Bu dosya bot kodu değil.');
+  $('#loadbox').classList.add('hide');
+  $('#app').classList.remove('hide');
+  status('Hazır. Bot kodu: worker.js · Veriler yalnızca bu sekmede, sayfa yenilenince silinir.');
+  render(); renderPanel();
+  $('#msg').focus();
+}
+(async () => {
+  try{
+    const SQL = await initSqlJs({locateFile: f => 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/' + f});
+    sdb = new SQL.Database();
+  }catch(e){ status('Veritabanı yüklenemedi (internet bağlantısı gerekli): ' + e.message); return; }
+  env = {DB, SITE_URL: location.protocol.startsWith('http') ? new URL('..', location.href).href : 'https://yirmirestoran.github.io',
+    VERIFY_TOKEN: 'sim', META_APP_SECRET: SECRET, WA_TOKEN: 'sim', WA_PHONE_ID: '111', IG_TOKEN: 'simulator-token',
+    STAFF_NUMBERS: PEOPLE.filter(p => p.staff).map(p => p.uid).join(','), ADMIN_KEY: 'sim'};
+  $('#clock').value = clockValue();
+  const w = await loadWorker();
+  if(w) return start(w);
+  status('');
+  $('#loadbox').classList.remove('hide');
+})();
+</script>
+</body>
+</html>

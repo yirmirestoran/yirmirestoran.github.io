@@ -407,6 +407,16 @@ h2{font-size:25px!important}
 .pill.pay-paid{background:#e3f1e4;color:var(--ok)}
 .pill.pay-deposit{background:#fdf3df;color:#8a6417}
 .pill.note{background:#fbeceb;color:#9a3b33;white-space:normal}
+.pill.bot{background:#e4f3ea;color:#1d6b43}
+.pill.req{background:#eaf2e3;color:#3c6b2a;white-space:normal}
+.bot-bar{padding:10px 14px}
+.bot-bar .res-row{gap:10px}
+.bot-dot{width:9px;height:9px;border-radius:50%;background:#c9c2b6;flex:none}
+.bot-dot.on{background:var(--ok)}
+.bot-dot.err{background:#c0392b}
+.bot-out{display:flex;align-items:center;gap:6px;font-weight:700;font-size:13px}
+.bot-out select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;font-weight:700;font-size:13px;background:#fff}
+.bot-out select.closed{background:#fbeceb;color:#9a3b33}
 .res-side{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
 .res-side select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;font-weight:700;font-size:12px;background:#fff}
 .res-side select.st-confirmed{background:#f1dfbf}
@@ -604,6 +614,23 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     <div class="res-row res-switch">
       <div class="seg" id="res-view" role="tablist"><button type="button" data-view="floor">Kroki</button><button type="button" data-view="list">Liste</button><button type="button" data-view="gantt">Çizelge</button></div>
       <div class="seg" id="res-area"><button type="button" data-area="ic">İç</button><button type="button" data-area="dis">Dış</button></div>
+    </div>
+  </div>
+
+  <!-- WhatsApp / Instagram botu: bağlıysa görünür -->
+  <div class="panel bot-bar hide" id="bot-bar">
+    <div class="res-row">
+      <span class="bot-dot" id="bot-dot"></span>
+      <b>Mesaj botu</b>
+      <span class="hint" id="bot-info" style="margin:0;flex:1;min-width:140px"></span>
+      <label class="bot-out">Dış alan
+        <select id="bot-outdoor" title="Yağmurlu havalarda kapatın; bot o günler yalnızca iç alana rezervasyon alır">
+          <option value="open">Açık</option>
+          <option value="today">Bugün kapalı</option>
+          <option value="tomorrow">Bugün + yarın kapalı</option>
+          <option value="always">Ben açana kadar kapalı</option>
+        </select>
+      </label>
     </div>
   </div>
 
@@ -1008,6 +1035,18 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     </div>
     <div class="row-actions"><button class="btn primary" type="submit">Token'ı Güncelle</button></div>
     <p class="msg" id="tk-msg"></p>
+  </form>
+
+  <form class="panel" id="bot-form" autocomplete="off">
+    <h2>WhatsApp / Instagram Botu</h2>
+    <p class="hint">Bot sunucusunun (Cloudflare Worker) adresini ve <code>ADMIN_KEY</code> değerini girin. Bilgiler yönetici şifrenizle şifrelenip saklanır, tüm cihazlarda geçerli olur. Bağlanınca bottan gelen talepler Rezervasyon sekmesine kendiliğinden düşer.</p>
+    <div class="grid" style="margin-top:10px">
+      <div class="field"><label>Bot adresi</label><input id="bot-url" placeholder="https://yirmi-bot.….workers.dev" inputmode="url"></div>
+      <div class="field"><label>Yönetici anahtarı (ADMIN_KEY)</label><input type="password" id="bot-key" autocomplete="off" placeholder="Değiştirmeyecekseniz boş bırakın"></div>
+      <div class="field"><label>Mevcut şifre</label><input type="password" id="bot-pw" autocomplete="current-password" required></div>
+    </div>
+    <div class="row-actions"><button class="btn primary" type="submit">Kaydet ve test et</button><button class="btn" type="button" id="bot-remove">Bağlantıyı kaldır</button></div>
+    <p class="msg" id="bot-msg"></p>
   </form>
 
   <div class="panel">
@@ -2579,11 +2618,13 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   }
   async function updateRes(id, patch, msg){
     try{
+      let rec = null, before = null;
       await mutateReservations(list => {
         const r = list.find(x => x.id === id);
-        if(r) Object.assign(r, patch, {updatedAt: new Date().toISOString()});
+        if(r){ before = r.status; Object.assign(r, patch, {updatedAt: new Date().toISOString()}); rec = r; }
       });
       if(msg) toast(msg);
+      botNotify(rec, before);
     }catch(e){ toast(e.status ? ghErrorText(e) : e.message, true, 7000); refreshResViews(); }
   }
 
@@ -3060,13 +3101,16 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       const meta = ['<span class="pill">' + esc(tableLabels(r)) + '</span>'];
       if(items.length) meta.push('<span class="pill po">🍽 ' + items.reduce((s, i) => s + (+i.qty || 1), 0) + ' ürün' + (r.preorder.readyAt ? ' · ' + esc(r.preorder.readyAt) + '\'de hazır' : '') + '</span>');
       if(pay.status === 'paid' || pay.status === 'deposit') meta.push('<span class="pill pay-' + pay.status + '">' + (pay.status === 'paid' ? 'Ödendi' : 'Kapora') + (+pay.amount ? ' · ' + Core.formatTL(+pay.amount) : '') + '</span>');
+      if(r.bot) meta.push('<span class="pill bot">' + (r.bot.channel === 'instagram' ? 'Instagram' : 'WhatsApp') + ' botu · ' + esc(r.bot.ref) + '</span>');
       if(r.note) meta.push('<span class="pill note">✎ ' + esc(r.note) + '</span>');
+      if(r.preorder && r.preorder.note) meta.push('<span class="pill req">🍽 ' + esc(r.preorder.note) + '</span>');
       return '<div class="res-card' + (r.status === 'cancelled' || r.status === 'noshow' ? ' is-off' : '') + '">' +
         '<div class="res-time"><b>' + esc(r.time) + '</b><small>' + Core.hm(b) + '\'e kadar</small></div>' +
         '<div class="res-main"><b>' + esc(r.name) + '</b> · ' + (+r.guests || 0) + ' kişi' +
           (r.phone ? ' · <a href="tel:' + esc(String(r.phone).replace(/[^\d+]/g, '')) + '">' + esc(r.phone) + '</a>' : '') +
           '<div class="res-meta">' + meta.join('') + '</div></div>' +
         '<div class="res-side"><select data-res-status="' + esc(r.id) + '" class="st-' + esc(r.status) + '" aria-label="Durum">' + optionsHtml(RES_STATUS, r.status) + '</select>' +
+          (r.status === 'pending' ? '<button class="btn sm primary" data-res-confirm="' + esc(r.id) + '">Onayla</button>' : '') +
           '<button class="btn sm" data-res-edit="' + esc(r.id) + '">Düzenle</button></div></div>';
     }).join('');
   }
@@ -3075,8 +3119,9 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     if(id) updateRes(id, {status: e.target.value}, 'Durum güncellendi: ' + RES_STATUS_LABEL[e.target.value]);
   });
   $('#res-list').addEventListener('click', e => {
-    const id = e.target.dataset && e.target.dataset.resEdit;
-    if(id) openResForm(resList.find(r => r.id === id));
+    const d = e.target.dataset || {};
+    if(d.resConfirm) return updateRes(d.resConfirm, {status: 'confirmed'}, 'Rezervasyon onaylandı.');
+    if(d.resEdit) openResForm(resList.find(r => r.id === d.resEdit));
   });
 
   $('#res-date').addEventListener('change', e => { if(e.target.value){ resDay = e.target.value; renderRes(); } });
@@ -3300,14 +3345,16 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       delete rec._new;
       rec.updatedAt = new Date().toISOString();
       if(isNew) rec.createdAt = rec.updatedAt;
+      let before = null;
       await mutateReservations(list => {
         const i = list.findIndex(x => x.id === rec.id);
-        if(i >= 0) list[i] = rec; else list.push(rec);
+        if(i >= 0){ before = list[i].status; list[i] = rec; } else list.push(rec);
       });
       resDay = rec.date;
       closeResForm();
       renderRes();
       toast(isNew ? 'Rezervasyon kaydedildi.' : 'Rezervasyon güncellendi.');
+      botNotify(rec, before);
     }catch(err){
       toast(err.status ? ghErrorText(err) : err.message, true, 7000);
     }finally{
@@ -3347,6 +3394,156 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   setInterval(() => {
     if(session && session.dataKey && !document.hidden && !$('#tab-res').classList.contains('hide') && $('#res-modal').classList.contains('hide')) loadReservations(true);
   }, 60000);
+
+  /* ---------- WhatsApp / Instagram botu ---------- */
+  // Bot (bot/worker.js) müşteriden aldığı talepleri kendi veritabanında bekletir. Panel açıkken her dakika talepler çekilir,
+  // kişi sayısına uygun boş masaya "Beklemede" olarak yerleştirilip şifreli listeye eklenir. Personel onaylayınca / iptal
+  // edince bot müşteriye mesaj atar. Dış alan kapalı ayarı botta tutulur (personel WhatsApp'tan "dış kapat" da yazabilir).
+  let botOutdoor = null, botBusy = false, botErr = '';
+  const botOn = () => !!(session && session.bot && session.bot.url && session.bot.key);
+  async function botApi(method, path, body, cfg){
+    const b = cfg || session.bot;
+    const r = await fetch(b.url.replace(/\/+$/, '') + path, {method, cache: 'no-store',
+      headers: Object.assign({'Authorization': 'Bearer ' + b.key}, body ? {'Content-Type': 'application/json'} : {}),
+      body: body ? JSON.stringify(body) : undefined});
+    const d = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(d.error || ('HTTP ' + r.status));
+    return d;
+  }
+  // Kişi sayısına en uygun (en küçük yeterli) boş masa; tek masa yetmezse birbirine yakın iki masa
+  function botPickTables(rec, list, pref){
+    const areas = pref === 'any' ? ['ic', 'dis'] : [pref === 'dis' ? 'dis' : 'ic'];
+    const s = resMin(rec.time), e = s + rec.duration;
+    const busy = id => list.some(r => r.date === rec.date && blocking(r) && (r.tables || []).includes(id) && resRange(r)[0] < e && s < resRange(r)[1]);
+    const free = {};
+    areas.forEach(a => { free[a] = Core.floorById(a).tables.filter(t => !busy(t.id)); });
+    for(const a of areas){
+      const one = free[a].filter(t => t.seats >= rec.guests).sort((x, y) => x.seats - y.seats)[0];
+      if(one) return {area: a, tables: [one.id]};
+    }
+    const mid = t => [t.x + t.w / 2, t.y + t.h / 2];
+    for(const a of areas){
+      const f = free[a];
+      let best = null;
+      for(let i = 0; i < f.length; i++) for(let j = i + 1; j < f.length; j++){
+        const sum = f[i].seats + f[j].seats;
+        if(sum < rec.guests) continue;
+        const [x1, y1] = mid(f[i]), [x2, y2] = mid(f[j]), dist = Math.hypot(x1 - x2, y1 - y2);
+        if(dist > 260) continue;
+        const score = sum * 1000 + dist;
+        if(!best || score < best.score) best = {score, ids: [f[i].id, f[j].id]};
+      }
+      if(best) return {area: a, tables: best.ids};
+    }
+    return null;
+  }
+  function botToRes(q, list){
+    const guests = Math.max(1, +q.guests || 2);
+    const rec = {id: 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), date: q.date, time: q.time,
+      duration: guests > 8 ? 150 : 120, guests, name: q.name || 'Misafir', phone: q.phone || '', tables: [], area: q.area === 'dis' ? 'dis' : 'ic',
+      status: 'pending', source: q.channel === 'instagram' ? 'instagram' : 'whatsapp', note: '',
+      preorder: {items: [], readyAt: '', note: q.request || ''}, payment: {status: 'none', amount: 0, method: ''},
+      bot: {ref: q.ref, channel: q.channel, smoking: q.smoking, occasion: q.occasion || '', area: q.area, igUser: q.igUser || ''}};
+    const pick = botPickTables(rec, list, q.area);
+    if(pick){ rec.area = pick.area; rec.tables = pick.tables; }
+    rec.note = [q.test ? 'TEST' : '', q.occasion ? 'Özel gün: ' + q.occasion : '', q.smoking === 'yes' ? 'Sigaralı' : 'Sigarasız',
+      q.area === 'any' ? 'Alan fark etmez' : '', q.igUser ? 'IG ' + q.igUser : '',
+      pick ? '' : '⚠ Uygun boş masa bulunamadı, masayı elle seçin'].filter(Boolean).join(' · ');
+    rec.createdAt = rec.updatedAt = new Date().toISOString();
+    return rec;
+  }
+  async function pullBotInbox(quiet){
+    if(!botOn() || !session.dataKey || botBusy) return;
+    botBusy = true;
+    try{
+      const d = await botApi('GET', '/api/inbox');
+      botErr = ''; botOutdoor = d.outdoor || null;
+      const reqs = (d.requests || []).filter(q => q && q.ref && q.date && q.time);
+      let added = [];
+      if(reqs.length){
+        const known = new Set((resList || []).filter(r => r.bot).map(r => r.bot.ref));
+        if(resList === null || reqs.some(q => !known.has(q.ref))){
+          await mutateReservations(list => {
+            added = [];
+            reqs.forEach(q => {
+              if(list.some(r => r.bot && r.bot.ref === q.ref)) return;
+              const rec = botToRes(q, list);
+              list.push(rec); added.push(rec);
+            });
+          });
+        }
+        await botApi('POST', '/api/ack', {refs: reqs.map(q => q.ref)});
+      }
+      if(added.length){
+        botChime();
+        const f = added[0];
+        toast('🆕 ' + (added.length > 1 ? added.length + ' yeni bot rezervasyonu geldi' :
+          'Yeni rezervasyon: ' + f.name + ' · ' + f.guests + ' kişi · ' + f.date.split('-').reverse().slice(0, 2).join('.') + ' ' + f.time + ' · ' + tableLabels(f)) + ' (onay bekliyor)', false, 9000);
+      }
+    }catch(e){
+      botErr = e.message;
+      if(!quiet) toast('Bot: ' + e.message, true, 7000);
+    }finally{
+      botBusy = false;
+      renderBotBar();
+    }
+  }
+  function botChime(){
+    try{
+      const ac = new (window.AudioContext || window.webkitAudioContext)();
+      [880, 1175].forEach((f, i) => {
+        const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + i * 0.18;
+        o.frequency.value = f; o.connect(g); g.connect(ac.destination);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.2, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+        o.start(t); o.stop(t + 0.32);
+      });
+    }catch(e){}
+  }
+  function outdoorValue(o){
+    const u = o && o.closedUntil, today = todayStr();
+    if(!u || (u !== 'always' && u < today)) return 'open';
+    if(u === 'always') return 'always';
+    if(u === today) return 'today';
+    if(u === shiftDay(today, 1)) return 'tomorrow';
+    return 'until:' + u;
+  }
+  function renderBotBar(){
+    const on = botOn();
+    $('#bot-bar').classList.toggle('hide', !on);
+    if(!on) return;
+    $('#bot-dot').className = 'bot-dot' + (botErr ? ' err' : botOutdoor ? ' on' : '');
+    const pending = (resList || []).filter(r => r.bot && r.status === 'pending' && r.date >= todayStr()).length;
+    $('#bot-info').textContent = botErr ? 'Bağlantı hatası: ' + botErr :
+      (botOutdoor ? 'Bağlı · WhatsApp ve Instagram talepleri buraya kendiliğinden düşer' : 'Bağlanıyor…') + (pending ? ' · ' + pending + ' talep onay bekliyor' : '');
+    const sel = $('#bot-outdoor'), v = outdoorValue(botOutdoor);
+    sel.querySelectorAll('option[data-custom]').forEach(o => o.remove());
+    if(v.startsWith('until:')) sel.insertAdjacentHTML('beforeend', '<option data-custom value="' + esc(v) + '">' + esc(v.slice(6).split('-').reverse().join('.')) + ' dahil kapalı</option>');
+    sel.value = v;
+    sel.classList.toggle('closed', v !== 'open');
+    sel.disabled = !botOutdoor;
+  }
+  $('#bot-outdoor').addEventListener('change', async e => {
+    const v = e.target.value, today = todayStr();
+    const closedUntil = v === 'open' ? null : v === 'always' ? 'always' : v === 'tomorrow' ? shiftDay(today, 1) : v === 'today' ? today : v.slice(6);
+    e.target.disabled = true;
+    try{
+      botOutdoor = (await botApi('POST', '/api/settings', {outdoor: {closedUntil}})).outdoor;
+      toast(closedUntil ? 'Dış alan kapatıldı: bot bu günlerde yalnızca iç alana rezervasyon alacak.' : 'Dış alan açıldı.');
+    }catch(err){ toast('Bot: ' + err.message, true, 7000); }
+    renderBotBar();
+  });
+  // Bottan gelen rezervasyon onaylanınca / iptal edilince müşteriye otomatik mesaj (bot aynı durumu iki kez göndermez)
+  function botNotify(rec, before){
+    if(!rec || !rec.bot || !botOn() || rec.status === before) return;
+    if(rec.status !== 'confirmed' && rec.status !== 'cancelled') return;
+    const ch = rec.bot.channel === 'instagram' ? 'Instagram' : 'WhatsApp';
+    botApi('POST', '/api/notify', {ref: rec.bot.ref, status: rec.status, name: rec.name, date: rec.date, time: rec.time, guests: rec.guests,
+      area: Core.floorById(rec.area).name, tables: (rec.tables || []).length ? tableLabels(rec) : ''})
+      .then(d => { if(!d.skipped) setTimeout(() => toast('✓ Müşteriye ' + ch + ' üzerinden ' + (rec.status === 'confirmed' ? 'onay' : 'iptal') + ' mesajı gönderildi.'), 1200); })
+      .catch(err => setTimeout(() => toast('Müşteriye otomatik mesaj gitmedi: ' + err.message, true, 10000), 1200));
+  }
+  setInterval(() => { if(session && botOn() && !document.hidden) pullBotInbox(true); }, 60000);
+  document.addEventListener('visibilitychange', () => { if(!document.hidden && session && botOn()) pullBotInbox(true); });
 
   /* ---------- Satış & Kâr ---------- */
   // Flag'den indirilen satış raporu (Excel/CSV) içe aktarılır; ürün maliyetleri ve giderlerle ciro, maliyet ve kâr hesaplanır.
@@ -3839,6 +4036,8 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     loadMenu();
     loadReservations(true);
     loadFloorLayout();
+    renderBotBar();
+    setTimeout(() => pullBotInbox(true), 4000);   // masa düzeni ve rezervasyonlar yüklendikten sonra
     touch();
   }
   function logout(){
@@ -3952,6 +4151,45 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       setMsg('#tk-msg', err.status ? 'Yeni token çalışmıyor: ' + ghErrorText(err) : 'Hata: ' + err.message, 'err');
     }
   });
+  // Bot bağlantısı (adres + ADMIN_KEY) şifreli auth.json'a eklenir
+  async function saveBotCfg(bot, pw){
+    if(!await verifyPassword(pw)) throw new Error('Mevcut şifre yanlış.');
+    const cfg = Object.assign({}, session);
+    if(bot) cfg.bot = bot; else delete cfg.bot;
+    await putFile(cfg, AUTH_PATH, JSON.stringify(await encryptCfg(cfg, pw), null, 2) + '\n', bot ? 'Mesaj botu bağlandı' : 'Mesaj botu bağlantısı kaldırıldı');
+    session = cfg;
+  }
+  $('#bot-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    let url = $('#bot-url').value.trim().replace(/\/+$/, '');
+    const key = $('#bot-key').value.trim() || (session.bot && session.bot.key) || '';
+    if(url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
+    if(!url || !key) return setMsg('#bot-msg', 'Bot adresini ve yönetici anahtarını girin.', 'err');
+    try{
+      setMsg('#bot-msg', 'Bota bağlanılıyor…');
+      const h = await botApi('GET', '/api/health', null, {url, key});
+      setMsg('#bot-msg', 'Kaydediliyor…');
+      await saveBotCfg({url, key}, $('#bot-pw').value);
+      $('#bot-key').value = ''; $('#bot-pw').value = '';
+      setMsg('#bot-msg', '✓ Bot bağlandı. WhatsApp: ' + (h.whatsapp ? 'hazır' : 'ayarlanmamış') + ' · Instagram: ' + (h.instagram ? 'hazır' : 'ayarlanmamış') +
+        ' · Bildirim alacak personel: ' + h.staff + ' numara', 'ok');
+      botErr = ''; botOutdoor = h.outdoor;
+      renderBotBar();
+      pullBotInbox(true);
+    }catch(err){
+      setMsg('#bot-msg', err.status ? ghErrorText(err) : (err instanceof TypeError ? 'Bota ulaşılamadı. Adresi ve ALLOWED_ORIGIN ayarını kontrol edin.' : err.message), 'err');
+    }
+  });
+  $('#bot-remove').addEventListener('click', async () => {
+    if(!session.bot) return setMsg('#bot-msg', 'Zaten bağlı bir bot yok.');
+    if(!$('#bot-pw').value) return setMsg('#bot-msg', 'Kaldırmak için mevcut şifrenizi girin.', 'err');
+    try{
+      await saveBotCfg(null, $('#bot-pw').value);
+      $('#bot-form').reset();
+      renderBotBar();
+      setMsg('#bot-msg', 'Bot bağlantısı kaldırıldı.', 'ok');
+    }catch(err){ setMsg('#bot-msg', err.status ? ghErrorText(err) : err.message, 'err'); }
+  });
   $('#reload-btn').addEventListener('click', () => {
     if(dirty && !confirm('Kaydedilmemiş değişiklikler kaybolacak. Devam edilsin mi?')) return;
     loadMenu();
@@ -3978,7 +4216,8 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     if(name === 'qr' && !$('#qr-url').value){ $('#qr-url').value = defaultMenuUrl(); if($('#qr-url').value) makeQr(); }
     if(state && name === 'home') renderDash();
     if(state && name === 'calendar') renderCalendar();
-    if(state && name === 'res') renderRes();
+    if(state && name === 'res'){ renderRes(); renderBotBar(); }
+    if(name === 'security' && session) $('#bot-url').value = (session.bot && session.bot.url) || '';
     if(state && name === 'sales') renderSales();
     const act = document.querySelector('.tab.active');
     if(act && act.scrollIntoView) act.scrollIntoView({block: 'nearest', inline: 'center'});
