@@ -357,7 +357,8 @@
           "calorieEstimated": true,
           "allergens": [],
           "traceWarning": "",
-          "id": "salatalar--yesil-salata"
+          "id": "salatalar--yesil-salata",
+          "image": "images/yesil-salata-mvjocnbv.jpg"
         },
         {
           "name": "Gavurdağı Salata",
@@ -370,7 +371,7 @@
           ],
           "traceWarning": "",
           "id": "salatalar--gavurdagi-salata",
-          "image": "images/gavurdagi-salata-mur83sbk.jpg"
+          "image": "images/gavurdagi-salata-mvjocwff.jpg"
         },
         {
           "name": "Avokado Salata",
@@ -381,7 +382,7 @@
           "allergens": [],
           "traceWarning": "",
           "id": "salatalar--avokado-salata",
-          "image": "images/avokado-salata-mur34nq0.jpg"
+          "image": "images/avokado-salata-mvjod2ba.jpg"
         },
         {
           "name": "Domates Salatası",
@@ -391,7 +392,8 @@
           "calorieEstimated": true,
           "allergens": [],
           "traceWarning": "",
-          "id": "salatalar--domates-salatasi"
+          "id": "salatalar--domates-salatasi",
+          "image": "images/domates-salatasi-mvjod7t9.jpg"
         },
         {
           "name": "Peynirli Roka Salata",
@@ -462,7 +464,8 @@
             "fish"
           ],
           "traceWarning": "",
-          "id": "ara-sicaklar--portakalli-karides"
+          "id": "ara-sicaklar--portakalli-karides",
+          "image": "images/portakalli-karides-mvjodirw.jpg"
         },
         {
           "name": "Yaprak Bonfile",
@@ -472,7 +475,8 @@
           "calorieEstimated": true,
           "allergens": [],
           "traceWarning": "",
-          "id": "ara-sicaklar--yaprak-bonfile"
+          "id": "ara-sicaklar--yaprak-bonfile",
+          "image": "images/yaprak-bonfile-mvjodflo.jpg"
         },
         {
           "name": "Ördek Tandır",
@@ -496,7 +500,8 @@
             "crustaceans"
           ],
           "traceWarning": "",
-          "id": "ara-sicaklar--karides-tava"
+          "id": "ara-sicaklar--karides-tava",
+          "image": "images/karides-tava-mvjodohz.jpg"
         },
         {
           "name": "Bostan Patlıcan",
@@ -530,7 +535,8 @@
           "calorieEstimated": true,
           "allergens": [],
           "traceWarning": "",
-          "id": "ara-sicaklar--limonlu-sac-kavurma"
+          "id": "ara-sicaklar--limonlu-sac-kavurma",
+          "image": "images/limonlu-sac-kavurma-mvjodty3.jpg"
         },
         {
           "name": "Meyhane Klasiği",
@@ -569,7 +575,8 @@
           "calorieEstimated": true,
           "allergens": [],
           "traceWarning": "",
-          "id": "ana-yemekler--kuzu-pirzola"
+          "id": "ana-yemekler--kuzu-pirzola",
+          "image": "images/kuzu-pirzola-mvjoed3t.jpg"
         },
         {
           "name": "Zırh Kıyma Kebabı",
@@ -589,7 +596,8 @@
           "calorieEstimated": true,
           "allergens": [],
           "traceWarning": "",
-          "id": "ana-yemekler--dana-bonfile"
+          "id": "ana-yemekler--dana-bonfile",
+          "image": "images/dana-bonfile-mvjoeicv.jpg"
         },
         {
           "name": "Tavuk Kanat",
@@ -622,7 +630,8 @@
             "milk"
           ],
           "traceWarning": "",
-          "id": "ana-yemekler--levrek"
+          "id": "ana-yemekler--levrek",
+          "image": "images/levrek-mvjoenqg.jpg"
         }
       ],
       "layout": "list",
@@ -668,7 +677,8 @@
           "calorieEstimated": true,
           "allergens": [],
           "traceWarning": "",
-          "id": "tatlilar--mevsim-meyveleri"
+          "id": "tatlilar--mevsim-meyveleri",
+          "image": "images/mevsim-meyveleri-mvjoetnc.jpg"
         }
       ],
       "layout": "list",
