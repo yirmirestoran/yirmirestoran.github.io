@@ -417,6 +417,10 @@ h2{font-size:25px!important}
 .bot-out{display:flex;align-items:center;gap:6px;font-weight:700;font-size:13px}
 .bot-out select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;font-weight:700;font-size:13px;background:#fff}
 .bot-out select.closed{background:#fbeceb;color:#9a3b33}
+.bc-row{display:grid;grid-template-columns:minmax(150px,auto) minmax(0,1fr) minmax(0,1.4fr);gap:8px;align-items:center;margin-top:8px}
+.bc-row input:not([type=checkbox]){width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#fff}
+@media (max-width:640px){ .bc-row{grid-template-columns:minmax(0,1fr);gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line)} }
+.bc-q{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
 .res-side{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
 .res-side select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;font-weight:700;font-size:12px;background:#fff}
 .res-side select.st-confirmed{background:#f1dfbf}
@@ -568,6 +572,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   <button class="tab" data-tab="ann">Duyurular</button>
   <button class="tab" data-tab="campaigns">Kampanyalar</button>
   <button class="tab" data-tab="site">İşletme Bilgileri</button>
+  <button class="tab" data-tab="bot">WhatsApp Botu</button>
   <button class="tab" data-tab="qr">QR Kod</button>
   <button class="tab" data-tab="security">Güvenlik</button>
 </div>
@@ -1014,6 +1019,16 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
 </div>
 
 <!-- GÜVENLİK -->
+<div class="page hide" id="tab-bot">
+  <div class="panel">
+    <h2>WhatsApp / Instagram Botu</h2>
+    <p class="hint">Botun müşteriye sorduğu soruları ve seçenekleri buradan değiştirin. <b>Kaydet ve Yayınla</b>'ya bastıktan birkaç dakika sonra bota yansır. Yayınlamadan önce <b>Simülatörde dene</b> ile nasıl göründüğüne bakabilirsiniz; simülatör açıkken burada yaptığınız değişiklikler oraya anında düşer.</p>
+    <p class="hint">Metinlerde kullanabilecekleriniz: <code>{ad}</code> müşterinin adı · <code>{isletme}</code> işletme adı · <code>{tarih}</code> seçilen gün · <code>{kod}</code> talep kodu · <code>*kalın*</code> WhatsApp'ta kalın yazı. Boş bıraktığınız alan varsayılan metne döner.</p>
+    <div class="row-actions"><button class="btn primary" type="button" id="bc-preview">Simülatörde dene ↗</button><button class="btn" type="button" id="bc-reset">Varsayılanlara dön</button></div>
+  </div>
+  <div id="bc-body"></div>
+</div>
+
 <div class="page hide" id="tab-security">
   <form class="panel" id="pw-form" autocomplete="off">
     <h2>Şifre Değiştir</h2>
@@ -3399,7 +3414,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   // Bot (bot/worker.js) müşteriden aldığı talepleri kendi veritabanında bekletir. Panel açıkken her dakika talepler çekilir,
   // kişi sayısına uygun boş masaya "Beklemede" olarak yerleştirilip şifreli listeye eklenir. Personel onaylayınca / iptal
   // edince bot müşteriye mesaj atar. Dış alan kapalı ayarı botta tutulur (personel WhatsApp'tan "dış kapat" da yazabilir).
-  let botOutdoor = null, botBusy = false, botErr = '';
+  let botOutdoor = null, botBusy = false, botErr = '', botMsgs = null;
   const botOn = () => !!(session && session.bot && session.bot.url && session.bot.key);
   async function botApi(method, path, body, cfg){
     const b = cfg || session.bot;
@@ -3457,7 +3472,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     botBusy = true;
     try{
       const d = await botApi('GET', '/api/inbox');
-      botErr = ''; botOutdoor = d.outdoor || null;
+      botErr = ''; botOutdoor = d.outdoor || null; botMsgs = d.msgs;
       const reqs = (d.requests || []).filter(q => q && q.ref && q.date && q.time);
       let added = [];
       if(reqs.length){
@@ -3514,7 +3529,8 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     $('#bot-dot').className = 'bot-dot' + (botErr ? ' err' : botOutdoor ? ' on' : '');
     const pending = (resList || []).filter(r => r.bot && r.status === 'pending' && r.date >= todayStr()).length;
     $('#bot-info').textContent = botErr ? 'Bağlantı hatası: ' + botErr :
-      (botOutdoor ? 'Bağlı · WhatsApp ve Instagram talepleri buraya kendiliğinden düşer' : 'Bağlanıyor…') + (pending ? ' · ' + pending + ' talep onay bekliyor' : '');
+      (botOutdoor ? 'Bağlı · WhatsApp ve Instagram talepleri buraya kendiliğinden düşer' : 'Bağlanıyor…') + (pending ? ' · ' + pending + ' talep onay bekliyor' : '') +
+      (botMsgs != null ? ' · Bu ay ' + botMsgs + ' WhatsApp mesajı' : '');
     const sel = $('#bot-outdoor'), v = outdoorValue(botOutdoor);
     sel.querySelectorAll('option[data-custom]').forEach(o => o.remove());
     if(v.startsWith('until:')) sel.insertAdjacentHTML('beforeend', '<option data-custom value="' + esc(v) + '">' + esc(v.slice(6).split('-').reverse().join('.')) + ' dahil kapalı</option>');
@@ -3542,6 +3558,82 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       .then(d => { if(!d.skipped) setTimeout(() => toast('✓ Müşteriye ' + ch + ' üzerinden ' + (rec.status === 'confirmed' ? 'onay' : 'iptal') + ' mesajı gönderildi.'), 1200); })
       .catch(err => setTimeout(() => toast('Müşteriye otomatik mesaj gitmedi: ' + err.message, true, 10000), 1200));
   }
+  /* ---------- Bot ayarları: sorular ve seçenekler ---------- */
+  // Varsayılan metinler doğrudan bot/worker.js'ten okunur (tek kaynak). Değişiklikler menu.json → site.bot olarak
+  // "Kaydet ve Yayınla" ile yayınlanır; bot menu.json'u birkaç dakikada bir okur.
+  let botDefs = null;
+  async function loadBotDefs(){
+    if(botDefs) return botDefs;
+    try{ botDefs = (await import('./bot/worker.js?v=' + Date.now())).default; }catch(e){ console.warn('bot/worker.js yüklenemedi', e); }
+    return botDefs;
+  }
+  const BC_MENU = [['rez', 'Rezervasyon'], ['ozel', 'Özel gün'], ['bilgi', 'Menü & bilgi'], ['yetkili', 'Yetkiliyle görüş']];
+  const BC_AREAS = [['ic', 'İç alan (sigarasız)'], ['dis_s', 'Dış alan · sigaralı'], ['dis_n', 'Dış alan · sigarasız'], ['any', 'Fark etmez']];
+  const BC_Q = [['date', 'Tarih sorusu'], ['time', 'Saat sorusu ({tarih}: seçilen gün)'], ['area', 'Oturma yeri sorusu'], ['guests', 'Kişi sayısı sorusu'],
+    ['request', 'Menü / istek sorusu'], ['requestOzel', 'Menü / istek sorusu (özel günlerde)'], ['occasion', 'Özel gün türü sorusu'],
+    ['name', 'İsim sorusu (yalnızca Instagram’da sorulur)'], ['confirm', 'Özetin altındaki onay sorusu']];
+  const botCfgNow = () => botDefs.mergeBotCfg(state.site.bot);
+  function saveBotPreview(){ try{ localStorage.setItem('yirmi-bot-onizleme', JSON.stringify(botCfgNow())); }catch(e){} }
+  async function renderBotCfg(){
+    const box = $('#bc-body');
+    if(!await loadBotDefs()){
+      box.innerHTML = '<div class="panel"><p class="msg err">Bot ayarları yüklenemedi. Paneli siteden (…github.io/admin.html) açtığınızdan emin olun.</p></div>';
+      return;
+    }
+    const c = botCfgNow();
+    const ta = (path, val, rows) => '<textarea data-bc="' + path + '" rows="' + (rows || 3) + '" maxlength="1000">' + esc(val) + '</textarea>';
+    const sw = (path, on, label) => '<label class="switch small"><input type="checkbox" data-bc="' + path + '"' + (on ? ' checked' : '') + '> ' + esc(label) + '</label>';
+    const rows = (group, list) => list.map(([k, label]) => {
+      const it = c[group][k];
+      return '<div class="bc-row">' + sw(group + '.' + k + '.on', it.on, label) +
+        '<input data-bc="' + group + '.' + k + '.title" value="' + esc(it.title) + '" maxlength="24" placeholder="Başlık (en fazla 24 karakter)">' +
+        '<input data-bc="' + group + '.' + k + '.desc" value="' + esc(it.desc) + '" maxlength="72" placeholder="Açıklama (isteğe bağlı)"></div>';
+    }).join('');
+    box.innerHTML =
+      '<div class="panel"><h2>Genel</h2>' +
+        '<label class="switch"><input type="checkbox" data-bc="notifyNew"' + (c.notifyNew ? ' checked' : '') + '> Yeni rezervasyonda personele WhatsApp bildirimi gönder</label>' +
+        '<p class="hint">Kapalıyken yeni talepler yalnızca bu panelde sesli uyarıyla görünür (her bildirim ücretli bir mesajdır). “Yetkili isteniyor” bildirimleri her zaman gider.</p>' +
+        '<label class="switch" style="margin-top:12px"><input type="checkbox" data-bc="askRequest"' + (c.askRequest ? ' checked' : '') + '> Menü / özel istek sorusunu sor</label>' +
+        '<div class="grid" style="margin-top:12px"><div class="field"><label>Bundan kalabalık gruplar yetkiliye aktarılsın (kişi)</label><input type="number" min="2" max="200" data-bc="maxGuests" value="' + c.maxGuests + '"></div></div></div>' +
+      '<div class="panel"><h2>Karşılama ve ana menü</h2><div class="field"><label>Karşılama mesajı</label>' + ta('welcome', c.welcome, 3) + '</div>' +
+        '<p class="hint" style="margin-top:10px">Ana menü seçenekleri. Kapattığınız seçenek müşteriye gösterilmez.</p>' + rows('menu', BC_MENU) + '</div>' +
+      '<div class="panel"><h2>Oturma yeri ve sigara</h2><p class="hint">Tek soruda sorulur. Dış alan kapalı günlerde yalnızca iç alan kalır ve soru atlanır.</p>' + rows('areas', BC_AREAS) + '</div>' +
+      '<div class="panel"><h2>Özel gün türleri</h2><p class="hint">Her satıra bir tür yazın (en fazla 9). “✨ Diğer” seçeneği otomatik eklenir.</p>' +
+        '<div class="field"><textarea data-bc="occasions" rows="6">' + esc(c.occasions.join('\n')) + '</textarea></div></div>' +
+      '<div class="panel"><h2>Sorular</h2><div class="grid bc-q">' +
+        BC_Q.map(([k, label]) => '<div class="field"><label>' + esc(label) + '</label>' + ta('q.' + k, c.q[k], /^request/.test(k) ? 5 : 2) + '</div>').join('') + '</div></div>' +
+      '<div class="panel"><h2>Mesajlar</h2><div class="grid bc-q">' +
+        '<div class="field"><label>Rezervasyon alındı mesajı ({kod}: talep kodu)</label>' + ta('done', c.done, 4) + '</div>' +
+        '<div class="field"><label>Yetkiliye aktarma mesajı</label>' + ta('handoff', c.handoff, 4) + '</div></div></div>';
+  }
+  $('#bc-body').addEventListener('input', e => {
+    const path = e.target.dataset.bc;
+    if(!path || !botDefs) return;
+    const cfg = botCfgNow();
+    let v = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    if(path === 'occasions') v = v.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 9);
+    if(path === 'maxGuests') v = +v || 0;
+    const keys = path.split('.');
+    let o = cfg;
+    keys.slice(0, -1).forEach(k => { o = o[k]; });
+    o[keys[keys.length - 1]] = v;
+    state.site.bot = cfg;
+    setDirty(true);
+    saveBotPreview();
+  });
+  $('#bc-preview').addEventListener('click', async () => {
+    if(!await loadBotDefs()) return toast('Bot ayarları yüklenemedi.', true);
+    saveBotPreview();
+    window.open('bot/simulator.html?onizleme=1', 'yirmi-bot-sim');
+  });
+  $('#bc-reset').addEventListener('click', async () => {
+    if(!confirm('Botun tüm soru ve seçenekleri varsayılana dönsün mü? (Yayınlamak için “Kaydet ve Yayınla”ya basın.)')) return;
+    delete state.site.bot;
+    setDirty(true);
+    await renderBotCfg();
+    saveBotPreview();
+  });
+
   setInterval(() => { if(session && botOn() && !document.hidden) pullBotInbox(true); }, 60000);
   document.addEventListener('visibilitychange', () => { if(!document.hidden && session && botOn()) pullBotInbox(true); });
 
@@ -4172,7 +4264,8 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       await saveBotCfg({url, key}, $('#bot-pw').value);
       $('#bot-key').value = ''; $('#bot-pw').value = '';
       setMsg('#bot-msg', '✓ Bot bağlandı. WhatsApp: ' + (h.whatsapp ? 'hazır' : 'ayarlanmamış') + ' · Instagram: ' + (h.instagram ? 'hazır' : 'ayarlanmamış') +
-        ' · Bildirim alacak personel: ' + h.staff + ' numara', 'ok');
+        ' · Bildirim alacak personel: ' + h.staff + ' numara' +
+        (h.botNumber ? ' · Bot numarası: ' + (h.botNumber.live ? 'aktif (+' + String(h.botNumber.number).replace(/\D/g, '') + ')' : 'bekliyor' + (h.botNumber.error ? ' — ' + h.botNumber.error : '')) : ''), 'ok');
       botErr = ''; botOutdoor = h.outdoor;
       renderBotBar();
       pullBotInbox(true);
@@ -4211,7 +4304,8 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   /* ---------- Sekmeler ---------- */
   function showTab(name){
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-    ['home','res','sales','menu','chef','calendar','ann','campaigns','site','qr','security'].forEach(n => $('#tab-' + n).classList.toggle('hide', n !== name));
+    ['home','res','sales','menu','chef','calendar','ann','campaigns','site','bot','qr','security'].forEach(n => $('#tab-' + n).classList.toggle('hide', n !== name));
+    if(state && name === 'bot') renderBotCfg();
     if(state && name === 'ann') renderAnn();
     if(name === 'qr' && !$('#qr-url').value){ $('#qr-url').value = defaultMenuUrl(); if($('#qr-url').value) makeQr(); }
     if(state && name === 'home') renderDash();

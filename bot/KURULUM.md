@@ -28,7 +28,7 @@ Müşteri istediği an **yetkili** yazarsa bot susar (12 saat) ve personele habe
 3. **Workers & Pages → Create → Create Worker**, adı: `yirmi-bot` → **Deploy**.
 4. **Edit code**: içindeki her şeyi silin, `bot/worker.js` dosyasının tamamını yapıştırın → **Deploy**.
 5. Worker → **Settings → Bindings → Add → D1 database**: Variable name `DB`, veritabanı `yirmi-bot`.
-6. Worker → **Settings → Triggers → Cron Triggers → Add**: `0 3 * * *` (her gece temizlik + Instagram anahtarını yenileme).
+6. Worker → **Settings → Triggers → Cron Triggers → Add**: `*/15 * * * *` (15 dakikada bir: bekleyen bot numarasını kontrol, temizlik, Instagram anahtarını yenileme).
 7. Worker → **Settings → Variables and Secrets** — aşağıdakileri ekleyin (gizli olanları **Secret** türünde):
 
 | Ad | Tür | Değer |
@@ -74,6 +74,22 @@ Worker adresiniz `https://yirmi-bot.<hesap-adınız>.workers.dev` olacak. Taray�
 8. Uygulamayı **Live (Yayında)** moduna alın. Uygulama panelinin üstündeki anahtardan yapılır.
 9. WhatsApp Manager → **Ödeme yöntemi** ekleyin. Sadece şablon mesajlar ücretlidir; müşterinin başlattığı sohbetlere verilen cevaplar ücretsizdir.
 
+### "Sadece görünen ad" bot numarası (onay beklerken hazırlık)
+Meta'nın verdiği asıl bot numarası onaylanınca bot kendiliğinden devreye girer. Bunun için önceden şunları ekleyin:
+
+| Ad | Tür | Değer |
+|---|---|---|
+| `WA_BOT_PHONE_ID` | Text | Yeni numaranın **Phone Number ID**'si (ör. `1342646595604844`) |
+| `WA_WABA_ID` | Text | Yeni numaranın bağlı olduğu **WhatsApp Business Account ID** |
+| `WA_PIN` | Secret | Kendi belirlediğiniz 6 haneli sayı (numaranın iki adımlı doğrulama PIN'i) |
+
+- `WA_PHONE_ID` şimdiki (test) numarada kalır; değiştirmeyin.
+- Sistem kullanıcısına (**yirmi-bot**) yeni WhatsApp hesabını da **Varlık ata → Tam kontrol** ile ekleyin.
+- Numarayı panelden elle **Register** etmeyin. Ederseniz aynı `WA_PIN` değerini kullanın.
+- Panel → **İşletme Bilgileri → Rezervasyon bağlantısı**: `https://yirmi-bot.<hesabınız>.workers.dev/wa`. Bu adres, bot numarası açılana kadar müşteriyi restoran numarasına, açılınca bota yönlendirir.
+
+Bot 15 dakikada bir kontrol eder. Meta görünen adı onaylayınca numarayı kaydeder, uygulamaya abone eder ve personele "Bot numarası aktif oldu" mesajı atar. Personel o mesajdaki bağlantıdan yeni numaraya bir kez **durum** yazmalı. Personel numarasından **durum** yazarak bekleyen numaranın durumunu görebilirsiniz.
+
 ### Personel bildirimleri hakkında
 Resmi API **normal bir WhatsApp grubuna mesaj atamaz**. Bunun yerine bildirim, `STAFF_NUMBERS`'daki her personele restoranın numarasından ayrı ayrı gider. Hepsi aynı mesajı aldığı için grup gibi çalışır.
 
@@ -110,6 +126,15 @@ Sonra Cloudflare'e `CONFIRM_TEMPLATE` = `rezervasyon_onay` ekleyin.
 3. Bottan gelen talepler listede **"WhatsApp botu · KOD"** etiketi ve **Onayla** düğmesiyle görünür. Durumu *Onaylandı* veya *İptal* yapınca müşteriye otomatik mesaj gider.
 4. Talepler, panel bir cihazda açıkken her dakika içeri alınır. Kimse paneli açmasa da talepler kaybolmaz; panel açılınca hepsi düşer.
 
+### Botun sorularını değiştirmek
+Panel → **WhatsApp Botu** sekmesinde şunları değiştirebilirsiniz:
+- karşılama mesajı ve ana menü seçenekleri (açıp kapatabilirsiniz),
+- oturma yeri / sigara seçenekleri,
+- özel gün türleri, tüm soru metinleri ve "talep alındı" mesajı,
+- en kalabalık grup sınırı ve yeni rezervasyonda personele WhatsApp bildirimi gidip gitmeyeceği.
+
+**Simülatörde dene** düğmesi kaydetmeden önizleme açar; paneldeki her değişiklik oraya anında yansır. **Kaydet ve Yayınla**'dan birkaç dakika sonra gerçek bota geçer. Personel numarasından **durum** yazınca bu ay gönderilen WhatsApp mesajı sayısı da görünür.
+
 ## 5) Personel komutları (personel numarasından restoran numarasına yazılır)
 
 | Komut | İşlev |
@@ -119,7 +144,17 @@ Sonra Cloudflare'e `CONFIRM_TEMPLATE` = `rezervasyon_onay` ekleyin.
 | `dış kapat süresiz` | Siz açana kadar kapalı |
 | `dış aç` | Dış alanı açar |
 | `durum` | Dış alan durumu, bekleyen talepler (ve 24 saatlik bildirim penceresini açar) |
+| `izle aç` / `izle kapat` | Müşterilerin bota yazdığı her mesajın kopyası personele gelsin / gelmesin |
 | `test` | Botu müşteri gibi denersiniz; çıkmak için `personel` |
+
+### Müşteriyle personel numarasından yazışmak
+Her müşteriye 4 harflik bir kod verilir (ör. `#MKS2`). Personel:
+- Bildirimi **sola kaydırıp yanıtlarsa** ya da **`#MKS2 mesajınız`** yazarsa, mesaj müşteriye restoranın WhatsApp hesabından gider. Personelin numarası müşteriye görünmez. İletilen mesajın altına ✅ tepkisi düşer.
+- Personel yazınca bot o müşteriye 12 saat karışmaz; müşterinin cevapları `💬 #MKS2 …` diye personele gelir.
+- **`#MKS2 bitir`** yazınca sohbet tekrar bota geçer.
+- Birden fazla personel varsa, birinin yazdığı mesajın kopyası diğerlerine de gider.
+
+Örneğin restoranın kendi numarası (+90 530 338 31 20) da `STAFF_NUMBERS` listesine `905303383120` olarak eklenirse, bütün bunlar o telefondaki WhatsApp Business uygulamasından yapılabilir.
 
 ## Sorun giderme
 - **Webhook doğrulanmıyor:** Worker adresinin sonunda `/webhook` olmalı, `VERIFY_TOKEN` birebir aynı yazılmalı.

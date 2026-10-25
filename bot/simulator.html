@@ -16,6 +16,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-ap
 header{max-width:1180px;margin:0 auto;padding:20px 16px 4px}
 h1{margin:0 0 4px;font-size:22px}
 header p{margin:0;color:var(--muted)}
+header .preview-note{margin-top:8px;background:#fff7d6;color:#6b5a00;border-radius:10px;padding:8px 12px}
 code{background:#ebe5db;padding:1px 5px;border-radius:5px;font-size:13px}
 main{max-width:1180px;margin:0 auto;padding:14px 16px 40px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
 @media (max-width:860px){ main{grid-template-columns:minmax(0,1fr)} }
@@ -67,6 +68,11 @@ select,input[type=datetime-local]{font:inherit;padding:6px 8px;border:1px solid 
 .qr button{background:#fff;border:1px solid #3b82f6;color:#3b82f6;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600}
 details.raw{align-self:flex-start;max-width:85%;font-size:11.5px;color:var(--muted)}
 details.raw pre{white-space:pre-wrap;word-break:break-all;background:#fff;border-radius:8px;padding:6px;margin:4px 0 0;max-height:220px;overflow:auto}
+.b .quote{border-left:3px solid var(--accent);background:rgba(0,0,0,.05);padding:3px 7px;border-radius:5px;font-size:12.5px;color:var(--muted);margin-bottom:4px}
+.b .rp{display:block;margin-top:4px;border:0;background:none;color:#027eb5;font-size:12px;font-weight:700;padding:0}
+.replybar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 12px;background:#e7f3ee;border-top:1px solid var(--line);font-size:13px}
+.replybar span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.replybar button{border:0;background:none;font-size:16px;color:var(--muted)}
 form.send{display:flex;gap:8px;padding:10px;background:#f0f0f0;border-top:1px solid var(--line)}
 form.send input{flex:1;min-width:0;border:0;border-radius:20px;padding:10px 14px;font:inherit}
 form.send button{border:0;border-radius:20px;background:var(--accent);color:#fff;padding:0 16px;font-weight:700}
@@ -89,6 +95,7 @@ ol li{margin:3px 0}
 <header>
   <h1>Yirmi · Bot Simülatörü</h1>
   <p>Bu sayfa <code>bot/worker.js</code> içindeki gerçek bot kodunu tarayıcınızda çalıştırır. Hiçbir müşteriye mesaj gitmez; Meta veya Cloudflare kurulumu gerekmez. Sayfa yenilenince her şey sıfırlanır.</p>
+  <p class="preview-note hide" id="preview-note">👁 <b>Önizleme:</b> yönetim panelindeki henüz yayınlanmamış bot ayarları kullanılıyor. Panelde değiştirdiğiniz metinler buraya anında yansır.</p>
 </header>
 
 <main>
@@ -105,6 +112,7 @@ ol li{margin:3px 0}
       <div class="phone">
         <div class="phead" id="phead"></div>
         <div class="chat" id="chat"></div>
+        <div class="replybar hide" id="replybar"><span>↩ Yanıtlanıyor: <i id="replytext"></i></span><button type="button" id="reply-x" aria-label="Yanıtı iptal et">✕</button></div>
         <form class="send" id="send" autocomplete="off">
           <input id="msg" placeholder="Mesaj yazın…" aria-label="Mesaj">
           <button type="submit">Gönder</button>
@@ -119,6 +127,7 @@ ol li{margin:3px 0}
           <button class="btn sm" data-q="durum">durum</button>
           <button class="btn sm" data-q="dış kapat">dış kapat</button>
           <button class="btn sm" data-q="dış aç">dış aç</button>
+          <button class="btn sm" data-q="izle aç">izle aç</button>
           <button class="btn sm" data-q="test">test</button>
         </span>
       </div>
@@ -150,7 +159,7 @@ ol li{margin:3px 0}
         <li>Onaylayınca <b>Personel</b> sekmesinde kırmızı rozet çıkar; bildirimi oradan görün.</li>
         <li>Sağdaki talepte <b>Onayla</b>'ya basın → müşteri sohbetine onay mesajı düşer.</li>
         <li>Personel sekmesinde <b>dış kapat</b> yazın, sonra müşteri olarak tekrar deneyin: alan sorusu atlanır.</li>
-        <li><b>yetkili</b> yazın: bot susar; <b>menü</b> yazınca geri döner.</li>
+        <li><b>yetkili</b> yazın: bot susar ve personele haber verir. Personel sekmesinde bildirimin altındaki <b>↩ Yanıtla</b>'ya basıp yazın → mesaj müşteriye gider. Müşterinin cevabı personele düşer. <b>#KOD bitir</b> yazınca sohbet bota döner.</li>
       </ol>
     </div>
 
@@ -225,6 +234,20 @@ function mk(q, p){
 const DB = {prepare: q => mk(q, []), batch: async list => { const r = []; for(const s of list) r.push(await s.run()); return r; }};
 if(!crypto.subtle.timingSafeEqual) crypto.subtle.timingSafeEqual = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
 
+/* ---------- Önizleme (panelden açıldıysa) ---------- */
+const PREVIEW = new URLSearchParams(location.search).has('onizleme');
+function previewCfg(){ try{ return JSON.parse(localStorage.getItem('yirmi-bot-onizleme')); }catch(e){ return null; } }
+if(PREVIEW) $('#preview-note').classList.remove('hide');
+// Panelde bir ayar değişince simülatör anında yeni ayarı kullanır
+window.addEventListener('storage', e => {
+  if(!PREVIEW || e.key !== 'yirmi-bot-onizleme' || !W) return;
+  if(W.clearCache) W.clearCache();
+  const t = threads[active];
+  if(!t.length || t[t.length - 1].text !== SETTINGS_NOTE) t.push({from: 'sys', text: SETTINGS_NOTE});
+  render();
+});
+const SETTINGS_NOTE = 'Paneldeki ayarlar güncellendi; bir sonraki bot mesajı yeni ayarlarla gelir. Baştan görmek için "menü" yazın.';
+
 /* ---------- Sahte Meta API: botun gönderdiği mesajlar sohbete düşer ---------- */
 let site = null;
 const realFetch = window.fetch.bind(window);
@@ -235,20 +258,32 @@ window.fetch = async (url, opts = {}) => {
       try{ const r = await realFetch('../menu.json', {cache: 'no-store'}); site = (await r.json()).site; }
       catch(e){ site = {name: 'Yirmi', opening: '18:00', closing: '00:00', address: 'Denizli', phone: '+90 530 338 31 20'}; }
     }
-    return new Response(JSON.stringify({site}));
+    // Paneldeki "Simülatörde dene": henüz yayınlanmamış bot ayarları kullanılır
+    const draft = PREVIEW && previewCfg();
+    return new Response(JSON.stringify({site: draft ? Object.assign({}, site, {bot: draft}) : site}));
   }
   if(/graph\.(facebook|instagram)\.com/.test(url)){
-    if(opts.method === 'POST'){ deliver(url, JSON.parse(opts.body)); return new Response(JSON.stringify({messages: [{id: 'sim'}], message_id: 'sim'})); }
+    if(opts.method === 'POST'){
+      const id = 'wamid.sim' + (++outId);
+      deliver(url, JSON.parse(opts.body), id);
+      return new Response(JSON.stringify({messages: [{id}], message_id: id}));
+    }
     if(/refresh_access_token/.test(url)) return new Response(JSON.stringify({access_token: 'simtoken', expires_in: 5184000}));
     return new Response(JSON.stringify({username: 'musteri_deneme', name: 'Instagram Müşterisi'}));
   }
   return realFetch(url, opts);
 };
-function deliver(url, b){
+let outId = 0, replyTo = null;
+function deliver(url, b, wamid){
   const ig = /graph\.instagram/.test(url);
   const key = (ig ? 'ig:' : 'wa:') + (ig ? b.recipient.id : b.to);
   if(!threads[key]) threads[key] = [];
-  const m = {from: 'bot', raw: b, at: Date.now()};
+  if(b.type === 'reaction'){
+    const target = threads[key].find(x => x.id === b.reaction.message_id);
+    if(target) target.reaction = b.reaction.emoji;
+    return;
+  }
+  const m = {from: 'bot', raw: b, at: Date.now(), id: wamid};
   if(ig){
     m.text = b.message.text;
     if(b.message.quick_replies) m.opts = b.message.quick_replies.map(q => ({id: q.payload, title: q.title})), m.kind = 'quick';
@@ -285,12 +320,16 @@ async function api(method, path, body){
 async function userSend(text, choice){
   if(busy || !W) return;
   const p = PEOPLE.find(x => x.key === active);
-  threads[active].push({from: 'me', text: text || (choice && choice.title), at: Date.now()});
+  const myId = 'sim' + (++mid), quoted = replyTo;
+  threads[active].push({from: 'me', text: text || (choice && choice.title), at: Date.now(), id: myId,
+    quote: quoted ? (threads[active].find(x => x.id === quoted) || {}).text : null});
+  setReply(null);
   render();
   busy = true;
   try{
     if(p.ch === 'wa'){
-      const m = {from: p.uid, id: 'sim' + (++mid), timestamp: String(Math.floor(Date.now() / 1000))};
+      const m = {from: p.uid, id: myId, timestamp: String(Math.floor(Date.now() / 1000))};
+      if(quoted) m.context = {from: '15556735799', id: quoted};
       if(choice){
         m.type = 'interactive';
         m.interactive = choice.kind === 'list' ? {type: 'list_reply', list_reply: {id: choice.id, title: choice.title}} : {type: 'button_reply', button_reply: {id: choice.id, title: choice.title}};
@@ -308,8 +347,9 @@ async function userSend(text, choice){
   }finally{
     busy = false;
   }
-  if(!threads[active].length || threads[active][threads[active].length - 1].from === 'me')
-    threads[active].push({from: 'sys', text: 'Bot cevap vermedi (yetkili modunda susması normaldir; "menü" yazarak geri döndürebilirsiniz).'});
+  const lastMsg = threads[active][threads[active].length - 1];
+  if(lastMsg && lastMsg.from === 'me' && !lastMsg.reaction)
+    threads[active].push({from: 'sys', text: 'Bot cevap vermedi (yetkili modunda susması normaldir; mesaj personele iletildi. "menü" yazarak bota dönebilirsiniz).'});
   render();
   renderPanel();
 }
@@ -337,7 +377,9 @@ function render(){
   }
   chat.innerHTML = list.map((m, i) => {
     if(m.from === 'sys') return '<div class="b sys">' + esc(m.text) + '</div>';
-    let h = '<div class="b ' + m.from + '">' + fmt(m.text, p.ch) + (m.at ? '<span class="tm">' + hhmm(m.at) + '</span>' : '') + '</div>';
+    let h = '<div class="b ' + m.from + '">' + (m.quote ? '<div class="quote">' + esc(m.quote).slice(0, 120) + '</div>' : '') + fmt(m.text, p.ch) +
+      (m.at ? '<span class="tm">' + hhmm(m.at) + (m.reaction ? ' ' + esc(m.reaction) : '') + '</span>' : '') +
+      (p.staff && m.from === 'bot' && m.id ? '<button type="button" class="rp" data-reply="' + esc(m.id) + '">↩ Yanıtla</button>' : '') + '</div>';
     if(m.opts && m.kind === 'button') h += '<div class="wbtns">' + m.opts.map((o, j) => '<button type="button" data-m="' + i + '" data-o="' + j + '">' + esc(o.title) + '</button>').join('') + '</div>';
     if(m.opts && m.kind === 'list') h += '<div class="wbtns"><div class="wlist"><button type="button" data-open="' + i + '">☰ ' + esc(m.listBtn || 'Seçenekler') + '</button>' +
       '<div class="rows' + (m.open ? '' : ' hide') + '">' + m.opts.map((o, j) => '<button type="button" data-m="' + i + '" data-o="' + j + '">' + esc(o.title) + (o.desc ? '<small>' + esc(o.desc) + '</small>' : '') + '</button>').join('') + '</div></div></div>';
@@ -351,10 +393,20 @@ $('#who').addEventListener('click', e => {
   const b = e.target.closest('button[data-k]');
   if(!b) return;
   active = b.dataset.k; unread[active] = 0;
+  setReply(null);
   render();
   $('#msg').focus();
 });
+function setReply(id){
+  replyTo = id;
+  const m = id && threads[active].find(x => x.id === id);
+  $('#replybar').classList.toggle('hide', !m);
+  if(m) $('#replytext').textContent = m.text.replace(/\s+/g, ' ').slice(0, 90);
+}
+$('#reply-x').addEventListener('click', () => setReply(null));
 $('#chat').addEventListener('click', e => {
+  const rp = e.target.closest('[data-reply]');
+  if(rp){ setReply(rp.dataset.reply); $('#msg').focus(); return; }
   const open = e.target.closest('[data-open]');
   if(open){ const m = threads[active][+open.dataset.open]; m.open = !m.open; return render(); }
   const b = e.target.closest('button[data-m]');
