@@ -421,6 +421,52 @@ h2{font-size:25px!important}
 .bc-row input:not([type=checkbox]){width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#fff}
 @media (max-width:640px){ .bc-row{grid-template-columns:minmax(0,1fr);gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line)} }
 .bc-q{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+/* Sohbetler */
+.tab-badge{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:#c0392b;color:#fff;font-size:11px;line-height:18px;margin-left:5px;font-weight:700;text-align:center}
+.cs-status{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;padding:12px}
+.cs-card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;min-width:0}
+.cs-card-h{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.cs-card .hint{overflow-wrap:anywhere}
+.cs-wrap{display:grid;grid-template-columns:minmax(240px,320px) minmax(0,1fr);padding:0;overflow:hidden;height:min(660px,calc(100vh - 200px));min-height:440px}
+.cs-side{display:flex;flex-direction:column;border-right:1px solid var(--line);min-width:0;min-height:0}
+.cs-tools{padding:10px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--line)}
+.cs-tools input{width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:#fff}
+.cs-items{flex:1;overflow-y:auto;min-height:0}
+.cs-item{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:10px 12px;cursor:pointer;font:inherit;color:inherit}
+.cs-item:hover{background:#faf7f2}
+.cs-item.on{background:#f3efe8}
+.cs-ch{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;background:#25d366}
+.cs-ch.ig{background:linear-gradient(135deg,#833ab4,#e1306c,#f77737)}
+.cs-mid{flex:1;min-width:0;display:flex;flex-direction:column}
+.cs-mid b,.cs-mid small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cs-mid small{color:var(--muted)}
+.cs-meta{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex:none}
+.cs-meta small{color:var(--muted);font-size:11px}
+.cs-unread{font-style:normal;background:#25d366;color:#fff;border-radius:9px;min-width:18px;padding:0 5px;font-size:11px;line-height:18px;text-align:center;font-weight:700}
+.cs-st{font-style:normal;font-size:10.5px;font-weight:700;border-radius:999px;padding:1px 7px;background:#fdf3df;color:#8a6417}
+.cs-view{display:flex;flex-direction:column;min-width:0;min-height:0;background:#efeae2}
+.cs-empty{margin:auto;color:var(--muted);padding:20px;text-align:center}
+.cs-head{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line)}
+.cs-who{flex:1;min-width:0;display:flex;flex-direction:column}
+.cs-who small{color:var(--muted);overflow-wrap:anywhere}
+.cs-back{display:none}
+.cs-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:6px;min-height:0}
+.cs-m{max-width:78%;padding:7px 10px;border-radius:10px;background:#fff;align-self:flex-start;box-shadow:0 1px 1px rgba(0,0,0,.06);overflow-wrap:anywhere;font-size:14px}
+.cs-m.out{align-self:flex-end;background:#f0f0f0}
+.cs-m.staff{align-self:flex-end;background:#d9fdd3}
+.cs-m.sys{align-self:center;background:#fff7d6;color:#6b5a00;font-size:12px;box-shadow:none;text-align:center}
+.cs-by{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:2px}
+.cs-t{display:block;text-align:right;font-size:10.5px;color:var(--muted);margin-top:2px}
+.cs-send{display:flex;gap:8px;padding:10px;background:#fff;border-top:1px solid var(--line)}
+.cs-send textarea{flex:1;min-width:0;resize:none;padding:8px 10px;border:1px solid var(--line);border-radius:10px;font:inherit}
+.cs-note{margin:0;padding:0 12px 10px;background:#fff}
+@media (max-width:760px){
+  .cs-wrap{grid-template-columns:minmax(0,1fr)}
+  .cs-wrap .cs-view{display:none}
+  .cs-wrap.open .cs-side{display:none}
+  .cs-wrap.open .cs-view{display:flex}
+  .cs-back{display:inline-flex}
+}
 .res-side{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
 .res-side select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;font-weight:700;font-size:12px;background:#fff}
 .res-side select.st-confirmed{background:#f1dfbf}
@@ -565,6 +611,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
 <div class="tabs">
   <button class="tab active" data-tab="home">Genel Bakış</button>
   <button class="tab" data-tab="res">Rezervasyon</button>
+  <button class="tab" data-tab="chats">Sohbetler<span class="tab-badge hide" id="chats-badge"></span></button>
   <button class="tab" data-tab="sales">Satış &amp; Kâr</button>
   <button class="tab" data-tab="menu">Menü</button>
   <button class="tab" data-tab="chef">Şef &amp; İmza</button>
@@ -1019,6 +1066,21 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
 </div>
 
 <!-- GÜVENLİK -->
+<div class="page hide" id="tab-chats">
+  <div class="panel cs-status" id="cs-status"></div>
+  <div class="panel cs-wrap" id="cs-wrap">
+    <div class="cs-side">
+      <div class="cs-tools">
+        <div class="seg" id="cs-filter"><button type="button" data-f="all" class="on">Tümü</button><button type="button" data-f="human">Personelde</button><button type="button" data-f="unread">Okunmamış</button></div>
+        <input id="cs-q" type="search" placeholder="İsim veya numara ara" aria-label="Sohbet ara">
+      </div>
+      <div class="cs-items" id="cs-items"><p class="res-empty">Yükleniyor…</p></div>
+    </div>
+    <div class="cs-view" id="cs-view"><div class="cs-empty">Soldan bir sohbet seçin.</div></div>
+  </div>
+  <p class="hint res-foot">Sohbetler bot sunucusunda 30 gün saklanır ve yalnızca bu panelden görülebilir. Liste birkaç saniyede bir kendiliğinden yenilenir.</p>
+</div>
+
 <div class="page hide" id="tab-bot">
   <div class="panel">
     <h2>WhatsApp / Instagram Botu</h2>
@@ -1240,11 +1302,15 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       cats.innerHTML = '<div class="panel">Menü yüklenemedi: ' + esc(ghErrorText(e)) + '</div>';
     }
   }
+  // Sayfa yenilenince menü yüklendikten sonra en son açık sekmeye dönülür
+  let pendingTab = null;
+  try{ pendingTab = sessionStorage.getItem('yirmi-admin-sekme'); }catch(e){}
   function afterLoad(msg){
     Core.prepare(state);   // ürünlere kalıcı kimlik verir, kampanya listesini hazırlar
     setDirty(false);
     renderAll();
     if(msg) toast(msg);
+    if(pendingTab && $('#tab-' + pendingTab)){ const t = pendingTab; pendingTab = null; showTab(t); }
   }
 
   /* ---------- Fotoğraf yükleme ---------- */
@@ -3473,6 +3539,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     try{
       const d = await botApi('GET', '/api/inbox');
       botErr = ''; botOutdoor = d.outdoor || null; botMsgs = d.msgs;
+      csSetWaiting(d.waiting);
       const reqs = (d.requests || []).filter(q => q && q.ref && q.date && q.time);
       let added = [];
       if(reqs.length){
@@ -3633,6 +3700,197 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     await renderBotCfg();
     saveBotPreview();
   });
+
+  /* ---------- Sohbetler: botun WhatsApp / Instagram yazışmaları (canlı) ---------- */
+  // Sekme açıkken liste 4 sn'de bir değişenleri, açık sohbet yeni mesajları çeker. Panelden yazılan mesaj
+  // restoran hesabından gider ve bot o müşteriye 12 saat karışmaz ("Bota devret" ile hemen geri verilir).
+  let csChats = new Map(), csSince = 0, csFullAt = 0, csOpen = null, csMsgs = [], csLastId = 0, csBusy = false;
+  let csFilter = 'all', csWaiting = null, csStatus = null, csStatusAt = 0, csSig = '', csErr = '';
+  const CS_STEP = {menu: 'ana menüde', occasion: 'özel gün soruluyor', date: 'tarih soruluyor', time: 'saat soruluyor', area: 'alan soruluyor',
+    guests: 'kişi sayısı soruluyor', request: 'istek soruluyor', name: 'isim soruluyor', phone: 'telefon soruluyor', confirm: 'onay bekliyor'};
+  const chName = ch => ch === 'ig' ? 'Instagram' : 'WhatsApp';
+  const csTitle = c => c.name || c.phone || (c.channel === 'ig' ? 'Instagram kullanıcısı' : 'Müşteri');
+  function csAgo(t){
+    if(!t) return '—';
+    const s = Math.max(0, (Date.now() - t) / 1000);
+    return s < 60 ? 'şimdi' : s < 3600 ? Math.floor(s / 60) + ' dk' : s < 86400 ? Math.floor(s / 3600) + ' sa' : Math.floor(s / 86400) + ' gün';
+  }
+  const csAgoLong = t => !t ? 'henüz yok' : csAgo(t) === 'şimdi' ? 'az önce' : csAgo(t) + ' önce';
+  function csTime(t){
+    const d = new Date(t), hm = d.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'});
+    return d.toDateString() === new Date().toDateString() ? hm : d.toLocaleDateString('tr-TR', {day: 'numeric', month: 'short'}) + ' ' + hm;
+  }
+  const csFmt = s => esc(s).replace(/\*([^*\n]+)\*/g, '<b>$1</b>').replace(/(^|\s)_([^_\n]+)_/g, '$1<i>$2</i>')
+    .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\n/g, '<br>');
+
+  // Sekmedeki kırmızı rozet: personelin cevap vermesi beklenen sohbet sayısı; artınca sesli uyarı
+  function csSetWaiting(n){
+    if(typeof n !== 'number') return;
+    if(csWaiting !== null && n > csWaiting){ botChime(); toast('💬 Bir müşteri personelden cevap bekliyor (Sohbetler sekmesi).', false, 7000); }
+    csWaiting = n;
+    $('#chats-badge').textContent = n;
+    $('#chats-badge').classList.toggle('hide', !n);
+  }
+
+  async function csLoadStatus(){
+    if(!botOn()) return renderCsStatus();
+    try{ csStatus = await botApi('GET', '/api/status'); csStatusAt = Date.now(); csSetWaiting(csStatus.waiting); }
+    catch(e){ csStatus = {error: e.message}; }
+    renderCsStatus();
+  }
+  function renderCsStatus(){
+    const box = $('#cs-status');
+    if(!botOn()){ box.innerHTML = '<p class="hint" style="margin:0">Bot bağlı değil. <b>Güvenlik → WhatsApp / Instagram Botu</b> bölümünden bağlayın.</p>'; return; }
+    const s = csStatus;
+    if(!s){ box.innerHTML = '<p class="hint" style="margin:0">Durum yükleniyor…</p>'; return; }
+    if(s.error){ box.innerHTML = '<p class="msg err" style="margin:0">Bota ulaşılamadı: ' + esc(s.error) + '</p>'; return; }
+    const recentErr = e => e && e.t && Date.now() - e.t < 6 * 3600e3 ? '⚠ Son hata (' + csAgoLong(e.t) + '): ' + esc(e.msg) : '';
+    const card = (title, ok, lines) => '<div class="cs-card"><div class="cs-card-h"><span class="bot-dot' + (ok ? ' on' : ' err') + '"></span><b>' + title + '</b></div>' +
+      lines.filter(Boolean).map(l => '<p class="hint" style="margin:2px 0 0">' + l + '</p>').join('') + '</div>';
+    const w = s.whatsapp || {}, ig = s.instagram || {}, bn = w.botNumber;
+    const waOk = w.configured && !w.error && !recentErr(w.lastErr);
+    const igOk = ig.configured && !ig.error && !recentErr(ig.lastErr);
+    const outdoor = (s.outdoor && s.outdoor.closedUntil) ? (s.outdoor.closedUntil === 'always' || s.outdoor.closedUntil >= todayStr() ? 'kapalı' : 'açık') : 'açık';
+    box.innerHTML =
+      card('WhatsApp botu', waOk, [
+        !w.configured ? 'Bağlı değil (WA_TOKEN / WA_PHONE_ID eksik)' : '',
+        w.phone ? esc((w.phone.name ? w.phone.name + ' · ' : '') + (w.phone.number || '')) + (w.phone.quality ? ' · kalite: ' + esc(w.phone.quality) : '') : '',
+        w.error ? '⚠ ' + esc(w.error) : '',
+        bn ? (bn.live ? 'Asıl bot numarası aktif ✅' : 'Asıl bot numarası bekliyor' + (bn.error ? ': ' + esc(bn.error) : '')) : '',
+        'Son gelen mesaj: ' + csAgoLong(w.lastIn),
+        recentErr(w.lastErr)]) +
+      card('Instagram botu', igOk, [
+        !ig.configured ? 'Bağlı değil (IG_TOKEN girilmemiş)' : ig.username ? '@' + esc(ig.username) : '',
+        ig.error ? '⚠ ' + esc(ig.error) : '',
+        ig.configured ? 'Son gelen mesaj: ' + csAgoLong(ig.lastIn) : '',
+        recentErr(ig.lastErr)]) +
+      '<div class="cs-card"><div class="cs-card-h"><b>Özet</b><span style="flex:1"></span><button type="button" class="btn sm" id="cs-refresh">Yenile</button></div>' +
+        '<p class="hint" style="margin:2px 0 0">Son 24 saatte <b>' + (s.today || 0) + '</b> sohbet · <b>' + (s.waiting || 0) + '</b> sohbet personel bekliyor</p>' +
+        '<p class="hint" style="margin:2px 0 0">Bu ay <b>' + (s.msgs || 0) + '</b> WhatsApp mesajı gönderildi (ilk 1.000 ücretsiz)</p>' +
+        '<p class="hint" style="margin:2px 0 0">Bildirim alan personel: ' + (s.staff || 0) + ' · İzleme: ' + (s.mirror ? 'açık' : 'kapalı') + ' · Dış alan: ' + outdoor + '</p></div>';
+  }
+  $('#cs-status').addEventListener('click', e => { if(e.target.id === 'cs-refresh') csLoadStatus(); });
+
+  function renderCsList(){
+    const q = ($('#cs-q').value || '').toLocaleLowerCase('tr').trim();
+    let list = [...csChats.values()].sort((a, b) => b.lastT - a.lastT);
+    if(csFilter === 'human') list = list.filter(c => c.state === 'human');
+    if(csFilter === 'unread') list = list.filter(c => c.unread > 0);
+    if(q) list = list.filter(c => (csTitle(c) + ' ' + c.phone + ' ' + c.code).toLocaleLowerCase('tr').includes(q));
+    $('#cs-items').innerHTML = (csErr ? '<p class="msg err" style="margin:10px">' + esc(csErr) + '</p>' : '') + (list.length ? list.map(c =>
+      '<button type="button" class="cs-item' + (csOpen === c.k ? ' on' : '') + '" data-k="' + esc(c.k) + '">' +
+        '<span class="cs-ch ' + c.channel + '">' + (c.channel === 'ig' ? 'IG' : 'WA') + '</span>' +
+        '<span class="cs-mid"><b>' + esc(csTitle(c)) + '</b><small>' + (c.lastDir === 'out' ? '🤖 ' : c.lastDir === 'staff' ? '👤 ' : '') + esc(c.last.replace(/\*/g, '').replace(/\s+/g, ' ').slice(0, 80)) + '</small></span>' +
+        '<span class="cs-meta"><small>' + csAgo(c.lastT) + '</small>' + (c.unread ? '<i class="cs-unread">' + c.unread + '</i>' : '') +
+          (c.state === 'human' ? '<i class="cs-st">Personelde</i>' : '') + '</span></button>').join('')
+      : '<p class="res-empty">' + (csChats.size ? 'Bu filtrede sohbet yok.' : 'Henüz sohbet yok. Müşteriler bota yazdıkça burada görünür.') + '</p>');
+  }
+  function csMsgHtml(m){
+    if(m.dir === 'sys') return '<div class="cs-m sys">' + esc(m.text) + ' · ' + csTime(m.t) + '</div>';
+    const who = m.dir === 'out' ? '🤖 Bot' : m.dir === 'staff' ? '👤 ' + (m.by || 'Personel') : '';
+    return '<div class="cs-m ' + esc(m.dir) + '">' + (who ? '<span class="cs-by">' + esc(who) + '</span>' : '') + csFmt(m.text) + '<span class="cs-t">' + csTime(m.t) + '</span></div>';
+  }
+  function renderCsView(force){
+    const c = csOpen && csChats.get(csOpen);
+    const sig = c ? [c.k, c.state, c.step, c.windowOpen, csLastId, csMsgs.length].join('|') : '';
+    if(!force && sig === csSig) return;
+    csSig = sig;
+    $('#cs-wrap').classList.toggle('open', !!csOpen);
+    const v = $('#cs-view');
+    if(!c){ v.innerHTML = '<div class="cs-empty">' + (csOpen ? 'Yükleniyor…' : 'Soldan bir sohbet seçin.') + '</div>'; return; }
+    // Yazılmakta olan mesaj ve kaydırma konumu korunur
+    const old = $('#cs-text'), draft = old ? old.value : '', focused = old && document.activeElement === old;
+    const box = $('#cs-msgs'), atBottom = !box || box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+    const st = c.state === 'human' ? 'Personelde (bot susuyor)' : c.state === 'done' ? 'Talep alındı' : c.step ? 'Bot · ' + (CS_STEP[c.step] || c.step) : 'Bot';
+    v.innerHTML = '<div class="cs-head"><button type="button" class="btn sm cs-back" data-cs="back" aria-label="Listeye dön">‹</button>' +
+        '<div class="cs-who"><b>' + esc(csTitle(c)) + '</b><small>' + chName(c.channel) +
+          (c.phone ? ' · <a href="tel:' + esc(c.phone.replace(/[^\d+]/g, '')) + '">' + esc(c.phone) + '</a>' : '') + (c.code ? ' · #' + esc(c.code) : '') + ' · ' + esc(st) + '</small></div>' +
+        (c.state === 'human' ? '<button type="button" class="btn sm" data-cs="bot">🤖 Bota devret</button>' : '<button type="button" class="btn sm primary" data-cs="human">🙋 Devral</button>') + '</div>' +
+      '<div class="cs-msgs" id="cs-msgs">' + (csMsgs.length ? csMsgs.map(csMsgHtml).join('') : '<div class="cs-empty">Mesaj yok.</div>') + '</div>' +
+      (c.windowOpen
+        ? '<form class="cs-send" id="cs-send"><textarea id="cs-text" rows="2" placeholder="Müşteriye yazın… (Enter: gönder · Shift+Enter: yeni satır)"></textarea><button class="btn primary" type="submit">Gönder</button></form>' +
+          '<p class="hint cs-note">Mesaj restoranın ' + chName(c.channel) + ' hesabından gider; gönderince bot bu müşteriye 12 saat karışmaz.</p>'
+        : '<p class="msg err cs-note" style="padding-top:10px">Müşteri 24 saatten uzun süredir yazmadığı için ' + chName(c.channel) + ' mesaj göndermeye izin vermiyor.' + (c.phone ? ' Telefonla arayabilirsiniz.' : '') + '</p>');
+    const nb = $('#cs-msgs');
+    if(atBottom) nb.scrollTop = nb.scrollHeight;
+    const ta = $('#cs-text');
+    if(ta){ ta.value = draft; if(focused) ta.focus(); }
+  }
+
+  async function csLoadMsgs(){
+    const k = csOpen;
+    const d = await botApi('GET', '/api/chat?k=' + encodeURIComponent(k) + '&after=' + csLastId + '&read=1');
+    if(k !== csOpen) return;
+    if(d.chat){ d.chat.unread = 0; csChats.set(k, d.chat); }
+    if(d.messages.length){ csMsgs = csMsgs.concat(d.messages); csLastId = d.messages[d.messages.length - 1].id; }
+    renderCsView();
+    renderCsList();
+  }
+  async function csPoll(){
+    if(csBusy || !session || !botOn() || document.hidden || $('#tab-chats').classList.contains('hide')) return;
+    csBusy = true;
+    try{
+      const full = Date.now() - csFullAt > 60000;
+      const d = await botApi('GET', '/api/chats?since=' + (full ? 0 : csSince));
+      if(full){ csChats = new Map(); csFullAt = Date.now(); }
+      d.chats.forEach(c => { if(csOpen === c.k) c.unread = 0; csChats.set(c.k, c); if(c.lastT > csSince) csSince = c.lastT; });
+      csErr = '';
+      csSetWaiting(d.waiting);
+      renderCsList();
+      if(csOpen) await csLoadMsgs();
+      if(Date.now() - csStatusAt > 60000) csLoadStatus();
+    }catch(e){
+      csErr = 'Sohbetler alınamadı: ' + e.message;
+      renderCsList();
+    }finally{ csBusy = false; }
+  }
+  function csShowTab(){
+    renderCsStatus();
+    if(!botOn()){ $('#cs-items').innerHTML = '<p class="res-empty">Bot bağlı değil.</p>'; return; }
+    csFullAt = 0; csStatusAt = 0;
+    csPoll();
+  }
+  function csOpenChat(k){
+    csOpen = k; csMsgs = []; csLastId = 0;
+    renderCsView(true);
+    renderCsList();
+    csLoadMsgs().catch(e => toast(e.message, true));
+  }
+  $('#cs-items').addEventListener('click', e => { const b = e.target.closest('[data-k]'); if(b) csOpenChat(b.dataset.k); });
+  $('#cs-filter').addEventListener('click', e => {
+    const b = e.target.closest('button[data-f]');
+    if(!b) return;
+    csFilter = b.dataset.f;
+    document.querySelectorAll('#cs-filter button').forEach(x => x.classList.toggle('on', x === b));
+    renderCsList();
+  });
+  $('#cs-q').addEventListener('input', renderCsList);
+  $('#cs-view').addEventListener('click', async e => {
+    const a = e.target.closest('[data-cs]');
+    if(!a) return;
+    if(a.dataset.cs === 'back'){ csOpen = null; renderCsView(true); renderCsList(); return; }
+    a.disabled = true;
+    try{
+      await botApi('POST', '/api/chat/mode', {k: csOpen, mode: a.dataset.cs});
+      toast(a.dataset.cs === 'bot' ? 'Sohbet bota devredildi.' : 'Sohbeti devraldınız; bot bu müşteriye cevap vermeyecek.');
+      await csLoadMsgs();
+    }catch(err){ toast(err.message, true, 7000); a.disabled = false; }
+  });
+  async function csSend(){
+    const ta = $('#cs-text'), text = ta && ta.value.trim();
+    if(!text || !csOpen) return;
+    const btn = $('#cs-send button');
+    btn.disabled = true;
+    try{
+      await botApi('POST', '/api/chat/send', {k: csOpen, text});
+      ta.value = '';
+      await csLoadMsgs();
+    }catch(err){ toast(err.message, true, 8000); }
+    finally{ const b = $('#cs-send button'); if(b) b.disabled = false; }
+  }
+  $('#cs-view').addEventListener('submit', e => { if(e.target.id === 'cs-send'){ e.preventDefault(); csSend(); } });
+  $('#cs-view').addEventListener('keydown', e => { if(e.target.id === 'cs-text' && e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); csSend(); } });
+  setInterval(csPoll, 4000);
 
   setInterval(() => { if(session && botOn() && !document.hidden) pullBotInbox(true); }, 60000);
   document.addEventListener('visibilitychange', () => { if(!document.hidden && session && botOn()) pullBotInbox(true); });
@@ -4120,9 +4378,25 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   let failedLogins = 0;
   const wait = ms => new Promise(r => setTimeout(r, ms));
 
+  // Oturum bu sekmede saklanır: sayfa yenilenince tekrar şifre sorulmaz. Sekme kapanınca ya da
+  // 30 dakika işlem yapılmayınca biter (sessionStorage başka sekmelerle ve diske kalıcı olarak paylaşılmaz).
+  const SS_KEY = 'yirmi-admin-oturum';
+  function rememberSession(){
+    try{ if(session) sessionStorage.setItem(SS_KEY, JSON.stringify({cfg: session, at: lastActive})); }catch(e){}
+  }
+  function restoredSession(){
+    try{
+      const s = JSON.parse(sessionStorage.getItem(SS_KEY) || 'null');
+      if(s && s.cfg && s.cfg.token && Date.now() - s.at < IDLE_MS) return s.cfg;
+      sessionStorage.removeItem(SS_KEY);
+    }catch(e){}
+    return null;
+  }
   function unlock(cfg){
     // github.io'da açılıyorsa kullanıcı/repo adı adresten alınır; repo yeniden adlandırılsa da panel doğru repoya kaydeder
     session = Object.assign({}, cfg, guessRepo() || {});
+    lastActive = Date.now();
+    rememberSession();
     document.body.classList.remove('locked');
     $('#login-pw').value = '';
     loadMenu();
@@ -4134,6 +4408,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   }
   function logout(){
     session = null;
+    try{ sessionStorage.removeItem(SS_KEY); }catch(e){}
     setDirty(false);
     location.reload();
   }
@@ -4237,6 +4512,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       const auth = await encryptCfg(cfg, pw);
       await putFile(cfg, AUTH_PATH, JSON.stringify(auth, null, 2) + '\n', 'GitHub token yenilendi');
       session = cfg;
+      rememberSession();
       $('#token-form').reset();
       setMsg('#tk-msg', '✓ Token güncellendi.', 'ok');
     }catch(err){
@@ -4250,6 +4526,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     if(bot) cfg.bot = bot; else delete cfg.bot;
     await putFile(cfg, AUTH_PATH, JSON.stringify(await encryptCfg(cfg, pw), null, 2) + '\n', bot ? 'Mesaj botu bağlandı' : 'Mesaj botu bağlantısı kaldırıldı');
     session = cfg;
+    rememberSession();
   }
   $('#bot-form').addEventListener('submit', async e => {
     e.preventDefault();
@@ -4299,12 +4576,15 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   let lastActive = Date.now();
   function touch(){ lastActive = Date.now(); }
   ['click','keydown','touchstart','input'].forEach(ev => document.addEventListener(ev, touch, {passive:true}));
-  setInterval(() => { if(session && !dirty && Date.now() - lastActive > IDLE_MS) logout(); }, 60000);
+  setInterval(() => { if(session && !dirty && Date.now() - lastActive > IDLE_MS) logout(); else rememberSession(); }, 60000);
+  window.addEventListener('pagehide', rememberSession);
 
   /* ---------- Sekmeler ---------- */
   function showTab(name){
+    try{ sessionStorage.setItem('yirmi-admin-sekme', name); }catch(e){}
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-    ['home','res','sales','menu','chef','calendar','ann','campaigns','site','bot','qr','security'].forEach(n => $('#tab-' + n).classList.toggle('hide', n !== name));
+    ['home','res','chats','sales','menu','chef','calendar','ann','campaigns','site','bot','qr','security'].forEach(n => $('#tab-' + n).classList.toggle('hide', n !== name));
+    if(name === 'chats') csShowTab();
     if(state && name === 'bot') renderBotCfg();
     if(state && name === 'ann') renderAnn();
     if(name === 'qr' && !$('#qr-url').value){ $('#qr-url').value = defaultMenuUrl(); if($('#qr-url').value) makeQr(); }
@@ -4325,6 +4605,8 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       $('#lock-loading').innerHTML = '<p class="msg err">Panel yalnızca güvenli (https) adresten açılabilir. Lütfen GitHub Pages adresini kullanın.</p>';
       return;
     }
+    const saved = restoredSession();
+    if(saved){ $('#lock-loading').classList.add('hide'); return unlock(saved); }
     try{
       const auth = await fetchAuth();
       if(!auth) return showSetup();

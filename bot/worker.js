@@ -156,7 +156,11 @@ const SCHEMA = [
   // Her WhatsApp kişisine, en son hangi bot numarasına yazdıysa o numaradan cevap verilir
   'CREATE TABLE IF NOT EXISTS routes (k TEXT PRIMARY KEY, pid TEXT NOT NULL)',
   // Aylık gönderilen WhatsApp mesajı sayısı (maliyet takibi)
-  'CREATE TABLE IF NOT EXISTS stats (k TEXT PRIMARY KEY, n INTEGER NOT NULL)'
+  'CREATE TABLE IF NOT EXISTS stats (k TEXT PRIMARY KEY, n INTEGER NOT NULL)',
+  // Sohbet geçmişi (yönetim panelindeki "Sohbetler" sekmesi için; 30 gün saklanır)
+  'CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, k TEXT NOT NULL, dir TEXT NOT NULL, text TEXT NOT NULL, by TEXT, t INTEGER NOT NULL)',
+  'CREATE INDEX IF NOT EXISTS messages_k ON messages (k, id)',
+  'CREATE TABLE IF NOT EXISTS chats (k TEXT PRIMARY KEY, last_t INTEGER NOT NULL, last_text TEXT, last_dir TEXT, unread INTEGER NOT NULL DEFAULT 0)'
 ];
 let schemaReady = null;
 async function db(env){
@@ -181,6 +185,19 @@ async function monthCount(env){
   const r = await (await db(env)).prepare('SELECT n FROM stats WHERE k = ?').bind(monthKey()).first();
   return r ? r.n : 0;
 }
+// Sohbet kaydı. dir: in (müşteri) · out (bot) · staff (personel) · sys (sistem notu)
+async function logMsg(env, k, dir, text, by){
+  try{
+    const D = await db(env), t = Date.now(), body = String(text || '').slice(0, 2000);
+    await D.batch([
+      D.prepare('INSERT INTO messages (k, dir, text, by, t) VALUES (?, ?, ?, ?, ?)').bind(k, dir, body, by || null, t),
+      D.prepare("INSERT INTO chats (k, last_t, last_text, last_dir, unread) VALUES (?1, ?2, ?3, ?4, ?5) ON CONFLICT(k) DO UPDATE SET last_t = ?2, last_text = ?3, last_dir = ?4, " +
+        "unread = CASE WHEN ?4 = 'in' THEN chats.unread + 1 WHEN ?4 = 'staff' THEN 0 ELSE chats.unread END")
+        .bind(k, t, body.slice(0, 160), dir, dir === 'in' ? 1 : 0)
+    ]);
+  }catch(e){ console.error('sohbet kaydı', e.message); }
+}
+const msgLogText = msg => String(msg.text || '') + (msg.options && msg.options.length ? '\n[' + msg.options.map(o => o.title).join(' · ') + ']' : '');
 // Meta aynı mesajı birden fazla kez gönderebilir; her mesaj bir kez işlenir
 async function firstSeen(env, id){
   const r = await (await db(env)).prepare('INSERT OR IGNORE INTO seen (id, t) VALUES (?, ?)').bind(id, Date.now()).run();
@@ -194,7 +211,9 @@ async function daily(env){
     D.prepare('DELETE FROM requests WHERE created < ?').bind(now - 120 * day),
     D.prepare('DELETE FROM contacts WHERE last_in < ?').bind(now - 120 * day),
     D.prepare('DELETE FROM relay_msgs WHERE t < ?').bind(now - 3 * day),
-    D.prepare('DELETE FROM relay WHERE updated < ?').bind(now - 30 * day)
+    D.prepare('DELETE FROM relay WHERE updated < ?').bind(now - 30 * day),
+    D.prepare('DELETE FROM messages WHERE t < ?').bind(now - 30 * day),
+    D.prepare('DELETE FROM chats WHERE last_t < ?').bind(now - 30 * day)
   ]);
   await refreshIgToken(env).catch(e => console.error('ig token', e && e.message || e));
   await ensureBotNumber(env).catch(e => console.error('bot numarası', e && e.message || e));
@@ -469,12 +488,19 @@ async function onMessage(env, m){
   await D.prepare("INSERT INTO contacts (k, last_in, name) VALUES (?1, ?2, ?3) ON CONFLICT(k) DO UPDATE SET last_in = ?2, name = CASE WHEN ?3 <> '' THEN ?3 ELSE contacts.name END")
     .bind(key, now, m.name || '').run();
   if(m.pid) await D.prepare('INSERT INTO routes (k, pid) VALUES (?1, ?2) ON CONFLICT(k) DO UPDATE SET pid = ?2').bind(key, m.pid).run();
+  // Instagram ismi gelmez; panelde görünsün diye kullanıcı adı bir kez alınır
+  if(m.channel === 'ig'){
+    const c = await D.prepare('SELECT name FROM contacts WHERE k = ?').bind(key).first();
+    if(!(c && c.name)){ const u = await igUsername(env, m.uid); if(u) await D.prepare('UPDATE contacts SET name = ? WHERE k = ?').bind(u, key).run(); }
+  }
   const row = await D.prepare('SELECT data, updated FROM sessions WHERE k = ?').bind(key).first();
   let s = row ? JSON.parse(row.data) : null;
   if(s && !s.human && now - row.updated > SESSION_MS) s = null;     // yarım kalmış eski sohbet
   const ctx = {env, m, key, t: norm(m.text), out: [], notes: [], after: []};
 
   const staff = m.channel === 'wa' && staffNumbers(env).includes(m.uid);
+  const logIt = !staff || !!(s && s.test);   // personelin bota yazdığı komutlar sohbet listesine girmez
+  if(logIt) await logMsg(env, key, 'in', m.media ? '[' + (MEDIA_LABEL[m.mediaType] || 'dosya') + ']' : (m.text || ''));
   if(staff && !(s && s.test)) s = await staffCommand(ctx);
   else{
     if(s && s.human){
@@ -490,8 +516,15 @@ async function onMessage(env, m){
   else await D.prepare('DELETE FROM sessions WHERE k = ?').bind(key).run();
 
   for(const msg of ctx.out){
-    try{ await send(env, m.channel, m.uid, msg); }
-    catch(e){ console.error('gönderilemedi', m.channel, e.message); break; }
+    try{
+      await send(env, m.channel, m.uid, msg);
+      if(logIt) await logMsg(env, key, 'out', msgLogText(msg));
+    }catch(e){
+      console.error('gönderilemedi', m.channel, e.message);
+      await setSetting(env, 'err:' + m.channel, {t: Date.now(), msg: e.message}).catch(() => {});
+      if(logIt) await logMsg(env, key, 'sys', 'Bot cevabı gönderilemedi: ' + e.message);
+      break;
+    }
   }
   for(const fn of ctx.after){ try{ await fn(); }catch(e){ console.error('sonraki iş', e.message); } }
 }
@@ -903,6 +936,7 @@ async function relayToCustomer(ctx, key, text){
   try{ await send(env, channel, uid, {text}); }
   catch(e){ say(ctx, '⚠️ Mesaj iletilemedi: ' + e.message); return; }
   await takeOver(env, key);
+  await logMsg(env, key, 'staff', text, firstName(ctx.m.name) || 'Personel');
   if(ctx.m.id) await waReact(env, ctx.m.uid, ctx.m.id, '✅').catch(() => {});
   // Diğer personel de konuşmayı görsün
   const who = (c && c.name) || (channel === 'wa' ? localPhone(uid) : 'Instagram müşterisi');
@@ -1008,7 +1042,38 @@ async function api(req, url, env){
         staff: staffNumbers(env).length, outdoor: await outdoorState(env), botNumber: await ensureBotNumber(env), msgs: await monthCount(env)});
     case '/api/inbox': {
       const r = await D.prepare('SELECT data FROM requests WHERE imported = 0 ORDER BY created LIMIT 50').all();
-      return json({requests: r.results.map(x => JSON.parse(x.data)), outdoor: await outdoorState(env), msgs: await monthCount(env)});
+      return json({requests: r.results.map(x => JSON.parse(x.data)), outdoor: await outdoorState(env), msgs: await monthCount(env), waiting: await waitingChats(env)});
+    }
+    case '/api/status':
+      return json(await botStatus(env));
+    case '/api/chats': {
+      const since = +url.searchParams.get('since') || 0;
+      const r = await D.prepare(CHAT_SELECT + ' WHERE ch.last_t > ?1 ORDER BY ch.last_t DESC LIMIT 80').bind(since).all();
+      return json({now: Date.now(), chats: r.results.map(chatRow), waiting: await waitingChats(env)});
+    }
+    case '/api/chat': {
+      const k = url.searchParams.get('k') || '', after = +url.searchParams.get('after') || 0;
+      if(!/^(wa|ig):/.test(k)) return json({error: 'Geçersiz sohbet'}, 400);
+      if(url.searchParams.get('read')) await D.prepare('UPDATE chats SET unread = 0 WHERE k = ?').bind(k).run();
+      const m = await D.prepare('SELECT id, dir, text, by, t FROM messages WHERE k = ?1 AND id > ?2 ORDER BY id DESC LIMIT 300').bind(k, after).all();
+      const row = await D.prepare(CHAT_SELECT + ' WHERE ch.k = ?').bind(k).first();
+      return json({messages: m.results.reverse(), chat: row ? chatRow(row) : null});
+    }
+    case '/api/chat/send':
+      if(!post) break;
+      return panelSend(env, body);
+    case '/api/chat/mode': {
+      if(!post) break;
+      const k = String(body.k || ''), by = clean(body.by, 40) || 'Panel';
+      if(!/^(wa|ig):/.test(k)) return json({error: 'Geçersiz sohbet'}, 400);
+      if(body.mode === 'bot'){
+        await D.prepare('DELETE FROM sessions WHERE k = ?').bind(k).run();
+        await logMsg(env, k, 'sys', '🤖 Sohbet bota devredildi', by);
+      }else{
+        await takeOver(env, k);
+        await logMsg(env, k, 'sys', '🙋 Personel devraldı — bot 12 saat bu müşteriye cevap vermeyecek', by);
+      }
+      return json({ok: true});
     }
     case '/api/ack': {
       if(!post) break;
@@ -1030,6 +1095,62 @@ async function api(req, url, env){
   }
   return json({error: 'Bulunamadı'}, 404);
 }
+/* ---------- Panel: sohbetler ve durum ---------- */
+const CHAT_SELECT = 'SELECT ch.k, ch.last_t, ch.last_text, ch.last_dir, ch.unread, c.name, c.last_in, s.data AS sess, s.updated AS sess_t, r.code ' +
+  'FROM chats ch LEFT JOIN contacts c ON c.k = ch.k LEFT JOIN sessions s ON s.k = ch.k LEFT JOIN relay r ON r.k = ch.k';
+function chatRow(r){
+  const i = r.k.indexOf(':'), channel = r.k.slice(0, i), uid = r.k.slice(i + 1), now = Date.now();
+  let state = 'bot', step = '';
+  try{
+    const s = r.sess ? JSON.parse(r.sess) : null;
+    if(s && s.human && s.human > now) state = 'human';
+    else if(s && s.step === 'done') state = 'done';
+    else if(s && s.step && now - r.sess_t < SESSION_MS) step = s.step;
+  }catch(e){}
+  return {k: r.k, channel, name: r.name || '', phone: channel === 'wa' ? localPhone(uid) : '', last: r.last_text || '', lastDir: r.last_dir || '',
+    lastT: r.last_t, unread: r.unread || 0, state, step, code: r.code || '', windowOpen: !!(r.last_in && now - r.last_in < WINDOW_MS)};
+}
+// Personelin cevap vermesi beklenen (devralınmış ve okunmamış mesajı olan) sohbet sayısı
+async function waitingChats(env){
+  const r = await (await db(env)).prepare("SELECT s.data FROM chats ch JOIN sessions s ON s.k = ch.k WHERE ch.unread > 0 AND s.data LIKE '%\"human\":%'").all();
+  const now = Date.now();
+  return r.results.filter(x => { try{ return JSON.parse(x.data).human > now; }catch(e){ return false; } }).length;
+}
+// Panelden müşteriye mesaj: bot o müşteriye 12 saat karışmaz
+async function panelSend(env, b){
+  const k = String(b.k || ''), text = String(b.text || '').trim().slice(0, 4000), by = clean(b.by, 40) || 'Panel';
+  if(!/^(wa|ig):/.test(k) || !text) return json({error: 'Mesaj boş.'}, 400);
+  const D = await db(env), i = k.indexOf(':'), channel = k.slice(0, i), uid = k.slice(i + 1);
+  const c = await D.prepare('SELECT last_in FROM contacts WHERE k = ?').bind(k).first();
+  if(!(c && Date.now() - c.last_in < WINDOW_MS))
+    return json({error: 'Müşteri 24 saatten uzun süredir yazmadığı için ' + channelName(channel) + ' mesaj göndermeye izin vermiyor. Müşteriyi telefonla arayabilirsiniz.'}, 409);
+  try{ await send(env, channel, uid, {text}); }
+  catch(e){ return json({error: 'Gönderilemedi: ' + e.message}, 502); }
+  await takeOver(env, k);
+  await logMsg(env, k, 'staff', text, by);
+  return json({ok: true});
+}
+async function botStatus(env){
+  const D = await db(env), base = 'https://graph.facebook.com/' + graphVer(env) + '/', pid = await primaryPid(env);
+  const lastIn = async p => (await D.prepare("SELECT MAX(t) AS t FROM messages WHERE dir = 'in' AND k >= ? AND k < ?").bind(p + ':', p + ';').first()).t || null;
+  const wa = {configured: !!(env.WA_TOKEN && pid), botNumber: await ensureBotNumber(env).catch(() => null), lastErr: await getSetting(env, 'err:wa'), lastIn: await lastIn('wa')};
+  if(wa.configured){
+    try{
+      const p = await getJSON(base + pid + '?fields=display_phone_number,verified_name,quality_rating,status,name_status', env.WA_TOKEN);
+      wa.phone = {number: p.display_phone_number, name: p.verified_name, quality: p.quality_rating, status: p.status, nameStatus: p.name_status};
+    }catch(e){ wa.error = e.message; }
+  }
+  const tok = await igToken(env);
+  const ig = {configured: !!tok, lastErr: await getSetting(env, 'err:ig'), lastIn: await lastIn('ig')};
+  if(tok){
+    try{ ig.username = (await getJSON('https://graph.instagram.com/' + graphVer(env) + '/me?fields=username', tok)).username || ''; }
+    catch(e){ ig.error = e.message; }
+  }
+  const today = await D.prepare('SELECT COUNT(*) AS n FROM chats WHERE last_t > ?').bind(Date.now() - 864e5).first();
+  return {whatsapp: wa, instagram: ig, today: today.n, waiting: await waitingChats(env), msgs: await monthCount(env),
+    staff: staffNumbers(env).length, mirror: !!(await getSetting(env, 'mirror')), outdoor: await outdoorState(env)};
+}
+
 // Personel panelde talebi onaylayınca / iptal edince müşteriye mesaj
 async function apiNotify(env, b){
   const D = await db(env);
@@ -1047,10 +1168,13 @@ async function apiNotify(env, b){
       'Farklı bir gün veya saat için *menü* yazarak yeni talep oluşturabilirsiniz.\n— ' + (site.name || 'Yirmi');
   const c = await D.prepare('SELECT last_in FROM contacts WHERE k = ?').bind(row.channel + ':' + row.user_id).first();
   const open = c && Date.now() - c.last_in < WINDOW_MS;
+  const ck = row.channel + ':' + row.user_id;
   try{
-    if(open) await send(env, row.channel, row.user_id, {text});
-    else if(row.channel === 'wa' && b.status === 'confirmed' && env.CONFIRM_TEMPLATE)
+    if(open){ await send(env, row.channel, row.user_id, {text}); await logMsg(env, ck, 'out', text); }
+    else if(row.channel === 'wa' && b.status === 'confirmed' && env.CONFIRM_TEMPLATE){
       await waTemplate(env, row.user_id, env.CONFIRM_TEMPLATE, [first || 'Misafirimiz', when, String(guests)]);
+      await logMsg(env, ck, 'out', '[Onay şablonu] ' + when + ' · ' + guests + ' kişi');
+    }
     else return json({error: 'Müşteri 24 saatten uzun süredir yazmadığı için ' + channelName(row.channel) + ' otomatik mesaja izin vermiyor. Lütfen telefonla bilgi verin.'}, 409);
   }catch(e){
     return json({error: 'Mesaj gönderilemedi: ' + e.message}, 502);

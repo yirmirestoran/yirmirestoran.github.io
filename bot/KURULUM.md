@@ -126,6 +126,17 @@ Sonra Cloudflare'e `CONFIRM_TEMPLATE` = `rezervasyon_onay` ekleyin.
 3. Bottan gelen talepler listede **"WhatsApp botu · KOD"** etiketi ve **Onayla** düğmesiyle görünür. Durumu *Onaylandı* veya *İptal* yapınca müşteriye otomatik mesaj gider.
 4. Talepler, panel bir cihazda açıkken her dakika içeri alınır. Kimse paneli açmasa da talepler kaybolmaz; panel açılınca hepsi düşer.
 
+### Sohbetler sekmesi (canlı takip)
+Panel → **Sohbetler**:
+- **Durum kartları:** WhatsApp ve Instagram botunun bağlı olup olmadığı, son gelen mesaj, son hata ve bu ayki mesaj sayısı.
+- **Sohbet listesi:** Tüm WhatsApp / Instagram yazışmaları 4 saniyede bir kendiliğinden yenilenir. **Personelde** ve **Okunmamış** filtreleri, ayrıca isim ve numara araması var.
+- **Sohbete müdahale:** Bir sohbeti açınca müşteri, bot ve personel mesajları ayrı renklerle görünür.
+  - Alttaki kutudan müşteriye yazabilirsiniz; mesaj restoran hesabından gider ve bot o müşteriye 12 saat karışmaz.
+  - **Devral** botu hemen susturur; **Bota devret** sohbeti bota geri verir.
+- **Rozet ve sesli uyarı:** Sekmedeki kırmızı rozet, personelden cevap bekleyen sohbet sayısıdır. Yeni bir bekleyen sohbet gelince panel sesli uyarı verir.
+
+Sohbetler bot sunucusunda 30 gün saklanır.
+
 ### Botun sorularını değiştirmek
 Panel → **WhatsApp Botu** sekmesinde şunları değiştirebilirsiniz:
 - karşılama mesajı ve ana menü seçenekleri (açıp kapatabilirsiniz),
