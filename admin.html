@@ -3595,8 +3595,9 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     if(!on) return;
     $('#bot-dot').className = 'bot-dot' + (botErr ? ' err' : botOutdoor ? ' on' : '');
     const pending = (resList || []).filter(r => r.bot && r.status === 'pending' && r.date >= todayStr()).length;
-    $('#bot-info').textContent = botErr ? 'Bağlantı hatası: ' + botErr :
-      (botOutdoor ? 'Bağlı · WhatsApp ve Instagram talepleri buraya kendiliğinden düşer' : 'Bağlanıyor…') + (pending ? ' · ' + pending + ' talep onay bekliyor' : '') +
+    $('#bot-info').innerHTML = botErr ? 'Bağlantı hatası: ' + esc(botErr) :
+      (botOutdoor ? 'Bağlı · WhatsApp ve Instagram talepleri buraya kendiliğinden düşer' : 'Bağlanıyor…') +
+      (pending ? ' · <a href="#" id="bot-pending"><b>' + pending + ' talep onay bekliyor → göster</b></a>' : '') +
       (botMsgs != null ? ' · Bu ay ' + botMsgs + ' WhatsApp mesajı' : '');
     const sel = $('#bot-outdoor'), v = outdoorValue(botOutdoor);
     sel.querySelectorAll('option[data-custom]').forEach(o => o.remove());
@@ -3605,6 +3606,42 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     sel.classList.toggle('closed', v !== 'open');
     sel.disabled = !botOutdoor;
   }
+  // Bottan gelen bir talebi açar (bildirimdeki admin.html#talep=KOD bağlantısı ve "onay bekliyor" yazısı)
+  async function openBotRequest(ref){
+    const find = () => (resList || []).find(r => r.bot && r.bot.ref === ref);
+    if(!find()) await pullBotInbox(true);
+    if(!find()){ resSha = null; await loadReservations(true); }
+    const r = find();
+    if(!r) return toast('#' + ref + ' kodlu talep bulunamadı (silinmiş ya da başka bir kod olabilir).', true, 7000);
+    showTab('res');
+    resDay = r.date; resArea = r.area || resArea;
+    renderRes();
+    openResForm(r);
+  }
+  $('#bot-info').addEventListener('click', e => {
+    if(e.target.closest('#bot-pending')){
+      e.preventDefault();
+      const first = (resList || []).filter(r => r.bot && r.status === 'pending' && r.date >= todayStr())
+        .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))[0];
+      if(first) openBotRequest(first.bot.ref);
+    }
+  });
+  // admin.html#talep=KOD: giriş yapılıp menü ve rezervasyonlar yüklenince o talep açılır
+  let deepRef = null;
+  function readDeepLink(){ const m = /talep=([A-Z0-9]{5})/i.exec(location.hash); if(m) deepRef = m[1].toUpperCase(); }
+  readDeepLink();
+  async function handleDeepLink(){
+    if(!deepRef || !session) return;
+    for(let i = 0; i < 40 && (!state || resList === null); i++) await new Promise(r => setTimeout(r, 250));
+    const ref = deepRef;
+    deepRef = null;
+    try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
+    if(!state) return toast('Menü yüklenemedi; talep açılamadı.', true);
+    if(resList === null) await loadReservations(true);
+    openBotRequest(ref);
+  }
+  window.addEventListener('hashchange', () => { readDeepLink(); handleDeepLink(); });
+
   $('#bot-outdoor').addEventListener('change', async e => {
     const v = e.target.value, today = todayStr();
     const closedUntil = v === 'open' ? null : v === 'always' ? 'always' : v === 'tomorrow' ? shiftDay(today, 1) : v === 'today' ? today : v.slice(6);
@@ -3659,7 +3696,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     box.innerHTML =
       '<div class="panel"><h2>Genel</h2>' +
         '<label class="switch"><input type="checkbox" data-bc="notifyNew"' + (c.notifyNew ? ' checked' : '') + '> Yeni rezervasyonda personele WhatsApp bildirimi gönder</label>' +
-        '<p class="hint">Kapalıyken yeni talepler yalnızca bu panelde sesli uyarıyla görünür (her bildirim ücretli bir mesajdır). “Yetkili isteniyor” bildirimleri her zaman gider.</p>' +
+        '<p class="hint">Bildirimde talebi doğrudan açan bir bağlantı olur. Kapatırsanız yeni talepler yalnızca bu panelde sesli uyarıyla görünür (her bildirim ücretli bir mesajdır). “Yetkili isteniyor” bildirimleri her zaman gider.</p>' +
         '<label class="switch" style="margin-top:12px"><input type="checkbox" data-bc="askRequest"' + (c.askRequest ? ' checked' : '') + '> Menü / özel istek sorusunu sor</label>' +
         '<div class="grid" style="margin-top:12px"><div class="field"><label>Bundan kalabalık gruplar yetkiliye aktarılsın (kişi)</label><input type="number" min="2" max="200" data-bc="maxGuests" value="' + c.maxGuests + '"></div></div></div>' +
       '<div class="panel"><h2>Karşılama ve ana menü</h2><div class="field"><label>Karşılama mesajı</label>' + ta('welcome', c.welcome, 3) + '</div>' +
@@ -4404,6 +4441,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     loadFloorLayout();
     renderBotBar();
     setTimeout(() => pullBotInbox(true), 4000);   // masa düzeni ve rezervasyonlar yüklendikten sonra
+    setTimeout(handleDeepLink, 300);
     touch();
   }
   function logout(){

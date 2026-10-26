@@ -31,6 +31,7 @@
  *   GRAPH_VERSION     (isteğe bağlı) Meta Graph API sürümü, varsayılan v23.0
  */
 
+const VERSION = '2026-10-26';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
 const SESSION_MS = 30 * 60e3;          // bu kadar sessiz kalan sohbet baştan başlar
 const HUMAN_MS = 12 * 3600e3;          // "yetkili" istenince bot bu süre susar
 const WINDOW_MS = 23.5 * 3600e3;       // WhatsApp/Instagram 24 saat mesajlaşma penceresi (pay bırakılarak)
@@ -79,7 +80,7 @@ const BOT_DEFAULTS = {
   done: '✅ *Rezervasyon talebiniz alınmıştır!*\n\nTalep kodunuz: *{kod}*\nEkibimiz masanızı ayarlayıp onayı kısa süre içinde buradan iletecek. Teşekkür ederiz 🙏',
   handoff: '🙋 Sizi ekibimize aktardım; en kısa sürede buradan dönüş yapacağız.\n(Otomatik asistana dönmek için *menü* yazabilirsiniz.)',
   askRequest: true,      // menü / özel istek sorusu sorulsun mu
-  notifyNew: false,      // yeni rezervasyonda personele WhatsApp bildirimi (her bildirim ücretli mesaj; panel zaten sesli uyarır)
+  notifyNew: true,       // yeni rezervasyonda personele WhatsApp bildirimi (talebi açan bağlantıyla)
   maxGuests: 30          // bundan kalabalık gruplar yetkiliye aktarılır
 };
 const MENU_KEYS = ['rez', 'ozel', 'bilgi', 'yetkili'], AREA_KEYS = ['ic', 'dis_s', 'dis_n', 'any'];
@@ -96,7 +97,7 @@ function mergeBotCfg(b){
     occasions: (occ.length ? occ : D.occasions).slice(0, 9),
     q: Object.fromEntries(Object.keys(D.q).map(k => [k, str((b.q || {})[k], D.q[k])])),
     done: str(b.done, D.done), handoff: str(b.handoff, D.handoff),
-    askRequest: b.askRequest !== false, notifyNew: b.notifyNew === true,
+    askRequest: b.askRequest !== false, notifyNew: b.notifyNew !== false,
     maxGuests: +b.maxGuests > 0 ? Math.min(200, Math.round(+b.maxGuests)) : D.maxGuests
   };
   if(!MENU_KEYS.some(k => out.menu[k].on)) out.menu.rez.on = true;
@@ -132,7 +133,7 @@ export default {
         if(req.method === 'OPTIONS') return cors(env, new Response(null, {status: 204}));
         return cors(env, await api(req, url, env));
       }
-      return new Response('Yirmi rezervasyon asistanı çalışıyor.', {headers: {'content-type': 'text/plain; charset=utf-8'}});
+      return new Response('Yirmi rezervasyon asistanı çalışıyor. (sürüm ' + VERSION + ')', {headers: {'content-type': 'text/plain; charset=utf-8'}});
     }catch(e){
       console.error(e && e.stack || e);
       return cors(env, json({error: 'Sunucu hatası: ' + (e && e.message || e)}, 500));
@@ -813,7 +814,7 @@ async function createRequest(ctx, d, test){
   if(rec.request) lines.push('🍽 İstek: ' + rec.request);
   const code = await relayCode(ctx.env, ctx.key);
   lines.push('👤 ' + rec.name + ' · ' + rec.phone + (rec.igUser ? ' · ' + rec.igUser : ''), '',
-    'Masaya yerleştirildi, onay bekliyor: ' + siteUrl(ctx.env) + '/admin.html', REPLY_HINT(code));
+    '👉 Görmek ve onaylamak için: ' + siteUrl(ctx.env) + '/admin.html#talep=' + ref, REPLY_HINT(code));
   const short = rec.name + ', ' + dateLong(rec.date) + ' ' + rec.time + ', ' + rec.guests + ' kişi, ' + AREA[rec.area] + ' (kod ' + ref + ')';
   ctx.after.push(() => notifyStaff(ctx.env, lines.join('\n'), short, ctx.key));
 }
