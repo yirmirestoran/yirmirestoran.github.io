@@ -31,7 +31,7 @@
  *   GRAPH_VERSION     (isteğe bağlı) Meta Graph API sürümü, varsayılan v23.0
  */
 
-const VERSION = '2026-10-26';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
+const VERSION = '2026-10-28';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
 const SESSION_MS = 30 * 60e3;          // bu kadar sessiz kalan sohbet baştan başlar
 const HUMAN_MS = 12 * 3600e3;          // "yetkili" istenince bot bu süre susar
 const WINDOW_MS = 23.5 * 3600e3;       // WhatsApp/Instagram 24 saat mesajlaşma penceresi (pay bırakılarak)
@@ -238,8 +238,17 @@ async function ensureBotNumber(env){
   const base = 'https://graph.facebook.com/' + graphVer(env) + '/';
   const next = Object.assign({}, same ? st : {}, {pid, at: Date.now(), error: ''});
   try{
-    const info = await getJSON(base + pid + '?fields=display_phone_number,verified_name,name_status,status', env.WA_TOKEN);
-    Object.assign(next, {number: info.display_phone_number || '', name: info.verified_name || '', nameStatus: info.name_status || '', status: info.status || ''});
+    const info = await getJSON(base + pid + '?fields=display_phone_number,verified_name,name_status,new_name_status,status', env.WA_TOKEN);
+    Object.assign(next, {number: info.display_phone_number || '', name: info.verified_name || '', nameStatus: info.name_status || '',
+      newNameStatus: info.new_name_status || '', status: info.status || ''});
+    // Yeni görünen ad onaylandığında Meta numaranın yeniden kaydedilmesini ister; kayıtla birlikte yeni ad devreye girer
+    if(next.newNameStatus === 'APPROVED'){
+      if(!/^\d{6}$/.test(String(env.WA_PIN || ''))) throw new Error('Yeni görünen ad onaylandı; numarayı yeniden kaydetmek için WA_PIN (6 haneli) gerekli');
+      try{ await graph(base + pid + '/register', env.WA_TOKEN, {messaging_product: 'whatsapp', pin: String(env.WA_PIN)}); }
+      catch(e){ throw new Error('Yeni ad için yeniden kayıt yapılamadı: ' + e.message + (/pin/i.test(e.message) ? ' — WhatsApp Manager\'daki iki adımlı doğrulama PIN\'i ile Cloudflare\'deki WA_PIN aynı olmalı' : '')); }
+      next.registered = true;
+      next.nameStatus = 'APPROVED';
+    }
     if(!next.registered){
       if(next.status === 'CONNECTED') next.registered = true;
       else{
