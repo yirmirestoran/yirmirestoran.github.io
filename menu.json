@@ -25,7 +25,8 @@
     },
     "social": {
       "instagram": "https://www.instagram.com/yirmirestoran/",
-      "whatsapp": "+90 530 338 31 20"
+      "whatsapp": "+90 530 338 31 20",
+      "google": "https://share.google/3ERGAEiAtNjVQIXLp"
     },
     "reservationUrl": "https://yirmi-bot.socialmediayirmirestoran.workers.dev/wa"
   },
