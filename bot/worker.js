@@ -31,7 +31,7 @@
  *   GRAPH_VERSION     (isteğe bağlı) Meta Graph API sürümü, varsayılan v23.0
  */
 
-const VERSION = '2026-10-28';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
+const VERSION = '2026-10-28b';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
 const SESSION_MS = 30 * 60e3;          // bu kadar sessiz kalan sohbet baştan başlar
 const HUMAN_MS = 12 * 3600e3;          // "yetkili" istenince bot bu süre susar
 const WINDOW_MS = 23.5 * 3600e3;       // WhatsApp/Instagram 24 saat mesajlaşma penceresi (pay bırakılarak)
@@ -253,13 +253,16 @@ async function ensureBotNumber(env){
       if(next.status === 'CONNECTED') next.registered = true;
       else{
         if(!/^\d{6}$/.test(String(env.WA_PIN || ''))) throw new Error('WA_PIN (6 haneli) girilmemiş');
-        await graph(base + pid + '/register', env.WA_TOKEN, {messaging_product: 'whatsapp', pin: String(env.WA_PIN)});
+        try{ await graph(base + pid + '/register', env.WA_TOKEN, {messaging_product: 'whatsapp', pin: String(env.WA_PIN)}); }
+        catch(e){ throw new Error('Numara kaydı (WA_BOT_PHONE_ID ' + pid + ') yapılamadı: ' + e.message); }
         next.registered = true;
       }
     }
     if(!next.subscribed){
       if(!env.WA_WABA_ID) throw new Error('WA_WABA_ID girilmemiş');
-      await graph(base + String(env.WA_WABA_ID).trim() + '/subscribed_apps', env.WA_TOKEN, {});
+      const waba = String(env.WA_WABA_ID).trim();
+      try{ await graph(base + waba + '/subscribed_apps', env.WA_TOKEN, {}); }
+      catch(e){ throw new Error('WhatsApp hesabı (WA_WABA_ID ' + waba + ') uygulamaya bağlanamadı: ' + e.message + ' — WA_WABA_ID, WhatsApp Manager > Hesap bilgileri bölümündeki "WhatsApp Business hesabı kimliği" olmalı'); }
       next.subscribed = true;
     }
     // Görünen ad onaylanmadan müşteriler bu numaraya yönlendirilmez
