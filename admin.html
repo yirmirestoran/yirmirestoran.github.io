@@ -2628,7 +2628,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   const SLOT = 30;
   let resList = null, resSha = null, resLoading = null;
   let resDay = null, resArea = 'ic', resTime = null;
-  let resEdit = null, resPoCat = '';
+  let resEdit = null, resPoCat = '', resWaManual = false;
 
   const optionsHtml = (list, val) => list.map(([k, l]) => '<option value="' + esc(k) + '"' + (k === val ? ' selected' : '') + '>' + esc(l) + '</option>').join('');
   const durLabel = m => (m % 60 ? (m / 60).toFixed(1).replace('.', ',') : m / 60) + ' saat';
@@ -3260,6 +3260,8 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     if(resEdit.tables.length) resEdit.area = (Core.tableById(resEdit.tables[0]) || {}).area || resEdit.area;
     resEdit._new = isNew;
     resPoCat = '';
+    resWaManual = false;
+    $('#resf-wa').textContent = 'WhatsApp\'tan onay gönder';
     $('#resf-title').textContent = isNew ? 'Yeni rezervasyon' : 'Rezervasyon · ' + (r.name || '');
     $('#resf-name').value = resEdit.name;
     $('#resf-phone').value = resEdit.phone || '';
@@ -3457,9 +3459,11 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       toast('Rezervasyon silindi.');
     }catch(err){ toast(err.status ? ghErrorText(err) : err.message, true, 7000); }
   });
-  // Müşteriye WhatsApp'tan hazır onay mesajı
-  $('#resf-wa').addEventListener('click', () => {
+  // Müşteriye WhatsApp'tan onay mesajı: bot bağlıysa bot numarasından otomatik gider;
+  // gönderilemezse düğme "Kendi WhatsApp'ımdan gönder"e döner ve hazır mesajla WhatsApp açılır
+  $('#resf-wa').addEventListener('click', async e => {
     readResForm();
+    const btn = e.currentTarget;
     const r = resEdit;
     let phone = String(r.phone || '').replace(/\D/g, '');
     if(phone.startsWith('0')) phone = '9' + phone;
@@ -3472,7 +3476,16 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     if(r.tables.length) msg += '\nMasa: ' + tableLabels(r) + ' (' + Core.floorById(r.area).name + ')';
     if(items.length) msg += '\nÖn siparişiniz: ' + items.map(i => i.qty + 'x ' + i.name).join(', ') + (r.preorder.readyAt ? ' — ' + r.preorder.readyAt + '\'de hazır olacak.' : '');
     msg += '\nSizi ağırlamayı dört gözle bekliyoruz.\n' + (site.name || 'Yirmi') + (site.city ? ' ' + site.city : '') + (site.phone ? '\n' + site.phone : '');
-    window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank', 'noopener');
+    if(resWaManual || !botOn()) return window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank', 'noopener');
+    btn.disabled = true;
+    try{
+      const d = await botApi('POST', '/api/wa-confirm', {phone, name: r.name, date: r.date, time: r.time, guests: r.guests, text: msg, ref: r.bot ? r.bot.ref : ''});
+      toast(d.via === 'template' ? '✓ Onay, bot numarasından WhatsApp şablonuyla gönderildi.' : '✓ Onay mesajı bot numarasından WhatsApp\'tan gönderildi.');
+    }catch(err){
+      resWaManual = true;
+      btn.textContent = 'Kendi WhatsApp\'ımdan gönder';
+      toast('Bot WhatsApp\'tan gönderemedi: ' + err.message + ' — Düğmeye tekrar basarsanız mesaj kendi WhatsApp\'ınızda hazır açılır.', true, 14000);
+    }finally{ btn.disabled = false; }
   });
   document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('#res-modal').classList.contains('hide')) closeResForm(); });
   // Başka cihazdan eklenen rezervasyonlar için her dakika kontrol
@@ -3663,8 +3676,8 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     const ch = rec.bot.channel === 'instagram' ? 'Instagram' : 'WhatsApp';
     botApi('POST', '/api/notify', {ref: rec.bot.ref, status: rec.status, name: rec.name, date: rec.date, time: rec.time, guests: rec.guests,
       area: Core.floorById(rec.area).name, tables: (rec.tables || []).length ? tableLabels(rec) : ''})
-      .then(d => { if(!d.skipped) setTimeout(() => toast('✓ Müşteriye ' + ch + ' üzerinden ' + (rec.status === 'confirmed' ? 'onay' : 'iptal') + ' mesajı gönderildi.'), 1200); })
-      .catch(err => setTimeout(() => toast('Müşteriye otomatik mesaj gitmedi: ' + err.message, true, 10000), 1200));
+      .then(d => { if(!d.skipped) setTimeout(() => toast('✓ Müşteriye ' + (d.via === 'whatsapp' ? 'WhatsApp' : ch) + ' üzerinden ' + (rec.status === 'confirmed' ? 'onay' : 'iptal') + ' mesajı gönderildi.'), 1200); })
+      .catch(err => setTimeout(() => toast('Müşteriye otomatik mesaj gitmedi: ' + err.message + ' — Rezervasyonu açıp "WhatsApp\'tan onay gönder"e basabilirsiniz.', true, 12000), 1200));
   }
   /* ---------- Bot ayarları: sorular ve seçenekler ---------- */
   // Varsayılan metinler doğrudan bot/worker.js'ten okunur (tek kaynak). Değişiklikler menu.json → site.bot olarak

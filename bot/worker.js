@@ -25,13 +25,13 @@
  *   STAFF_NUMBERS     Bildirim alacak personel numaraları, virgülle: 905321112233,905441112233
  *   ADMIN_KEY         Yönetim panelinin bota bağlanırken kullandığı uzun, rastgele anahtar
  *   STAFF_TEMPLATE    (isteğe bağlı) 24 saat penceresi dışında personele gidecek şablonun adı
- *   CONFIRM_TEMPLATE  (isteğe bağlı) 24 saat dışında müşteriye gidecek onay şablonunun adı
+ *   CONFIRM_TEMPLATE  (isteğe bağlı) 24 saat dışında müşteriye gidecek onay şablonunun adı (varsayılan rezervasyon_onay; yoksa bot oluşturur)
  *
  * Sorular, seçenekler, en kalabalık grup sınırı ve personel bildirimi yönetim panelinin "Bot" sekmesinden ayarlanır (menu.json → site.bot).
  *   GRAPH_VERSION     (isteğe bağlı) Meta Graph API sürümü, varsayılan v23.0
  */
 
-const VERSION = '2026-10-28d';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
+const VERSION = '2026-10-28e';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
 const SESSION_MS = 30 * 60e3;          // bu kadar sessiz kalan sohbet baştan başlar
 const HUMAN_MS = 12 * 3600e3;          // "yetkili" istenince bot bu süre susar
 const WINDOW_MS = 23.5 * 3600e3;       // WhatsApp/Instagram 24 saat mesajlaşma penceresi (pay bırakılarak)
@@ -1108,6 +1108,9 @@ async function api(req, url, env){
     case '/api/notify':
       if(!post) break;
       return apiNotify(env, body);
+    case '/api/wa-confirm':
+      if(!post) break;
+      return apiWaConfirm(env, body);
   }
   return json({error: 'Bulunamadı'}, 404);
 }
@@ -1171,6 +1174,64 @@ async function botStatus(env){
     staff: staffNumbers(env).length, mirror: !!(await getSetting(env, 'mirror')), outdoor: await outdoorState(env)};
 }
 
+const whenText = b => (validDate(b.date) ? dateLong(b.date) : '') + (parseHM(b.time) != null ? ' · ' + b.time : '');
+// "0532 123 45 67" / "+90 532…" / "5321234567" → 905321234567
+function waNumber(p){
+  let d = String(p || '').replace(/\D/g, '');
+  if(d.startsWith('00')) d = d.slice(2);
+  if(d.length === 11 && d.startsWith('0')) d = '9' + d;
+  else if(d.length === 10 && d.startsWith('5')) d = '90' + d;
+  return d.length >= 11 && d.length <= 15 ? d : '';
+}
+/* ---------- Bot numarasından WhatsApp onayı ---------- */
+// Müşteri son 24 saatte bot numarasına yazdıysa düz metin; yazmadıysa WhatsApp yalnızca onaylı şablona izin verir.
+// Şablon (CONFIRM_TEMPLATE, varsayılan "rezervasyon_onay") Meta'da yoksa bot onu kendisi oluşturup incelemeye gönderir.
+const confirmTpl = env => String(env.CONFIRM_TEMPLATE || 'rezervasyon_onay').trim();
+async function createConfirmTemplate(env){
+  if(!env.WA_WABA_ID) throw new Error('WA_WABA_ID girilmemiş');
+  const site = await siteInfo(env);
+  return graph('https://graph.facebook.com/' + graphVer(env) + '/' + String(env.WA_WABA_ID).trim() + '/message_templates', env.WA_TOKEN, {
+    name: confirmTpl(env), language: env.TEMPLATE_LANG || 'tr', category: 'UTILITY',
+    components: [{type: 'BODY', text: 'Merhaba {{1}}, {{2}} için {{3}} kişilik rezervasyonunuz onaylandı. Sizi ağırlamayı dört gözle bekliyoruz. Bir değişiklik olursa bu numaraya yazabilirsiniz. — ' + (site.name || 'Yirmi') + ' Restoran',
+      example: {body_text: [['Ahmet', '1 Kasım Cumartesi · 20:00', '4']]}}]
+  });
+}
+async function waConfirm(env, b){
+  const num = waNumber(b.phone);
+  if(!num) throw new Error('Geçerli bir telefon numarası yok');
+  const D = await db(env), k = 'wa:' + num, first = firstName(b.name), guests = +b.guests || 0, when = whenText(b);
+  const c = await D.prepare('SELECT last_in FROM contacts WHERE k = ?').bind(k).first();
+  if(c && Date.now() - c.last_in < WINDOW_MS){
+    const text = String(b.text || '').trim().slice(0, 4000) || confirmText(await siteInfo(env), b);
+    await waSend(env, num, {text});
+    await logMsg(env, k, 'out', text);
+    return 'text';
+  }
+  try{ await waTemplate(env, num, confirmTpl(env), [first || 'Misafirimiz', when, String(guests)]); }
+  catch(e){
+    if(e.code !== 132001) throw new Error(e.message + (e.code === 131042 ? ' — Meta\'da ödeme yöntemi eklenmeli (WhatsApp Manager > Faturalandırma)' : ''));
+    // Şablon yok: oluşturulup incelemeye gönderilir (aynı adla zaten bekliyorsa Meta hata verir, sorun değil)
+    let made = true;
+    try{ await createConfirmTemplate(env); }catch(x){ made = /already|exist|zaten/i.test(x.message); if(!made) throw new Error('Onay şablonu oluşturulamadı: ' + x.message); }
+    throw new Error('Müşteri bot numarasına hiç yazmadığı için WhatsApp onaylı şablon istiyor. "' + confirmTpl(env) + '" şablonu Meta incelemesine gönderildi; onaylanınca (genelde birkaç dakika – birkaç saat) bu düğme otomatik gönderecek');
+  }
+  await logMsg(env, k, 'out', '[Onay şablonu] ' + when + ' · ' + guests + ' kişi');
+  return 'template';
+}
+async function apiWaConfirm(env, b){
+  try{
+    const via = await waConfirm(env, b);
+    if(b.ref) await (await db(env)).prepare('UPDATE requests SET notified = ? WHERE ref = ?').bind('confirmed', String(b.ref)).run();
+    return json({ok: true, via});
+  }catch(e){ return json({error: e.message}, 409); }
+}
+function confirmText(site, b){
+  const first = firstName(b.name);
+  return '✅ *Rezervasyonunuz onaylandı!*\n\n📅 ' + whenText(b) + '\n👥 ' + (+b.guests || 0) + ' kişi' +
+    (b.area ? '\n📍 ' + clean(b.area, 40) + (b.tables ? ' · Masa ' + clean(b.tables, 40) : '') : '') +
+    '\n\nSizi ağırlamayı dört gözle bekliyoruz' + (first ? ', ' + first : '') + '! Bir değişiklik olursa buradan yazabilirsiniz.\n— ' + (site.name || 'Yirmi');
+}
+
 // Personel panelde talebi onaylayınca / iptal edince müşteriye mesaj
 async function apiNotify(env, b){
   const D = await db(env);
@@ -1179,26 +1240,27 @@ async function apiNotify(env, b){
   if(b.status !== 'confirmed' && b.status !== 'cancelled') return json({error: 'Geçersiz durum'}, 400);
   if(row.notified === b.status) return json({ok: true, skipped: true, channel: row.channel});
   const site = await siteInfo(env), first = firstName(b.name), guests = +b.guests || 0;
-  const when = (validDate(b.date) ? dateLong(b.date) : '') + (parseHM(b.time) != null ? ' · ' + b.time : '');
-  const text = b.status === 'confirmed'
-    ? '✅ *Rezervasyonunuz onaylandı!*\n\n📅 ' + when + '\n👥 ' + guests + ' kişi' +
-      (b.area ? '\n📍 ' + clean(b.area, 40) + (b.tables ? ' · Masa ' + clean(b.tables, 40) : '') : '') +
-      '\n\nSizi ağırlamayı dört gözle bekliyoruz' + (first ? ', ' + first : '') + '! Bir değişiklik olursa buradan yazabilirsiniz.\n— ' + (site.name || 'Yirmi')
+  const when = whenText(b);
+  const text = b.status === 'confirmed' ? confirmText(site, b)
     : 'Merhaba' + (first ? ' ' + first : '') + ', üzgünüz 🙏 ' + when + ' için ' + guests + ' kişilik uygun masamız kalmadı.\n' +
       'Farklı bir gün veya saat için *menü* yazarak yeni talep oluşturabilirsiniz.\n— ' + (site.name || 'Yirmi');
   const c = await D.prepare('SELECT last_in FROM contacts WHERE k = ?').bind(row.channel + ':' + row.user_id).first();
   const open = c && Date.now() - c.last_in < WINDOW_MS;
   const ck = row.channel + ':' + row.user_id;
+  let via = row.channel === 'wa' ? 'whatsapp' : 'instagram';
   try{
     if(open){ await send(env, row.channel, row.user_id, {text}); await logMsg(env, ck, 'out', text); }
-    else if(row.channel === 'wa' && b.status === 'confirmed' && env.CONFIRM_TEMPLATE){
-      await waTemplate(env, row.user_id, env.CONFIRM_TEMPLATE, [first || 'Misafirimiz', when, String(guests)]);
-      await logMsg(env, ck, 'out', '[Onay şablonu] ' + when + ' · ' + guests + ' kişi');
+    // 24 saat geçtiyse onay, müşterinin telefonuna bot numarasından WhatsApp ile gider (Instagram müşterisi için de)
+    else if(b.status === 'confirmed'){
+      let rec = {};
+      try{ rec = JSON.parse(row.data); }catch(e){}
+      try{ await waConfirm(env, Object.assign({}, b, {phone: row.channel === 'wa' ? row.user_id : rec.phone})); via = 'whatsapp'; }
+      catch(e){ return json({error: channelName(row.channel) + ' 24 saat kuralı nedeniyle mesaj gönderilemedi; WhatsApp\'tan da gitmedi: ' + e.message}, 409); }
     }
     else return json({error: 'Müşteri 24 saatten uzun süredir yazmadığı için ' + channelName(row.channel) + ' otomatik mesaja izin vermiyor. Lütfen telefonla bilgi verin.'}, 409);
   }catch(e){
     return json({error: 'Mesaj gönderilemedi: ' + e.message}, 502);
   }
   await D.prepare('UPDATE requests SET notified = ? WHERE ref = ?').bind(b.status, row.ref).run();
-  return json({ok: true, channel: row.channel});
+  return json({ok: true, channel: row.channel, via});
 }
