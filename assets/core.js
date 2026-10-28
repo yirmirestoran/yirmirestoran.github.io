@@ -341,11 +341,20 @@
   }
   // Duyuru ve etkinliklerin isteğe bağlı detayları: ücret, tarih/saat metni, rezervasyon telefonu, WhatsApp, konum, yol tarifi
   function posterInfo(o, site){
-    const phone = String(o.phone || '').trim();
-    const place = String(o.place || '').trim() || (site && site.address) || '';
+    const phone = String(o.phone || '').trim(), own = String(o.place || '').trim();
+    const place = own || (site && site.address) || '';
     return {price: String(o.price || '').trim(), when: String(o.when || '').trim(), phone, whatsapp: !!(o.whatsapp && phone),
-      place: String(o.place || '').trim(), directions: !!(o.directions && place),
-      mapUrl: place ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(place) : ''};
+      place: own, directions: !!(o.directions && place),
+      mapUrl: own ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(own) : mapsUrl(site)};
+  }
+  // Yol tarifi: panelde Google Haritalar bağlantısı girildiyse o; yoksa işletme adı + adres (yalnız adres aranınca harita yanlış noktaya gidebiliyor)
+  function mapsUrl(site){
+    site = site || {};
+    const own = String(site.mapUrl || '').trim();
+    if(/^https?:\/\//i.test(own)) return own;
+    const addr = String(site.address || '').trim();
+    if(!addr) return '';
+    return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((site.name ? site.name + ' Restoran, ' : '') + addr);
   }
   // Açılış popup'ında gösterilecek afişler, sırasıyla: duyurular (panel sırası) → aktif kampanyalar → yaklaşan etkinlikler
   function posterSlides(data, n){
@@ -389,7 +398,7 @@
       out.push({key: x.key, label: x.label, href: /^https?:\/\//i.test(v) ? v : x.url(v)});
     });
     if(site.phone && s.showPhone !== false) out.push({key:'phone', label:'Ara: ' + site.phone, href:'tel:' + String(site.phone).replace(/\s/g, '')});
-    if(site.address && s.showMap !== false) out.push({key:'map', label:'Yol tarifi', href:'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(site.address)});
+    if(site.address && s.showMap !== false) out.push({key:'map', label:'Yol tarifi', href: mapsUrl(site)});
     return out;
   }
 
@@ -479,7 +488,7 @@
     now, setNowOverride, parseWall, parseHM, hm,
     campaignState, describeSchedule, campaignTargets, applyDiscount, discountLabel, priceInfo, formatCountdown, newCampaign,
     campaignOnDay, EVENT_TYPES, eventType, eventDays, eventWindow, upcomingEvents, newEvent,
-    announcementState, newAnnouncement, posterSlides, posterInfo, SOCIALS, socialLinks,
+    announcementState, newAnnouncement, posterSlides, posterInfo, mapsUrl, SOCIALS, socialLinks,
     openState, chefInfo, isDefaultChefPhoto
   };
 })(window);

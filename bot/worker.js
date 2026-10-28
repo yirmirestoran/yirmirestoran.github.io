@@ -575,7 +575,7 @@ async function greet(ctx, base){
 async function infoText(env){
   const site = await siteInfo(env), lines = ['📖 *Menümüz:* ' + siteUrl(env)];
   if(site.opening && site.closing) lines.push('🕕 *Çalışma saatleri:* ' + site.opening + ' – ' + site.closing);
-  if(site.address) lines.push('📍 *Adres:* ' + site.address, '🗺 Yol tarifi: https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(site.address));
+  if(site.address) lines.push('📍 *Adres:* ' + site.address, '🗺 Yol tarifi: ' + (/^https?:\/\//.test(site.mapUrl || '') ? site.mapUrl : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(site.address)));
   if(site.phone) lines.push('📞 ' + site.phone);
   return lines.join('\n');
 }

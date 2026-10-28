@@ -28,7 +28,8 @@
       "whatsapp": "+90 530 338 31 20",
       "google": "https://share.google/3ERGAEiAtNjVQIXLp"
     },
-    "reservationUrl": "https://yirmi-bot.socialmediayirmirestoran.workers.dev/wa"
+    "reservationUrl": "https://wa.me/17117646211?text=Merhaba",
+    "mapUrl": "https://maps.app.goo.gl/5yUtTwjsTrHGFq9P9"
   },
   "categories": [
     {

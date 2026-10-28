@@ -778,7 +778,7 @@ body.no-scroll .social{opacity:0;pointer-events:none}
 
     const addr = site.address || '';
     $('#i-address').textContent = addr;
-    $('#i-address').href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(addr);
+    $('#i-address').href = C.mapsUrl(site);
     $('#i-phone').textContent = site.phone || '';
     $('#i-phone').href = 'tel:' + String(site.phone || '').replace(/\s/g, '');
     $('#i-email').textContent = site.email || '';
