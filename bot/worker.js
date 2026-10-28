@@ -31,7 +31,7 @@
  *   GRAPH_VERSION     (isteğe bağlı) Meta Graph API sürümü, varsayılan v23.0
  */
 
-const VERSION = '2026-10-28c';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
+const VERSION = '2026-10-28d';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
 const SESSION_MS = 30 * 60e3;          // bu kadar sessiz kalan sohbet baştan başlar
 const HUMAN_MS = 12 * 3600e3;          // "yetkili" istenince bot bu süre susar
 const WINDOW_MS = 23.5 * 3600e3;       // WhatsApp/Instagram 24 saat mesajlaşma penceresi (pay bırakılarak)
@@ -481,8 +481,11 @@ async function handleUpdate(body, env){
       if(pb){ inp.text = pb.title || ''; inp.choice = pb.payload || null; }
       else{
         inp.text = msg.text || ''; inp.choice = (msg.quick_reply && msg.quick_reply.payload) || null;
-        inp.media = !msg.text && !!msg.attachments;
-        if(inp.media) inp.mediaType = (msg.attachments[0] || {}).type;
+        // Instagram bazen yazının ardından kendiliğinden ek gönderir (bağlantı önizlemesi vb.); yalnızca müşterinin gönderdiği dosyalar sayılır
+        const att = (msg.attachments || []).filter(a => /^(image|video|audio|file|sticker)$/.test(a.type));
+        if(!msg.text && msg.attachments && !att.length) continue;
+        inp.media = !msg.text && att.length > 0;
+        if(inp.media) inp.mediaType = att[0].type;
       }
       if(!inp.text && !inp.choice && !inp.media) continue;
       await onMessage(env, inp);
@@ -811,7 +814,7 @@ async function createRequest(ctx, d, test){
   while(await D.prepare('SELECT 1 FROM requests WHERE ref = ?').bind(ref).first());
   const rec = {ref, channel: ctx.m.channel === 'wa' ? 'whatsapp' : 'instagram', kind: d.kind, occasion: d.occasion || '',
     date: d.date, time: d.time, area: d.area, guests: d.guests, smoking: d.smoking, request: d.request || '',
-    name: d.name, phone: d.phone, test: !!test, createdAt: new Date().toISOString()};
+    name: d.name, phone: d.phone, key: ctx.key, test: !!test, createdAt: new Date().toISOString()};
   if(ctx.m.channel === 'ig') rec.igUser = await igUsername(ctx.env, ctx.m.uid);
   await D.prepare('INSERT INTO requests (ref, channel, user_id, data, created) VALUES (?, ?, ?, ?, ?)')
     .bind(ref, ctx.m.channel, ctx.m.uid, JSON.stringify(rec), Date.now()).run();

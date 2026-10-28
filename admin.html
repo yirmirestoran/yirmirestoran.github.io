@@ -460,6 +460,10 @@ h2{font-size:25px!important}
 .cs-send{display:flex;gap:8px;padding:10px;background:#fff;border-top:1px solid var(--line)}
 .cs-send textarea{flex:1;min-width:0;resize:none;padding:8px 10px;border:1px solid var(--line);border-radius:10px;font:inherit}
 .cs-note{margin:0;padding:0 12px 10px;background:#fff}
+.cs-res{display:flex;flex-direction:column;gap:6px;padding:8px 12px;background:#fffbea;border-bottom:1px solid var(--line)}
+.cs-ri{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cs-rt{flex:1;min-width:160px;display:flex;flex-direction:column}
+.cs-rt small{color:var(--muted)}
 @media (max-width:760px){
   .cs-wrap{grid-template-columns:minmax(0,1fr)}
   .cs-wrap .cs-view{display:none}
@@ -3524,7 +3528,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       duration: guests > 8 ? 150 : 120, guests, name: q.name || 'Misafir', phone: q.phone || '', tables: [], area: q.area === 'dis' ? 'dis' : 'ic',
       status: 'pending', source: q.channel === 'instagram' ? 'instagram' : 'whatsapp', note: '',
       preorder: {items: [], readyAt: '', note: q.request || ''}, payment: {status: 'none', amount: 0, method: ''},
-      bot: {ref: q.ref, channel: q.channel, smoking: q.smoking, occasion: q.occasion || '', area: q.area, igUser: q.igUser || ''}};
+      bot: {ref: q.ref, channel: q.channel, smoking: q.smoking, occasion: q.occasion || '', area: q.area, igUser: q.igUser || '', key: q.key || ''}};
     const pick = botPickTables(rec, list, q.area);
     if(pick){ rec.area = pick.area; rec.tables = pick.tables; }
     rec.note = [q.test ? 'TEST' : '', q.occasion ? 'Özel gün: ' + q.occasion : '', q.smoking === 'yes' ? 'Sigaralı' : 'Sigarasız',
@@ -3827,9 +3831,31 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     const who = m.dir === 'out' ? '🤖 Bot' : m.dir === 'staff' ? '👤 ' + (m.by || 'Personel') : '';
     return '<div class="cs-m ' + esc(m.dir) + '">' + (who ? '<span class="cs-by">' + esc(who) + '</span>' : '') + csFmt(m.text) + '<span class="cs-t">' + csTime(m.t) + '</span></div>';
   }
+  // Sohbetteki müşterinin bottan gelen rezervasyonları (yeni kayıtlarda sohbet anahtarıyla, eskilerde IG kullanıcı adı / telefonla eşleşir)
+  const csDigits = s => String(s || '').replace(/\D/g, '').slice(-10);
+  function csResFor(c){
+    const today = todayStr();
+    return (resList || []).filter(r => r.bot && (r.bot.key ? r.bot.key === c.k :
+        c.channel === 'ig' ? !!r.bot.igUser && r.bot.igUser === c.name : !!c.phone && csDigits(r.phone) === csDigits(c.phone)))
+      .filter(r => r.date >= today || r.status === 'pending')
+      .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time)).slice(0, 3);
+  }
+  function csResHtml(list){
+    if(!list.length) return '';
+    return '<div class="cs-res">' + list.map(r => {
+      const d = r.date.split('-').reverse().slice(0, 2).join('.');
+      return '<div class="cs-ri"><div class="cs-rt"><b>📋 ' + esc(d + ' · ' + r.time + ' · ' + r.guests + ' kişi') + '</b>' +
+          '<small>' + esc(tableLabels(r) + (r.bot.occasion ? ' · 🎉 ' + r.bot.occasion : '') + ' · #' + r.bot.ref) + '</small></div>' +
+        '<span class="pill ' + (r.status === 'pending' ? 'soon' : r.status === 'cancelled' || r.status === 'noshow' ? 'off' : 'on') + '">' + esc(RES_STATUS_LABEL[r.status] || r.status) + '</span>' +
+        (r.status === 'pending' ? '<button type="button" class="btn sm primary" data-csr="confirmed" data-id="' + esc(r.id) + '">✅ Onayla</button>' +
+          '<button type="button" class="btn sm" data-csr="cancelled" data-id="' + esc(r.id) + '">❌ Reddet</button>' : '') +
+        '<button type="button" class="btn sm" data-csr="open" data-ref="' + esc(r.bot.ref) + '">Aç</button></div>';
+    }).join('') + '</div>';
+  }
   function renderCsView(force){
     const c = csOpen && csChats.get(csOpen);
-    const sig = c ? [c.k, c.state, c.step, c.windowOpen, csLastId, csMsgs.length].join('|') : '';
+    const cres = c ? csResFor(c) : [];
+    const sig = c ? [c.k, c.state, c.step, c.windowOpen, csLastId, csMsgs.length, cres.map(r => r.id + r.status + r.tables).join()].join('|') : '';
     if(!force && sig === csSig) return;
     csSig = sig;
     $('#cs-wrap').classList.toggle('open', !!csOpen);
@@ -3843,6 +3869,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
         '<div class="cs-who"><b>' + esc(csTitle(c)) + '</b><small>' + chName(c.channel) +
           (c.phone ? ' · <a href="tel:' + esc(c.phone.replace(/[^\d+]/g, '')) + '">' + esc(c.phone) + '</a>' : '') + (c.code ? ' · #' + esc(c.code) : '') + ' · ' + esc(st) + '</small></div>' +
         (c.state === 'human' ? '<button type="button" class="btn sm" data-cs="bot">🤖 Bota devret</button>' : '<button type="button" class="btn sm primary" data-cs="human">🙋 Devral</button>') + '</div>' +
+      csResHtml(cres) +
       '<div class="cs-msgs" id="cs-msgs">' + (csMsgs.length ? csMsgs.map(csMsgHtml).join('') : '<div class="cs-empty">Mesaj yok.</div>') + '</div>' +
       (c.windowOpen
         ? '<form class="cs-send" id="cs-send"><textarea id="cs-text" rows="2" placeholder="Müşteriye yazın… (Enter: gönder · Shift+Enter: yeni satır)"></textarea><button class="btn primary" type="submit">Gönder</button></form>' +
@@ -3885,6 +3912,8 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     renderCsStatus();
     if(!botOn()){ $('#cs-items').innerHTML = '<p class="res-empty">Bot bağlı değil.</p>'; return; }
     csFullAt = 0; csStatusAt = 0;
+    // Sohbetin üstünde müşterinin talebini göstermek için rezervasyonlar gerekir
+    if(resList === null) loadReservations(true).then(() => renderCsView(true)).catch(() => {});
     csPoll();
   }
   function csOpenChat(k){
@@ -3903,6 +3932,16 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   });
   $('#cs-q').addEventListener('input', renderCsList);
   $('#cs-view').addEventListener('click', async e => {
+    const rb = e.target.closest('[data-csr]');
+    if(rb){
+      const act = rb.dataset.csr;
+      if(act === 'open') return openBotRequest(rb.dataset.ref);
+      if(act === 'cancelled' && !confirm('Talep reddedilsin mi? Müşteriye uygun masa kalmadığı mesajı gider.')) return;
+      rb.disabled = true;
+      await updateRes(rb.dataset.id, {status: act}, act === 'confirmed' ? 'Rezervasyon onaylandı.' : 'Talep reddedildi.');
+      renderCsView(true);
+      return;
+    }
     const a = e.target.closest('[data-cs]');
     if(!a) return;
     if(a.dataset.cs === 'back'){ csOpen = null; renderCsView(true); renderCsList(); return; }
