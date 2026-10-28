@@ -188,7 +188,33 @@ h2{font-size:25px!important}
 .cchip.camp{background:#f4e6d8;color:#6f4c2d}
 .cchip.off{background:#fff;color:var(--muted);border:1px dashed #bbb}
 .cmore{font-size:10.5px;color:var(--muted)}
+.cres{display:block;font-size:10.5px;line-height:1.3;padding:3px 5px;border-radius:5px;background:#eef6ee;color:#245c2a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cres.busy{background:#fff3d6;color:#7a5200}
+.cres.full{background:#fde3e0;color:#9b2a1e}
+.cres i{font-style:normal;font-weight:800;color:#b26a00}
+.cal-res{border-top:1px solid var(--line);margin-top:10px;padding-top:10px}
+.crs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:6px;margin-bottom:10px}
+.crs{border:1px solid var(--line);border-radius:10px;padding:7px 9px;background:#fff}
+.crs b{display:block;font-size:18px}
+.crs small{color:var(--muted);font-size:11.5px}
+.crs.warn{border-color:#f0c36d;background:#fffbea}
+.crs.off{opacity:.65}
+.cfl{display:grid;grid-template-columns:90px 1fr auto;gap:8px;align-items:center;font-size:13px;margin:4px 0}
+.cbar{height:9px;border-radius:5px;background:#f1ebe0;overflow:hidden}
+.cbar i{display:block;height:100%;background:var(--accent)}
+.crows{margin-top:8px}
+.crow{display:grid;grid-template-columns:48px minmax(0,1.4fr) 56px minmax(0,1fr) auto;gap:8px;align-items:center;width:100%;padding:7px 4px;border:0;border-top:1px solid #f1ebe0;background:none;font:inherit;font-size:13px;text-align:left;cursor:pointer}
+.crow:hover{background:var(--accent-soft)}
+.crow .t{font-weight:800}
+.crow .n,.crow .m{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crow small{color:var(--muted);font-weight:700}
 @media(max-width:640px){
+  .cres{font-size:9px;padding:2px 3px}
+  .cres br{display:none}
+  .crow{grid-template-columns:44px minmax(0,1fr) auto;row-gap:2px}
+  .crow .m,.crow > span:nth-child(3){grid-column:2;font-size:12px;color:var(--muted)}
+  .cfl{grid-template-columns:70px 1fr;}
+  .cfl > span:last-child{grid-column:1 / -1;font-size:12px}
   .cal-cell{min-height:58px;padding:4px}
   .cchip{font-size:0;padding:0;width:8px;height:8px;border-radius:50%;display:inline-block}
   .cal-cell .chips-wrap{flex-direction:row;flex-wrap:wrap;gap:3px}
@@ -2092,6 +2118,8 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     $('#cal-title').textContent = fmtDay(first, {month:'long', year:'numeric'});
     const offset = (new Date(first).getUTCDay() + 6) % 7;   // Pazartesi ile başla
     const start = first - offset * DAY_MS;
+    // Rezervasyonlar henüz okunmadıysa okunur; gelince takvim kendiliğinden yenilenir
+    if(resList === null && session && session.dataKey && !resLoading) loadReservations(true);
     let html = Core.DAYS.map(x => '<div class="cal-dow">' + x.s + '</div>').join('');
     for(let i = 0; i < 42; i++){
       const day = start + i * DAY_MS;
@@ -2100,8 +2128,18 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       const {evs, camps} = dayItems(day);
       const chips = evs.map(ev => '<span class="cchip ' + (ev.published === false ? 'off' : 'ev') + '" title="' + esc(evLine(ev)) + '">' + esc(evLine(ev)) + '</span>')
         .concat(camps.map(x => '<span class="cchip camp" title="' + esc(x.c.title + ' · ' + x.info.time) + '">% ' + esc(Core.discountLabel(x.c)) + '</span>'));
+      let rs = '';
+      if(resList){
+        const s = dayResStats(isoDay(day));
+        if(s.act.length){
+          const full = s.total && s.peak.n / s.total;
+          rs = '<span class="cres' + (full >= .9 ? ' full' : full >= .6 ? ' busy' : '') + '" title="' + s.act.length + ' rezervasyon · ' + s.guests + ' kişi · ' + s.used + '/' + s.total + ' masa' +
+            (s.peak.n ? ' · en yoğun ' + s.peak.time + ' (' + s.peak.n + ' masa)' : '') + (s.pending ? ' · ' + s.pending + ' onay bekliyor' : '') + '">' +
+            '<b>🍽 ' + s.act.length + '</b> · ' + s.guests + ' kişi<br>🪑 ' + s.used + '/' + s.total + ' masa' + (s.pending ? ' <i>⏳' + s.pending + '</i>' : '') + '</span>';
+        }
+      }
       html += '<button type="button" class="cal-cell' + (inMonth ? '' : ' out') + (day === n.dayStart ? ' today' : '') + (day === selDay ? ' sel' : '') + '" data-day="' + day + '">' +
-        '<span class="num">' + new Date(day).getUTCDate() + '</span><span class="chips-wrap">' + chips.slice(0, 3).join('') + '</span>' +
+        '<span class="num">' + new Date(day).getUTCDate() + '</span>' + rs + '<span class="chips-wrap">' + chips.slice(0, 3).join('') + '</span>' +
         (chips.length > 3 ? '<span class="cmore">+' + (chips.length - 3) + ' daha</span>' : '') + '</button>';
     }
     $('#cal-grid').innerHTML = html;
@@ -2113,13 +2151,36 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     const {evs, camps} = dayItems(day);
     const title = fmtDay(day, {day:'numeric', month:'long', weekday:'long'}) + (day === n.dayStart ? ' · Bugün' : '');
     $('#cal-day').innerHTML = '<div class="cal-head" style="margin:0"><h2 style="margin:0;text-align:left">' + esc(title) + '</h2><span style="flex:1"></span>' +
+        '<button class="btn sm" data-dact="resday">Rezervasyonlara git</button>' +
         '<button class="btn primary sm" data-dact="add">+ Bu güne etkinlik ekle</button></div>' +
+      dayResHtml(isoDay(day)) +
       (!evs.length && !camps.length ? '<p class="hint">Bu gün için planlanmış etkinlik veya kampanya yok.</p>' : '') +
       evs.map(ev => { const t = Core.eventType(ev); return '<div class="day-item"><span class="lg ' + (ev.published === false ? 'off' : 'ev') + '"></span><div class="tx"><b>' + t.icon + ' ' + esc(ev.title) + '</b>' +
         '<small>' + esc(t.label) + ' · ' + esc(ev.start ? ev.start + (ev.end ? '–' + ev.end : '') : 'Tüm gün') + (ev.repeat === 'weekly' ? ' · her hafta' : '') + (ev.popup ? ' · popup' : '') + (ev.published === false ? ' · yayında değil' : '') + '</small></div>' +
         '<button class="btn sm" data-dact="edit" data-id="' + esc(ev.id) + '">Düzenle</button></div>'; }).join('') +
       camps.map(x => '<div class="day-item"><span class="lg camp"></span><div class="tx"><b>% ' + esc(x.c.title) + '</b><small>Kampanya · ' + esc(Core.describeSchedule(x.c)) + '</small></div>' +
         '<button class="btn sm" data-dact="camp" data-id="' + esc(x.c.id) + '">Kampanyayı aç</button></div>').join('');
+  }
+  // Gün panelindeki rezervasyon dökümü: sayılar, kat kat masa doluluğu ve günün rezervasyon listesi
+  function dayResHtml(date){
+    if(resList === null) return '<p class="hint">Rezervasyonlar yükleniyor…</p>';
+    const s = dayResStats(date);
+    if(!s.all.length) return '<div class="cal-res"><p class="hint" style="margin:0">Bu gün için rezervasyon yok · ' + s.total + ' masanın hepsi boş.</p></div>';
+    const box = (n, l, cls) => '<div class="crs' + (cls ? ' ' + cls : '') + '"><b>' + n + '</b><small>' + l + '</small></div>';
+    const bar = f => { const p = f.total ? Math.round(f.used / f.total * 100) : 0;
+      return '<div class="cfl"><span>' + esc(f.name) + '</span><div class="cbar"><i style="width:' + p + '%"></i></div><span><b>' + f.used + '</b>/' + f.total + ' dolu · ' + (f.total - f.used) + ' boş</span></div>'; };
+    const rows = s.all.map(r => '<button type="button" class="crow" data-dact="res" data-id="' + esc(r.id) + '"><span class="t">' + esc(r.time) + '</span>' +
+      '<span class="n">' + esc(r.name || '—') + (r.bot ? ' <small>' + (r.bot.channel === 'instagram' ? 'IG' : 'WA') + '</small>' : '') + '</span>' +
+      '<span>' + (+r.guests || 0) + ' kişi</span><span class="m">' + esc((r.tables || []).length ? tableLabels(r) : 'masa yok') + '</span>' +
+      '<span class="pill ' + (r.status === 'pending' ? 'soon' : r.status === 'cancelled' || r.status === 'noshow' ? 'off' : 'on') + '">' + esc(RES_STATUS_LABEL[r.status] || r.status) + '</span></button>').join('');
+    return '<div class="cal-res"><div class="crs-grid">' +
+        box(s.act.length, 'rezervasyon') + box(s.guests, 'kişi') + box(s.used + '/' + s.total, 'masa dolu') + box(s.total - s.used, 'boş masa') +
+        (s.peak.n ? box(s.peak.time, 'en yoğun saat · ' + s.peak.n + ' masa') : '') +
+        (s.pending ? box(s.pending, 'onay bekliyor', 'warn') : '') + (s.confirmed ? box(s.confirmed, 'onaylı') : '') +
+        (s.seated ? box(s.seated, 'masada') : '') + (s.done ? box(s.done, 'tamamlandı') : '') +
+        (s.noTable ? box(s.noTable, 'masası seçilmemiş', 'warn') : '') + (s.preorder ? box(s.preorder, 'ön siparişli') : '') +
+        (s.bot ? box(s.bot, 'bottan gelen') : '') + (s.cancelled ? box(s.cancelled, 'iptal', 'off') : '') + (s.noshow ? box(s.noshow, 'gelmedi', 'off') : '') +
+      '</div>' + s.floors.map(bar).join('') + '<div class="crows">' + rows + '</div></div>';
   }
   function renderEventList(){
     const n = Core.now();
@@ -2160,6 +2221,11 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     if(!b) return;
     const act = b.dataset.dact;
     if(act === 'add') addEvent(selDay);
+    if(act === 'resday' || act === 'res'){
+      resDay = isoDay(selDay); showTab('res'); renderRes();
+      const r = act === 'res' && (resList || []).find(x => x.id === b.dataset.id);
+      if(r){ resArea = r.area || resArea; renderRes(); openResForm(r); }
+    }
     if(act === 'edit'){ const ev = state.events.find(x => x.id === b.dataset.id); if(ev) openEventForm(ev, false); }
     if(act === 'camp'){ const c = state.campaigns.find(x => x.id === b.dataset.id); if(c){ openCamps.add(c); showTab('campaigns'); renderCampaigns(); } }
     if(act === 'day'){ selDay = +b.dataset.day; const d = new Date(selDay); calMonth = {y: d.getUTCFullYear(), m: d.getUTCMonth()}; showTab('calendar'); }
@@ -2754,6 +2820,26 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   /* ---------- Rezervasyon sekmesi ---------- */
   function refreshResViews(){
     if(!$('#tab-res').classList.contains('hide')) renderRes();
+    if(!$('#tab-calendar').classList.contains('hide')) renderCalendar();
+  }
+  // Bir günün rezervasyon özeti (takvim için): kaç rezervasyon, kaç kişi, kaç masa dolu, en yoğun saat
+  function dayResStats(date){
+    const all = dayRes(date), act = all.filter(r => r.status !== 'cancelled' && r.status !== 'noshow');
+    const count = st => all.filter(r => r.status === st).length;
+    const used = new Set(act.flatMap(r => r.tables || []));
+    const floors = Core.FLOORS.map(f => ({name: f.name, total: f.tables.length, used: f.tables.filter(t => used.has(t.id)).length}));
+    let peak = {n: 0, time: ''};
+    slotList(0).forEach(t => {
+      const m = resMin(t), busy = new Set();
+      act.forEach(r => { const g = resRange(r); if(g[0] <= m && m < g[1]) (r.tables || []).forEach(id => busy.add(id)); });
+      if(busy.size > peak.n) peak = {n: busy.size, time: t};
+    });
+    return {all, act, guests: act.reduce((s, r) => s + (+r.guests || 0), 0), floors,
+      used: floors.reduce((s, f) => s + f.used, 0), total: floors.reduce((s, f) => s + f.total, 0), peak,
+      pending: count('pending'), confirmed: count('confirmed'), seated: count('seated'), done: count('done'),
+      cancelled: count('cancelled'), noshow: count('noshow'), noTable: act.filter(r => !(r.tables || []).length).length,
+      preorder: act.filter(r => r.preorder && (r.preorder.items || []).length).length,
+      bot: act.filter(r => r.bot).length};
   }
   function ensureResDefaults(){
     if(!resDay) resDay = todayStr();
