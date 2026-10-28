@@ -31,7 +31,7 @@
  *   GRAPH_VERSION     (isteğe bağlı) Meta Graph API sürümü, varsayılan v23.0
  */
 
-const VERSION = '2026-10-28b';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
+const VERSION = '2026-10-28c';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
 const SESSION_MS = 30 * 60e3;          // bu kadar sessiz kalan sohbet baştan başlar
 const HUMAN_MS = 12 * 3600e3;          // "yetkili" istenince bot bu süre susar
 const WINDOW_MS = 23.5 * 3600e3;       // WhatsApp/Instagram 24 saat mesajlaşma penceresi (pay bırakılarak)
@@ -1144,9 +1144,13 @@ async function panelSend(env, b){
   return json({ok: true});
 }
 async function botStatus(env){
+  // Önce asıl numara kontrol edilir: o anda devreye girdiyse kart doğrudan yeni numarayı gösterir
+  const bn = await ensureBotNumber(env).catch(() => null);
   const D = await db(env), base = 'https://graph.facebook.com/' + graphVer(env) + '/', pid = await primaryPid(env);
   const lastIn = async p => (await D.prepare("SELECT MAX(t) AS t FROM messages WHERE dir = 'in' AND k >= ? AND k < ?").bind(p + ':', p + ';').first()).t || null;
-  const wa = {configured: !!(env.WA_TOKEN && pid), botNumber: await ensureBotNumber(env).catch(() => null), lastErr: await getSetting(env, 'err:wa'), lastIn: await lastIn('wa')};
+  let lastErr = await getSetting(env, 'err:wa');
+  if(lastErr && bn && bn.live && lastErr.t < bn.at) lastErr = null;   // asıl numaraya geçmeden önceki (test numarası) hatası
+  const wa = {configured: !!(env.WA_TOKEN && pid), botNumber: bn, lastErr, lastIn: await lastIn('wa')};
   if(wa.configured){
     try{
       const p = await getJSON(base + pid + '?fields=display_phone_number,verified_name,quality_rating,status,name_status', env.WA_TOKEN);
