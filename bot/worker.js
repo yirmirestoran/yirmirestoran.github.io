@@ -31,7 +31,7 @@
  *   GRAPH_VERSION     (isteğe bağlı) Meta Graph API sürümü, varsayılan v23.0
  */
 
-const VERSION = '2026-10-28e';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
+const VERSION = '2026-10-29a';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
 const SESSION_MS = 30 * 60e3;          // bu kadar sessiz kalan sohbet baştan başlar
 const HUMAN_MS = 12 * 3600e3;          // "yetkili" istenince bot bu süre susar
 const WINDOW_MS = 23.5 * 3600e3;       // WhatsApp/Instagram 24 saat mesajlaşma penceresi (pay bırakılarak)
@@ -829,10 +829,11 @@ async function createRequest(ctx, d, test){
   if(rec.request) lines.push('🍽 İstek: ' + rec.request);
   const code = await relayCode(ctx.env, ctx.key);
   lines.push('👤 ' + rec.name + ' · ' + rec.phone + (rec.igUser ? ' · ' + rec.igUser : ''), '',
-    '👉 Görmek ve onaylamak için: ' + siteUrl(ctx.env) + '/admin.html#talep=' + ref, REPLY_HINT(code));
+    '👇 Aşağıdan onaylayın, reddedin ya da sohbeti devralın. Masa planı: ' + siteUrl(ctx.env) + '/admin.html#talep=' + ref, REPLY_HINT(code));
   const short = rec.name + ', ' + dateLong(rec.date) + ' ' + rec.time + ', ' + rec.guests + ' kişi, ' + AREA[rec.area] + ' (kod ' + ref + ')';
-  ctx.after.push(() => notifyStaff(ctx.env, lines.join('\n'), short, ctx.key));
+  ctx.after.push(() => notifyStaff(ctx.env, lines.join('\n'), short, ctx.key, null, decideButtons(ref)));
 }
+const decideButtons = ref => [{id: 's:ok:' + ref, title: '✅ Onayla'}, {id: 's:no:' + ref, title: '❌ Reddet'}, {id: 's:take:' + ref, title: '🙋 Devral'}];
 
 /* ---------- Personel ---------- */
 const STAFF_HELP = '👋 *Personel komutları*\n' +
@@ -842,12 +843,16 @@ const STAFF_HELP = '👋 *Personel komutları*\n' +
   '• *dış aç* – dış alanı aç\n' +
   '• *durum* – bot durumu\n' +
   '• *izle aç* / *izle kapat* – müşterilerin bota yazdığı her mesajın kopyası size gelsin\n' +
-  '• *test* – botu müşteri gibi deneyin\n\n' +
+  '• *test* – botu müşteri gibi deneyin\n' +
+  '• *onayla KOD* / *reddet KOD* / *devral KOD* – talep bildirimindeki düğmelerle aynı\n\n' +
   '*Müşteriye yazmak:* bildirimi sola kaydırıp yanıtlayın ya da *#KOD mesajınız* yazın. Siz yazınca bot o müşteriye 12 saat karışmaz; *#KOD bitir* yazarsanız sohbet bota döner.\n\n' +
   'İpucu: Her gün bu numaraya bir kez yazmanız (ör. *durum*), o gün gelen bildirimlerin ayrıntılı ve ücretsiz gelmesini sağlar.';
 const REPLY_HINT = code => '↩ Müşteriye yazmak için bu mesajı yanıtlayın ya da *#' + code + ' mesajınız* yazın.';
 async function staffCommand(ctx){
   const t = ctx.t, env = ctx.env, today = trNow().date;
+  // Düğmeye basmak bildirimi "yanıtlamak" sayılır; müşteriye aktarılmadan önce karar olarak işlenir
+  const dec = staffDecision(ctx);
+  if(dec){ await staffDecide(ctx, dec); return null; }
   const target = await relayTarget(ctx);
   if(target){ if(target.key) await relayToCustomer(ctx, target.key, target.text); return null; }
   if(/^izle (ac|acik)$/.test(t)){
@@ -897,17 +902,84 @@ async function staffCommand(ctx){
 // Personel numaralarına bildirim. Personel son 24 saatte bu numaraya yazdıysa düz metin (ücretsiz),
 // yazmadıysa onaylı şablon (STAFF_TEMPLATE) kullanılır; WhatsApp pencere dışında düz metni teslim etmez.
 // custKey verilirse personelin bu bildirime verdiği yanıt o müşteriye iletilir.
-async function notifyStaff(env, text, short, custKey, exceptNum){
+// options: bildirimin altındaki düğmeler (ör. Onayla / Reddet / Devral)
+async function notifyStaff(env, text, short, custKey, exceptNum, options){
   const D = await db(env);
   const res = await Promise.allSettled(staffNumbers(env).filter(n => n !== exceptNum).map(async num => {
     const c = await D.prepare('SELECT last_in FROM contacts WHERE k = ?').bind('wa:' + num).first();
     const j = env.STAFF_TEMPLATE && !(c && Date.now() - c.last_in < WINDOW_MS)
       ? await waTemplate(env, num, env.STAFF_TEMPLATE, [short])
-      : await waSend(env, num, {text});
-    const mid = j && j.messages && j.messages[0] && j.messages[0].id;
-    if(custKey && mid) await D.prepare('INSERT OR REPLACE INTO relay_msgs (mid, k, t) VALUES (?, ?, ?)').bind(mid, custKey, Date.now()).run();
+      : await waSend(env, num, {text, options});
+    await rememberRelay(env, j, custKey);
   }));
   res.forEach(r => { if(r.status === 'rejected') console.error('personel bildirimi', r.reason && r.reason.message); });
+}
+// Personele giden mesaj yanıtlanırsa yanıt bu müşteriye iletilir
+async function rememberRelay(env, j, custKey){
+  const mid = j && j.messages && j.messages[0] && j.messages[0].id;
+  if(custKey && mid) await (await db(env)).prepare('INSERT OR REPLACE INTO relay_msgs (mid, k, t) VALUES (?, ?, ?)').bind(mid, custKey, Date.now()).run();
+}
+
+/* ---------- Personel WhatsApp'tan karar verir ---------- */
+// Bildirimdeki düğmeler ya da yazıyla: "onayla KOD", "reddet KOD", "devral KOD"
+function staffDecision(ctx){
+  const c = /^s:(ok|no|take):([A-Z0-9]{5})$/.exec(ctx.m.choice || '');
+  if(c) return {act: c[1], ref: c[2]};
+  const m = /^(onayla|onay|reddet|red|devral)\s+#?([a-z0-9]{5})$/.exec(ctx.t);
+  return m ? {act: {onayla: 'ok', onay: 'ok', reddet: 'no', red: 'no', devral: 'take'}[m[1]], ref: m[2].toUpperCase()} : null;
+}
+const STATUS_TR = {confirmed: 'onaylandı', cancelled: 'reddedildi'};
+async function staffDecide(ctx, d){
+  const env = ctx.env, D = await db(env);
+  const row = await D.prepare('SELECT * FROM requests WHERE ref = ?').bind(d.ref).first();
+  if(!row){ say(ctx, '#' + d.ref + ' kodlu talep bulunamadı (120 günden eski talepler silinir).'); return; }
+  const rec = JSON.parse(row.data), key = row.channel + ':' + row.user_id, code = await relayCode(env, key);
+  const by = firstName(ctx.m.name) || localPhone(ctx.m.uid) || 'Personel';
+  const who = rec.name + ' · ' + dateLong(rec.date) + ' ' + rec.time + ' · ' + rec.guests + ' kişi';
+  if(d.act === 'take'){
+    await takeOver(env, key);
+    await logMsg(env, key, 'sys', '🙋 Personel devraldı — bot 12 saat bu müşteriye cevap vermeyecek', by);
+    const text = '🙋 *' + rec.name + '* sohbetini devraldınız (#' + code + '). Bot bu müşteriye 12 saat cevap vermeyecek.\n\n' +
+      REPLY_HINT(code) + '\nİşiniz bitince *#' + code + ' bitir* yazın, sohbet bota döner.' +
+      (rec.phone ? '\n📞 Aramak için: ' + rec.phone : '');
+    ctx.after.push(async () => rememberRelay(env, await waSend(env, ctx.m.uid, {text}), key));
+    ctx.after.push(() => notifyStaff(env, '🙋 ' + by + ', #' + d.ref + ' (' + who + ') sohbetini devraldı.', by + ' #' + d.ref + ' sohbetini devraldı', key, ctx.m.uid));
+    return;
+  }
+  const status = d.act === 'ok' ? 'confirmed' : 'cancelled', prev = rec.status || row.notified;
+  if(prev){
+    say(ctx, '#' + d.ref + ' zaten ' + (STATUS_TR[prev] || prev) + (rec.decidedBy ? ' (' + rec.decidedBy + ')' : '') + '.' +
+      (prev !== status ? ' Değiştirmek için panelden açın: ' + siteUrl(env) + '/admin.html#talep=' + d.ref : ''));
+    return;
+  }
+  // Talep panele yeniden düşer; panel kaydı bu durumla günceller
+  Object.assign(rec, {status, decidedBy: by, decidedAt: new Date().toISOString()});
+  await D.prepare('UPDATE requests SET data = ?, imported = 0 WHERE ref = ?').bind(JSON.stringify(rec), d.ref).run();
+  await logMsg(env, key, 'sys', (status === 'confirmed' ? '✅ Rezervasyon onaylandı' : '❌ Rezervasyon reddedildi') + ' (WhatsApp)', by);
+  let result;
+  try{
+    const via = await notifyCustomer(env, row, {ref: d.ref, status, name: rec.name, date: rec.date, time: rec.time, guests: rec.guests,
+      area: rec.area === 'any' ? '' : AREA[rec.area]});
+    result = '📨 Müşteriye ' + channelName(via) + ' üzerinden ' + (status === 'confirmed' ? 'onay' : 'ret') + ' mesajı gitti.';
+  }catch(e){
+    result = '⚠️ Müşteriye mesaj gidemedi: ' + e.message + (rec.phone ? '\n📞 Lütfen arayın: ' + rec.phone : '');
+  }
+  const head = (status === 'confirmed' ? '✅' : '❌') + ' #' + d.ref + ' ' + STATUS_TR[status] + ' — ' + who;
+  if(status === 'confirmed'){
+    const share = 'https://wa.me/?text=' + encodeURIComponent(groupText(rec));
+    say(ctx, head + '\n' + result + '\n\n📣 *Gruba paylaşmak için* aşağıdaki bağlantıya dokunun, grubu seçip gönderin:\n' + share +
+      '\n\n🪑 Masa ataması panelde: ' + siteUrl(env) + '/admin.html#talep=' + d.ref);
+  }else say(ctx, head + '\n' + result);
+  ctx.after.push(() => notifyStaff(env, head + ' (' + by + ')', by + ' #' + d.ref + ' talebini ' + (status === 'confirmed' ? 'onayladı' : 'reddetti'), key, ctx.m.uid));
+}
+// Onaylanan rezervasyonun ekip grubuna paylaşılacak özeti
+function groupText(rec){
+  return ['✅ *Onaylı rezervasyon* · ' + rec.ref,
+    '📅 ' + dateLong(rec.date) + ' · ' + rec.time,
+    '👥 ' + rec.guests + ' kişi · ' + (AREA[rec.area] || '') + ' · ' + (rec.smoking === 'yes' ? '🚬 Sigaralı' : '🚭 Sigarasız'),
+    rec.occasion ? '🎉 Özel gün: ' + rec.occasion : '', rec.request ? '🍽 İstek: ' + rec.request : '',
+    '👤 ' + rec.name + (rec.phone ? ' · ' + rec.phone : ''),
+    '📲 ' + channelName(rec.channel) + (rec.decidedBy ? ' · onaylayan: ' + rec.decidedBy : '')].filter(Boolean).join('\n');
 }
 
 /* ---------- Personel ↔ müşteri aktarımı ---------- */
@@ -1239,6 +1311,12 @@ async function apiNotify(env, b){
   if(!row) return json({error: 'Talep bulunamadı (çok eski olabilir).'}, 404);
   if(b.status !== 'confirmed' && b.status !== 'cancelled') return json({error: 'Geçersiz durum'}, 400);
   if(row.notified === b.status) return json({ok: true, skipped: true, channel: row.channel});
+  try{ return json({ok: true, channel: row.channel, via: await notifyCustomer(env, row, b)}); }
+  catch(e){ return json({error: e.message}, e.status || 502); }
+}
+// Onay / iptal mesajını müşteriye gönderir; hangi kanaldan gittiğini döndürür ('whatsapp' | 'instagram')
+async function notifyCustomer(env, row, b){
+  const D = await db(env), fail = (msg, status) => Object.assign(new Error(msg), {status});
   const site = await siteInfo(env), first = firstName(b.name), guests = +b.guests || 0;
   const when = whenText(b);
   const text = b.status === 'confirmed' ? confirmText(site, b)
@@ -1255,12 +1333,12 @@ async function apiNotify(env, b){
       let rec = {};
       try{ rec = JSON.parse(row.data); }catch(e){}
       try{ await waConfirm(env, Object.assign({}, b, {phone: row.channel === 'wa' ? row.user_id : rec.phone})); via = 'whatsapp'; }
-      catch(e){ return json({error: channelName(row.channel) + ' 24 saat kuralı nedeniyle mesaj gönderilemedi; WhatsApp\'tan da gitmedi: ' + e.message}, 409); }
+      catch(e){ throw fail(channelName(row.channel) + ' 24 saat kuralı nedeniyle mesaj gönderilemedi; WhatsApp\'tan da gitmedi: ' + e.message, 409); }
     }
-    else return json({error: 'Müşteri 24 saatten uzun süredir yazmadığı için ' + channelName(row.channel) + ' otomatik mesaja izin vermiyor. Lütfen telefonla bilgi verin.'}, 409);
+    else throw fail('Müşteri 24 saatten uzun süredir yazmadığı için ' + channelName(row.channel) + ' otomatik mesaja izin vermiyor. Lütfen telefonla bilgi verin.', 409);
   }catch(e){
-    return json({error: 'Mesaj gönderilemedi: ' + e.message}, 502);
+    throw e.status ? e : fail('Mesaj gönderilemedi: ' + e.message, 502);
   }
   await D.prepare('UPDATE requests SET notified = ? WHERE ref = ?').bind(b.status, row.ref).run();
-  return json({ok: true, channel: row.channel, via});
+  return via;
 }

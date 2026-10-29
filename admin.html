@@ -3633,8 +3633,19 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     rec.note = [q.test ? 'TEST' : '', q.occasion ? 'Özel gün: ' + q.occasion : '', q.smoking === 'yes' ? 'Sigaralı' : 'Sigarasız',
       q.area === 'any' ? 'Alan fark etmez' : '', q.igUser ? 'IG ' + q.igUser : '',
       pick ? '' : '⚠ Uygun boş masa bulunamadı, masayı elle seçin'].filter(Boolean).join(' · ');
+    botApplyDecision(rec, q);
     rec.createdAt = rec.updatedAt = new Date().toISOString();
     return rec;
+  }
+  // Personel talebi WhatsApp'tan onayladı / reddettiyse (bot müşteriye zaten bildirdi)
+  function botApplyDecision(rec, q){
+    if(q.status !== 'confirmed' && q.status !== 'cancelled') return false;
+    if(rec.status !== 'pending' && rec.status !== q.status) return false;   // panelde başka bir duruma alınmış
+    const changed = rec.status !== q.status;
+    rec.status = q.status;
+    if(q.decidedBy && !(rec.note || '').includes('WhatsApp\'tan')) rec.note = [rec.note, (q.status === 'confirmed' ? 'Onaylayan' : 'Reddeden') + ': ' + q.decidedBy + ' (WhatsApp\'tan)'].filter(Boolean).join(' · ');
+    if(changed) rec.updatedAt = new Date().toISOString();
+    return changed;
   }
   async function pullBotInbox(quiet){
     if(!botOn() || !session.dataKey || botBusy) return;
@@ -3644,14 +3655,15 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       botErr = ''; botOutdoor = d.outdoor || null; botMsgs = d.msgs;
       csSetWaiting(d.waiting);
       const reqs = (d.requests || []).filter(q => q && q.ref && q.date && q.time);
-      let added = [];
+      let added = [], decided = [];
       if(reqs.length){
         const known = new Set((resList || []).filter(r => r.bot).map(r => r.bot.ref));
-        if(resList === null || reqs.some(q => !known.has(q.ref))){
+        if(resList === null || reqs.some(q => !known.has(q.ref) || q.status)){
           await mutateReservations(list => {
-            added = [];
+            added = []; decided = [];
             reqs.forEach(q => {
-              if(list.some(r => r.bot && r.bot.ref === q.ref)) return;
+              const old = list.find(r => r.bot && r.bot.ref === q.ref);
+              if(old){ if(botApplyDecision(old, q)) decided.push(old); return; }
               const rec = botToRes(q, list);
               list.push(rec); added.push(rec);
             });
@@ -3663,7 +3675,15 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
         botChime();
         const f = added[0];
         toast('🆕 ' + (added.length > 1 ? added.length + ' yeni bot rezervasyonu geldi' :
-          'Yeni rezervasyon: ' + f.name + ' · ' + f.guests + ' kişi · ' + f.date.split('-').reverse().slice(0, 2).join('.') + ' ' + f.time + ' · ' + tableLabels(f)) + ' (onay bekliyor)', false, 9000);
+          'Yeni rezervasyon: ' + f.name + ' · ' + f.guests + ' kişi · ' + f.date.split('-').reverse().slice(0, 2).join('.') + ' ' + f.time + ' · ' + tableLabels(f)) +
+          (f.status === 'pending' ? ' (onay bekliyor)' : f.status === 'confirmed' ? ' (WhatsApp\'tan onaylandı)' : ' (WhatsApp\'tan reddedildi)'), false, 9000);
+      }
+      if(decided.length){
+        refreshResViews();
+        // O talep formda açıksa form da güncellensin (kaydedince eski durum geri yazılmasın)
+        const open = resEdit && resEdit.bot && decided.find(r => r.bot.ref === resEdit.bot.ref);
+        if(open && !$('#res-modal').classList.contains('hide')){ resEdit.status = open.status; $('#resf-status').value = open.status; $('#resf-note').value = open.note; }
+        toast(decided.map(r => (r.status === 'confirmed' ? '✅ ' : '❌ ') + r.name + ' · ' + r.time + ' WhatsApp\'tan ' + (r.status === 'confirmed' ? 'onaylandı' : 'reddedildi')).join(' · '), false, 9000);
       }
     }catch(e){
       botErr = e.message;
