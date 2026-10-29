@@ -1324,5 +1324,78 @@ body.no-scroll .social{opacity:0;pointer-events:none}
   }
 })();
 </script>
+
+<!-- 29 Ekim Cumhuriyet Bayramı: yalnızca 29.10.2026 (Türkiye saati) gösterilir; önizleme: ?ata=1 -->
+<style>
+#ata-pop{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,6,4,.78);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;transition:opacity .4s var(--ease)}
+#ata-pop.in{opacity:1}
+#ata-pop .ata-card{position:relative;width:min(420px,100%);max-height:calc(100dvh - 32px);overflow:auto;background:var(--bg2);border:1px solid var(--line2);border-radius:18px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.6);transform:translateY(14px) scale(.98);transition:transform .5s var(--ease)}
+#ata-pop.in .ata-card{transform:none}
+#ata-pop .ata-flag{display:block;width:100%;height:auto;aspect-ratio:2/1}
+#ata-pop .ata-photo{width:150px;height:190px;margin:-60px auto 0;border-radius:12px;overflow:hidden;border:3px solid var(--bg2);box-shadow:0 0 0 1px var(--gold3),0 14px 34px rgba(0,0,0,.55);position:relative}
+#ata-pop .ata-photo img{width:100%;height:100%;object-fit:cover;object-position:50% 12%;filter:grayscale(1) contrast(1.05)}
+#ata-pop .ata-body{padding:18px 24px 26px}
+#ata-pop .ata-eyebrow{font:600 11px/1 var(--sans);letter-spacing:.24em;text-transform:uppercase;color:#e30a17}
+#ata-pop h2{font:500 34px/1.1 var(--serif);margin:10px 0 6px;color:var(--text)}
+#ata-pop h2 em{font-style:italic;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+#ata-pop p{font:300 14px/1.65 var(--sans);color:var(--muted);margin:0 0 6px}
+#ata-pop blockquote{margin:14px 0 4px;font:italic 400 19px/1.4 var(--serif);color:var(--gold2)}
+#ata-pop cite{display:block;font:500 11px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--faint);font-style:normal}
+#ata-pop .ata-sign{margin-top:16px;font:400 13px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--text)}
+#ata-pop .ata-x{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,.45);color:#fff;font-size:20px;line-height:36px;cursor:pointer;z-index:1}
+#ata-pop .ata-ok{margin-top:18px;padding:12px 26px;border:1px solid var(--gold);border-radius:999px;background:transparent;color:var(--gold2);font:500 12px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;cursor:pointer}
+#ata-badge{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:9000;display:flex;align-items:center;gap:10px;padding:6px 14px 6px 6px;border:1px solid var(--line2);border-radius:999px;background:rgba(19,16,12,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--text);cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.45);font:500 11px/1.25 var(--sans);letter-spacing:.08em;text-align:left;animation:ataIn .6s var(--ease) both}
+#ata-badge img{width:46px;height:46px;border-radius:50%;object-fit:cover;object-position:50% 10%;filter:grayscale(1);border:2px solid #e30a17}
+#ata-badge b{display:block;font:500 17px/1.1 var(--serif);letter-spacing:0;color:var(--gold2)}
+@keyframes ataIn{from{opacity:0;transform:translateY(20px)}}
+@media (max-width:420px){#ata-pop h2{font-size:29px}#ata-badge{padding-right:12px}#ata-badge img{width:40px;height:40px}}
+</style>
+<script>
+(() => {
+  const preview = /[?&]ata=1\b/.test(location.search);
+  let today = '';
+  try{ today = new Intl.DateTimeFormat('en-CA', {timeZone: 'Europe/Istanbul', year: 'numeric', month: '2-digit', day: '2-digit'}).format(new Date()); }catch(e){}
+  if(!preview && today !== '2026-10-29') return;
+  const IMG = 'assets/ataturk.jpg';
+  const FLAG = '<svg class="ata-flag" viewBox="0 0 1200 600" aria-hidden="true"><rect width="1200" height="600" fill="#e30a17"/>' +
+    '<g transform="translate(-200 -100)"><circle cx="425" cy="400" r="200" fill="#fff"/><circle cx="475" cy="400" r="160" fill="#e30a17"/>' +
+    '<polygon fill="#fff" points="583.334,400 764.235,458.779 652.431,304.894 652.431,495.106 764.235,341.221"/></g></svg>';
+  const age = 2026 - 1923;
+
+  function open(){
+    if(document.getElementById('ata-pop')) return;
+    const el = document.createElement('div');
+    el.id = 'ata-pop'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', '29 Ekim Cumhuriyet Bayramı');
+    el.innerHTML = '<div class="ata-card"><button class="ata-x" aria-label="Kapat">×</button>' + FLAG +
+      '<div class="ata-photo"><img src="' + IMG + '" alt="Mustafa Kemal Atatürk"></div>' +
+      '<div class="ata-body"><div class="ata-eyebrow">29 Ekim 1923 – 29 Ekim 2026</div>' +
+      '<h2>Cumhuriyet Bayramımız <em>kutlu olsun</em></h2>' +
+      '<p>Cumhuriyetimizin ' + age + '. yılını gururla kutluyor; başta Gazi Mustafa Kemal Atatürk olmak üzere tüm kahramanlarımızı saygı ve minnetle anıyoruz.</p>' +
+      '<blockquote>“Ne mutlu Türküm diyene!”</blockquote><cite>Mustafa Kemal Atatürk</cite>' +
+      '<div class="ata-sign">Yirmi Restoran ailesi</div>' +
+      '<button class="ata-ok">Menüye geç</button></div></div>';
+    document.body.appendChild(el);
+    const prev = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    requestAnimationFrame(() => el.classList.add('in'));
+    const close = () => { el.classList.remove('in'); document.documentElement.style.overflow = prev; setTimeout(() => el.remove(), 400); document.removeEventListener('keydown', esc); };
+    const esc = e => { if(e.key === 'Escape') close(); };
+    document.addEventListener('keydown', esc);
+    el.addEventListener('click', e => { if(e.target === el || e.target.closest('.ata-x, .ata-ok')) close(); });
+  }
+
+  function start(){
+    const b = document.createElement('button');
+    b.id = 'ata-badge'; b.setAttribute('aria-label', '29 Ekim Cumhuriyet Bayramı mesajı');
+    b.innerHTML = '<img src="' + IMG + '" alt=""><span><b>29 Ekim</b>Cumhuriyet Bayramı</span>';
+    b.addEventListener('click', open);
+    document.body.appendChild(b);
+    let seen = false;
+    try{ seen = !preview && sessionStorage.getItem('yirmi-29ekim'); sessionStorage.setItem('yirmi-29ekim', '1'); }catch(e){}
+    if(!seen) setTimeout(open, 600);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+</script>
 </body>
 </html>
