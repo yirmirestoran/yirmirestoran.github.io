@@ -22,7 +22,8 @@
  *   WA_WABA_ID        Asıl bot numarasının bağlı olduğu "WhatsApp Business Account ID"
  *   WA_PIN            Asıl bot numarası için 6 haneli iki adımlı doğrulama PIN'i (kayıt sırasında kullanılır)
  *   IG_TOKEN          Instagram erişim anahtarı (60 günlük; bot her hafta kendisi yeniler)
- *   STAFF_NUMBERS     Bildirim alacak personel numaraları, virgülle: 905321112233,905441112233
+ *   STAFF_NUMBERS     Bildirim alacak personel numaraları, virgülle: 905321112233,905441112233 (905303383120 her zaman yöneticidir)
+ *   GROUP_NUMBERS     (isteğe bağlı) Onaylanan rezervasyonun özetinin gideceği ekip numaraları, virgülle (personel yetkisi yok)
  *   ADMIN_KEY         Yönetim panelinin bota bağlanırken kullandığı uzun, rastgele anahtar
  *   STAFF_TEMPLATE    (isteğe bağlı) 24 saat penceresi dışında personele gidecek şablonun adı
  *   CONFIRM_TEMPLATE  (isteğe bağlı) 24 saat dışında müşteriye gidecek onay şablonunun adı (varsayılan rezervasyon_onay; yoksa bot oluşturur)
@@ -31,7 +32,7 @@
  *   GRAPH_VERSION     (isteğe bağlı) Meta Graph API sürümü, varsayılan v23.0
  */
 
-const VERSION = '2026-10-29b';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
+const VERSION = '2026-10-29c';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
 const SESSION_MS = 30 * 60e3;          // bu kadar sessiz kalan sohbet baştan başlar
 const HUMAN_MS = 12 * 3600e3;          // "yetkili" istenince bot bu süre susar
 const WINDOW_MS = 23.5 * 3600e3;       // WhatsApp/Instagram 24 saat mesajlaşma penceresi (pay bırakılarak)
@@ -416,7 +417,12 @@ function safeEqual(a, b){
   const x = enc(a), y = enc(b);
   return x.length === y.length && crypto.subtle.timingSafeEqual(x, y);
 }
-function staffNumbers(env){ return String(env.STAFF_NUMBERS || '').split(/[,;\s]+/).map(x => x.replace(/\D/g, '')).filter(Boolean); }
+// Restoranın yönetici numarası her zaman personeldir: bot ona müşteri gibi davranmaz, bildirimleri ve özetleri o alır
+const ADMIN_NUMBERS = ['905303383120'];
+const numList = s => String(s || '').split(/[,;\s]+/).map(x => x.replace(/\D/g, '')).filter(Boolean);
+function staffNumbers(env){ return [...new Set(ADMIN_NUMBERS.concat(numList(env.STAFF_NUMBERS)))]; }
+// Ekip "grubu": onaylanan rezervasyonun özeti bu numaralara gider (personel yetkisi yoktur)
+function groupNumbers(env){ const st = staffNumbers(env); return numList(env.GROUP_NUMBERS).filter(n => !st.includes(n)); }
 const channelName = ch => ch === 'wa' || ch === 'whatsapp' ? 'WhatsApp' : 'Instagram';
 
 /* ---------- Webhook ---------- */
@@ -516,9 +522,10 @@ async function onMessage(env, m){
   const ctx = {env, m, key, t: norm(m.text), out: [], notes: [], after: []};
 
   const staff = m.channel === 'wa' && staffNumbers(env).includes(m.uid);
-  const logIt = !staff || !!(s && s.test);   // personelin bota yazdığı komutlar sohbet listesine girmez
+  const team = !staff && m.channel === 'wa' && groupNumbers(env).includes(m.uid);
+  const logIt = !(staff || team) || !!(s && s.test);   // personelin bota yazdığı komutlar sohbet listesine girmez
   if(logIt) await logMsg(env, key, 'in', m.media ? '[' + (MEDIA_LABEL[m.mediaType] || 'dosya') + ']' : (m.text || ''));
-  if(!staff){
+  if(!staff && !team){
     const f = await floodCheck(env, key, now, !m.choice);
     if(f === 'warn'){
       const text = '🙏 Çok kısa sürede çok sayıda mesaj aldık. Lütfen ' + Math.round(FLOOD_MUTE_MS / 60e3) + ' dakika bekleyip tek mesajla yazın; ekibimiz mesajlarınızı görüyor.';
@@ -527,6 +534,11 @@ async function onMessage(env, m){
     if(f) return;   // bot cevap vermez, personele de iletilmez (mesaj sohbet kaydında durur)
   }
   if(staff && !(s && s.test)) s = await staffCommand(ctx);
+  else if(team){
+    // Ekip numarası müşteri akışına girmez; yazması 24 saat boyunca özetlerin ücretsiz gelmesini sağlar
+    say(ctx, '👋 Burası ekip bildirim hattı. Onaylanan rezervasyonların özeti buraya gelecek.\nÖzetlerin kesintisiz gelmesi için günde bir kez herhangi bir mesaj yazmanız yeterli.');
+    s = null;
+  }
   else{
     if(s && s.human){
       // Personel ilgileniyor: bot susar, müşterinin mesajı personele iletilir
@@ -882,6 +894,8 @@ const STAFF_HELP = '👋 *Personel komutları*\n' +
   '• *durum* – bot durumu\n' +
   '• *izle aç* / *izle kapat* – müşterilerin bota yazdığı her mesajın kopyası size gelsin\n' +
   '• *test* – botu müşteri gibi deneyin\n' +
+  '• *bekleyen* – onay bekleyen talepler, düğmeleriyle\n' +
+  '• *bugün* / *yarın* / *5.11* – o günün talepleri\n' +
   '• *onayla KOD* / *reddet KOD* / *devral KOD* – talep bildirimindeki düğmelerle aynı\n\n' +
   '*Müşteriye yazmak:* bildirimi sola kaydırıp yanıtlayın ya da *#KOD mesajınız* yazın. Siz yazınca bot o müşteriye 12 saat karışmaz; *#KOD bitir* yazarsanız sohbet bota döner.\n\n' +
   'İpucu: Her gün bu numaraya bir kez yazmanız (ör. *durum*), o gün gelen bildirimlerin ayrıntılı ve ücretsiz gelmesini sağlar.';
@@ -934,16 +948,65 @@ async function staffCommand(ctx){
       '• Panele henüz aktarılmamış talep: ' + waiting.n + (waiting.n ? ' (yönetim panelini açınca aktarılır)' : ''));
     return null;
   }
-  say(ctx, STAFF_HELP);
+  if(/^(bekleyen|bekleyenler|onay bekleyen|talepler)$/.test(t)){
+    const list = (await botRequests(env)).filter(r => !r.decided && r.date >= today).slice(0, 5);
+    if(!list.length){ say(ctx, '✅ Onay bekleyen talep yok.'); return null; }
+    list.forEach(r => say(ctx, reqLine(r, true), decideButtons(r.ref)));
+    return null;
+  }
+  let day = /^(bugun|yarin)$/.test(t) ? (t === 'bugun' ? today : addDays(today, 1)) : null;
+  if(!day && (m = /^(\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?|\d{1,2} [a-z]+)$/.exec(t))) day = parseDate(t);
+  if(day){
+    const list = (await botRequests(env)).filter(r => r.date === day && r.status !== 'cancelled').sort((a, b) => a.time.localeCompare(b.time));
+    const guests = list.filter(r => r.status === 'confirmed').reduce((n, r) => n + (+r.guests || 0), 0);
+    say(ctx, '📅 *' + dateLong(day) + '* — bot üzerinden gelen talepler\n' +
+      (list.length ? list.map(r => reqLine(r)).join('\n') + '\n\nOnaylı: ' + list.filter(r => r.status === 'confirmed').length + ' rezervasyon · ' + guests + ' kişi'
+        : 'Talep yok.') + '\n\n(Panelden elle girilen rezervasyonlar için: ' + siteUrl(env) + '/admin.html)');
+    return null;
+  }
+  say(ctx, await adminSummary(env) + '\n\n' + STAFF_HELP);
   return null;
+}
+// Bottan gelen (test olmayan) talepler; decided: personel WhatsApp'tan ya da panelden karar verdi mi
+async function botRequests(env){
+  const r = await (await db(env)).prepare('SELECT data, notified FROM requests WHERE created > ? ORDER BY created DESC LIMIT 300').bind(Date.now() - 60 * 864e5).all();
+  return r.results.map(x => {
+    const d = JSON.parse(x.data);
+    d.status = d.status || x.notified || 'pending';
+    d.decided = d.status !== 'pending';
+    return d;
+  }).filter(d => !d.test);
+}
+const STATUS_ICON = {pending: '⏳', confirmed: '✅', cancelled: '❌'};
+function reqLine(r, full){
+  const base = STATUS_ICON[r.status] + ' ' + r.time + ' · ' + r.guests + ' kişi · ' + r.name + ' · ' + (AREA[r.area] || '') + ' (#' + r.ref + ')';
+  if(!full) return base;
+  return '⏳ *Onay bekliyor* — ' + channelName(r.channel) + '\n📅 ' + dateLong(r.date) + ' · ' + r.time + '\n👥 ' + r.guests + ' kişi · ' + (AREA[r.area] || '') +
+    ' · ' + (r.smoking === 'yes' ? '🚬 Sigaralı' : '🚭 Sigarasız') + (r.occasion ? '\n🎉 ' + r.occasion : '') + (r.request ? '\n🍽 ' + r.request : '') +
+    '\n👤 ' + r.name + ' · ' + r.phone + '\nKod: *' + r.ref + '*';
+}
+// Yönetici numarası selam verince / tanınmayan bir şey yazınca gelen özet
+async function adminSummary(env){
+  const today = trNow().date, all = await botRequests(env);
+  const pending = all.filter(r => !r.decided && r.date >= today);
+  const of = day => all.filter(r => r.date === day && r.status === 'confirmed');
+  const sum = l => l.length + ' rezervasyon · ' + l.reduce((n, r) => n + (+r.guests || 0), 0) + ' kişi';
+  return '📊 *Yirmi — yönetici özeti*\n' +
+    '• Onay bekleyen: *' + pending.length + '*' + (pending.length ? ' → *bekleyen* yazın, düğmelerle onaylayın' : '') + '\n' +
+    '• Bugün onaylı: ' + sum(of(today)) + ' → ayrıntı için *bugün*\n' +
+    '• Yarın onaylı: ' + sum(of(addDays(today, 1))) + ' → *yarın*\n' +
+    '_(Bot üzerinden gelen talepler; tüm masa planı: ' + siteUrl(env) + '/admin.html)_';
 }
 // Personel numaralarına bildirim. Personel son 24 saatte bu numaraya yazdıysa düz metin (ücretsiz),
 // yazmadıysa onaylı şablon (STAFF_TEMPLATE) kullanılır; WhatsApp pencere dışında düz metni teslim etmez.
 // custKey verilirse personelin bu bildirime verdiği yanıt o müşteriye iletilir.
 // options: bildirimin altındaki düğmeler (ör. Onayla / Reddet / Devral)
 async function notifyStaff(env, text, short, custKey, exceptNum, options){
+  return notifyNumbers(env, staffNumbers(env).filter(n => n !== exceptNum), text, short, custKey, options);
+}
+async function notifyNumbers(env, nums, text, short, custKey, options){
   const D = await db(env);
-  const res = await Promise.allSettled(staffNumbers(env).filter(n => n !== exceptNum).map(async num => {
+  const res = await Promise.allSettled(nums.map(async num => {
     const c = await D.prepare('SELECT last_in FROM contacts WHERE k = ?').bind('wa:' + num).first();
     const j = env.STAFF_TEMPLATE && !(c && Date.now() - c.last_in < WINDOW_MS)
       ? await waTemplate(env, num, env.STAFF_TEMPLATE, [short])
@@ -1004,8 +1067,10 @@ async function staffDecide(ctx, d){
   }
   const head = (status === 'confirmed' ? '✅' : '❌') + ' #' + d.ref + ' ' + STATUS_TR[status] + ' — ' + who;
   if(status === 'confirmed'){
-    const share = 'https://wa.me/?text=' + encodeURIComponent(groupText(rec));
-    say(ctx, head + '\n' + result + '\n\n📣 *Gruba paylaşmak için* aşağıdaki bağlantıya dokunun, grubu seçip gönderin:\n' + share +
+    const share = 'https://wa.me/?text=' + encodeURIComponent(groupText(rec)), team = groupNumbers(env);
+    if(team.length) ctx.after.push(() => notifyNumbers(env, team, groupText(rec), 'Onaylı rezervasyon: ' + who + ' (kod ' + d.ref + ')'));
+    say(ctx, head + '\n' + result + (team.length ? '\n📣 Ekibe (' + team.length + ' kişi) özet gönderildi.' : '') +
+      '\n\n📣 *WhatsApp grubunuza paylaşmak için* aşağıdaki bağlantıya dokunun, grubu seçip gönderin:\n' + share +
       '\n\n🪑 Masa ataması panelde: ' + siteUrl(env) + '/admin.html#talep=' + d.ref);
   }else say(ctx, head + '\n' + result);
   ctx.after.push(() => notifyStaff(env, head + ' (' + by + ')', by + ' #' + d.ref + ' talebini ' + (status === 'confirmed' ? 'onayladı' : 'reddetti'), key, ctx.m.uid));

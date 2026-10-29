@@ -37,7 +37,8 @@ Müşteri istediği an **yetkili** yazarsa bot susar (12 saat) ve personele habe
 | `ALLOWED_ORIGIN` | Text | `https://yirmirestoran.github.io` |
 | `VERIFY_TOKEN` | Secret | Kendiniz uydurun, ör. `yirmi-dogrulama-2026` |
 | `ADMIN_KEY` | Secret | Uzun rastgele bir anahtar (aşağıya bakın) |
-| `STAFF_NUMBERS` | Secret | Bildirim alacak personel: `905321112233,905441112233` (başında 90, boşluksuz) |
+| `STAFF_NUMBERS` | Secret | Bildirim alacak personel: `905321112233,905441112233` (başında 90, boşluksuz). Yönetici numarası `905303383120` kodda sabittir, yazılmasa da personeldir |
+| `GROUP_NUMBERS` | Secret | (isteğe bağlı) Ekip: onaylanan her rezervasyonun özeti bu numaralara gider; onay/ret yetkileri yoktur |
 | `META_APP_SECRET` | Secret | Meta adımında alınacak |
 | `WA_TOKEN` | Secret | Meta adımında alınacak |
 | `WA_PHONE_ID` | Text | Meta adımında alınacak |
@@ -92,6 +93,10 @@ Bot 15 dakikada bir kontrol eder. Meta görünen adı onaylayınca numarayı kay
 
 ### Personel bildirimleri hakkında
 Resmi API **normal bir WhatsApp grubuna mesaj atamaz**. Bunun yerine bildirim, `STAFF_NUMBERS`'daki her personele restoranın numarasından ayrı ayrı gider. Hepsi aynı mesajı aldığı için grup gibi çalışır.
+
+Onaylanan rezervasyonlar için iki yol var:
+- **Ekip numaraları (`GROUP_NUMBERS`):** Özet bu numaralara otomatik gider. Bu kişiler bota yazarsa müşteri akışına girmezler.
+- **Mevcut WhatsApp grubunuz:** Onayladığınızda gelen mesajdaki "WhatsApp grubunuza paylaşmak için" bağlantısına dokunun, grubu seçip gönderin. Özet hazır yazılı gelir.
 
 WhatsApp kuralı gereği personel son 24 saat içinde bot numarasına yazmadıysa düz mesaj **teslim edilmez**. İki çözüm var (ikisini birlikte de kullanabilirsiniz):
 - **Kolay:** Her personel günde bir kez restoran numarasına **durum** yazsın. O gün tüm bildirimler ücretsiz ve ayrıntılı gelir.
