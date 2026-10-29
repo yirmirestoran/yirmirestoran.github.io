@@ -498,7 +498,13 @@ body.no-scroll .social{opacity:0;pointer-events:none}
   white-space:nowrap;background:var(--gold);color:var(--bg);font:500 10.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;padding:8px 10px;transition:all .3s var(--ease)}
 .social-list a:hover::after{opacity:1;transform:translate(0,-50%)}
 .social-toggle{display:none}
+/* Yandaki yatay "Rezervasyon Al" kutusu: akıllı rezervasyon asistanına (WhatsApp) gider */
+.side-reserve{display:flex;align-items:center;gap:9px;margin-bottom:8px;padding:13px 16px 13px 15px;background:var(--gold);color:var(--bg);border:1px solid var(--gold2);border-right:0;
+  font:600 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.4);transition:background .3s,padding .3s var(--ease)}
+.side-reserve svg{width:17px;height:17px;flex:none}
+.side-reserve:hover{background:var(--gold2);padding-right:22px}
 @media(max-width:760px){
+  .side-reserve{padding:12px 13px;font-size:10.5px;letter-spacing:.12em}
   .social{top:auto;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:none}
   .social-toggle{display:grid;place-items:center;width:44px;height:44px;background:var(--gold);color:var(--bg);box-shadow:0 6px 20px rgba(0,0,0,.4)}
   .social-toggle svg{width:19px;height:19px}
@@ -668,6 +674,10 @@ body.no-scroll .social{opacity:0;pointer-events:none}
 </footer>
 
 <nav class="social" id="social" aria-label="Sosyal medya" hidden>
+  <a class="side-reserve" id="side-reserve" href="https://wa.me/17117646211?text=Merhaba" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.5" y="5" width="17" height="15" rx="1.5"/><path d="M3.5 10h17M8 3v4M16 3v4m-7.5 7.5 2.2 2.2 4.3-4.4"/></svg>
+    <span>Rezervasyon Al</span>
+  </a>
   <button class="social-toggle" id="social-toggle" aria-label="Sosyal medya bağlantıları" aria-expanded="false">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/></svg>
   </button>
@@ -787,6 +797,8 @@ body.no-scroll .social{opacity:0;pointer-events:none}
     const wa = (site.social || {}).whatsapp;
     $('#i-reserve').href = site.reservationUrl || (wa ? 'https://wa.me/' + String(wa).replace(/\D/g, '').replace(/^0/, '90') + '?text=' + encodeURIComponent('Merhaba, rezervasyon yapmak istiyorum.') : 'tel:' + String(site.phone || '').replace(/\s/g, ''));
     if(site.reservationUrl) $('#i-reserve').target = '_blank';
+    $('#side-reserve').href = $('#i-reserve').href;
+    $('#side-reserve').target = /^https?:/.test($('#side-reserve').href) ? '_blank' : '';
 
     renderChef();
     renderMenu();
@@ -959,7 +971,8 @@ body.no-scroll .social{opacity:0;pointer-events:none}
     const links = C.socialLinks(DATA.site);
     const html = links.map(l => '<a href="' + esc(l.href) + '"' + (/^https?:/.test(l.href) ? ' target="_blank" rel="noopener"' : '') +
       ' aria-label="' + esc(l.label) + '" data-label="' + esc(l.label) + '">' + (SOCIAL_ICONS[l.key] || '') + '</a>').join('');
-    $('#social').hidden = !links.length;
+    $('#social').hidden = false;   // "Rezervasyon Al" kutusu her zaman görünür
+    $('#social-toggle').hidden = !links.length;
     $('#social-list').innerHTML = html;
     $('#foot-social').innerHTML = html;
   }

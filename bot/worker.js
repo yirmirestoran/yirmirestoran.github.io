@@ -31,7 +31,7 @@
  *   GRAPH_VERSION     (isteğe bağlı) Meta Graph API sürümü, varsayılan v23.0
  */
 
-const VERSION = '2026-10-29a';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
+const VERSION = '2026-10-29b';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
 const SESSION_MS = 30 * 60e3;          // bu kadar sessiz kalan sohbet baştan başlar
 const HUMAN_MS = 12 * 3600e3;          // "yetkili" istenince bot bu süre susar
 const WINDOW_MS = 23.5 * 3600e3;       // WhatsApp/Instagram 24 saat mesajlaşma penceresi (pay bırakılarak)
@@ -214,7 +214,8 @@ async function daily(env){
     D.prepare('DELETE FROM relay_msgs WHERE t < ?').bind(now - 3 * day),
     D.prepare('DELETE FROM relay WHERE updated < ?').bind(now - 30 * day),
     D.prepare('DELETE FROM messages WHERE t < ?').bind(now - 30 * day),
-    D.prepare('DELETE FROM chats WHERE last_t < ?').bind(now - 30 * day)
+    D.prepare('DELETE FROM chats WHERE last_t < ?').bind(now - 30 * day),
+    D.prepare("DELETE FROM settings WHERE k LIKE 'flood:%'")
   ]);
   await refreshIgToken(env).catch(e => console.error('ig token', e && e.message || e));
   await ensureBotNumber(env).catch(e => console.error('bot numarası', e && e.message || e));
@@ -517,6 +518,14 @@ async function onMessage(env, m){
   const staff = m.channel === 'wa' && staffNumbers(env).includes(m.uid);
   const logIt = !staff || !!(s && s.test);   // personelin bota yazdığı komutlar sohbet listesine girmez
   if(logIt) await logMsg(env, key, 'in', m.media ? '[' + (MEDIA_LABEL[m.mediaType] || 'dosya') + ']' : (m.text || ''));
+  if(!staff){
+    const f = await floodCheck(env, key, now, !m.choice);
+    if(f === 'warn'){
+      const text = '🙏 Çok kısa sürede çok sayıda mesaj aldık. Lütfen ' + Math.round(FLOOD_MUTE_MS / 60e3) + ' dakika bekleyip tek mesajla yazın; ekibimiz mesajlarınızı görüyor.';
+      try{ await send(env, m.channel, m.uid, {text}); await logMsg(env, key, 'out', text); }catch(e){ console.error('spam uyarısı', e.message); }
+    }
+    if(f) return;   // bot cevap vermez, personele de iletilmez (mesaj sohbet kaydında durur)
+  }
   if(staff && !(s && s.test)) s = await staffCommand(ctx);
   else{
     if(s && s.human){
@@ -543,6 +552,20 @@ async function onMessage(env, m){
     }
   }
   for(const fn of ctx.after){ try{ await fn(); }catch(e){ console.error('sonraki iş', e.message); } }
+}
+// Spam önlemi: 1 dakikada 12'den fazla mesaj → tek uyarı, sonra 3 dakika sessizlik.
+// Aynı yazı üst üste 3. kez gelirse (ör. 5 kez "merhaba") bot yalnızca ilk ikisine cevap verir (düğme seçimleri hariç).
+const FLOOD_N = 12, FLOOD_WIN_MS = 60e3, FLOOD_MUTE_MS = 3 * 60e3, REPEAT_N = 3;
+async function floodCheck(env, key, now, typed){
+  const D = await db(env), mk = 'flood:' + key;
+  const mute = await getSetting(env, mk);
+  if(mute && mute.until > now) return 'mute';
+  const r = await D.prepare("SELECT text, t FROM messages WHERE k = ? AND dir = 'in' AND t > ? ORDER BY id DESC LIMIT ?").bind(key, now - FLOOD_WIN_MS, FLOOD_N + 1).all();
+  const rows = r.results;
+  if(rows.length > FLOOD_N){ await setSetting(env, mk, {until: now + FLOOD_MUTE_MS}); return 'warn'; }
+  const last = rows.slice(0, REPEAT_N).map(x => norm(x.text));
+  if(typed && last.length === REPEAT_N && last[0] && last.every(x => x === last[0])) return 'mute';
+  return null;
 }
 function say(ctx, text, options, button){
   ctx.out.push({text: ctx.notes.concat(text).join('\n\n'), options, button});
@@ -809,6 +832,21 @@ const ANSWERS = {
 
 async function createRequest(ctx, d, test){
   const D = await db(ctx.env);
+  // Aynı kişiden çift talep olmasın: aynı güne açık talebi varsa ya da son 24 saatte 3 talep verdiyse yenisi açılmaz
+  if(!test){
+    const prev = (await D.prepare('SELECT ref, data, notified FROM requests WHERE channel = ? AND user_id = ? AND created > ? ORDER BY created DESC')
+      .bind(ctx.m.channel, ctx.m.uid, Date.now() - 864e5).all()).results.map(r => Object.assign(JSON.parse(r.data), {notified: r.notified}));
+    const same = prev.find(x => x.date === d.date && x.status !== 'cancelled' && x.notified !== 'cancelled');
+    if(same){
+      say(ctx, '😊 ' + dateLong(d.date) + ' için talebiniz zaten bize ulaştı (kod *' + same.ref + '*, ' + same.time + ', ' + same.guests + ' kişi). Ekibimiz en kısa sürede dönüş yapacak.\n\n' +
+        'Saat ya da kişi sayısını değiştirmek isterseniz *yetkili* yazın.');
+      return;
+    }
+    if(prev.length >= 3){
+      say(ctx, 'Son 24 saatte birden fazla talebiniz bize ulaştı; ekibimiz hepsine bakıp size dönecek 🙏 Acil bir durum için *yetkili* yazabilirsiniz.');
+      return;
+    }
+  }
   let ref;
   do{ ref = randomCode(5); }
   while(await D.prepare('SELECT 1 FROM requests WHERE ref = ?').bind(ref).first());
