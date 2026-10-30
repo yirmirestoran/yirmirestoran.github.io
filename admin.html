@@ -1166,10 +1166,11 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       <h2 style="margin:0;flex:1">Menü Teklifi</h2>
       <div class="seg" id="of-kind"><button type="button" data-k="offer">Teklif</button><button type="button" data-k="contract">Sözleşme</button></div>
     </div>
-    <p class="hint">Belirli günlerde toplu yemek isteyen gruplara (şirket, okul, dernek…) fix menü teklifi veya sözleşmesi hazırlayın. Sağdaki belge siz yazdıkça güncellenir; <b>Yazdır / PDF</b> ile A4 olarak kaydedip gönderebilirsiniz.</p>
+    <p class="hint">Belirli günlerde toplu yemek isteyen gruplara (şirket, okul, dernek…) fix menü teklifi veya sözleşmesi hazırlayın. Sağdaki belge siz yazdıkça güncellenir; <b>PDF indir</b> ile A4 PDF dosyası olarak cihazınıza iner, müşteriye gönderebilirsiniz.</p>
     <div class="row-actions">
       <button class="btn primary" type="button" id="of-save">Kaydet</button>
-      <button class="btn" type="button" id="of-print">Yazdır / PDF</button>
+      <button class="btn primary" type="button" id="of-pdf">PDF indir</button>
+      <button class="btn" type="button" id="of-print">Yazdır</button>
       <button class="btn" type="button" id="of-wa">WhatsApp'ta gönder</button>
       <button class="btn" type="button" id="of-new">Yeni teklif</button>
     </div>
@@ -5188,6 +5189,32 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     const img = root.querySelector('img');
     const go = () => setTimeout(() => window.print(), 60);
     if(img && !img.complete){ img.onload = img.onerror = go; } else go();
+  });
+  // PDF: belge görünmeyen bir alanda A4 genişliğinde çizilip doğrudan dosya olarak indirilir (kütüphane ilk tıklamada yüklenir)
+  function loadScript(src){
+    return new Promise((ok, fail) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => fail(new Error('PDF aracı yüklenemedi, internet bağlantınızı kontrol edin.')); document.head.appendChild(s); });
+  }
+  $('#of-pdf').addEventListener('click', async e => {
+    if(!ofCur) return;
+    const btn = e.currentTarget, label = btn.textContent;
+    btn.disabled = true; btn.textContent = 'PDF hazırlanıyor…';
+    const box = document.createElement('div');
+    box.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;background:#fff';
+    box.innerHTML = ofDocHtml(ofCur);
+    document.body.appendChild(box);
+    try{
+      if(!window.html2pdf) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
+      if(document.fonts && document.fonts.ready) await document.fonts.ready;
+      await Promise.all([...box.querySelectorAll('img')].map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; })));
+      const doc = box.firstChild;
+      doc.style.boxShadow = 'none'; doc.style.borderRadius = '0';
+      const name = ([ofCur.no || 'Teklif', ofCur.client].filter(Boolean).join(' ').replace(/[\\/:*?"<>|]+/g, '').replace(/[.\s]+$/, '') || 'Teklif') + '.pdf';
+      await window.html2pdf().set({margin: [8, 0, 8, 0], filename: name, image: {type: 'jpeg', quality: 0.95}, html2canvas: {scale: 2, useCORS: true, backgroundColor: '#ffffff'},
+        jsPDF: {unit: 'mm', format: 'a4', orientation: 'portrait'}, pagebreak: {mode: ['css'], avoid: ['.ofd-menu', '.ofd table', '.ofd-grand', '.ofd-sign', '.ofd-course', '.ofd li', '.ofd-valid', '.ofd-party']}}).from(doc).save();
+      toast(name + ' indirildi.');
+    }catch(err){ toast(err.message || 'PDF oluşturulamadı.', true, 7000); }
+    box.remove();
+    btn.disabled = false; btn.textContent = label;
   });
   $('#of-wa').addEventListener('click', () => {
     if(!ofCur) return;
