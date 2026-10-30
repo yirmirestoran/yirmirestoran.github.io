@@ -590,6 +590,88 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
 .lock-card{box-shadow:0 0 0 1px rgba(255,214,150,.5),0 0 40px rgba(255,170,70,.35),0 30px 60px rgba(40,24,8,.4)!important;text-align:center}
 .lock-logo{display:block;width:min(190px,72%);height:auto;margin:0 auto 8px;filter:drop-shadow(0 0 1px rgba(255,236,190,.9)) drop-shadow(0 0 6px rgba(255,190,100,.8)) drop-shadow(0 0 16px rgba(255,160,60,.45))}
 .lock-script{display:none;font:400 64px/1 'Mrs Saint Delafield','Great Vibes',cursive;color:#a57b3e;margin-bottom:6px}
+/* Menü teklifi: solda form, sağda canlı A4 belge */
+.of-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:14px;align-items:start}
+.of-prev{position:sticky;top:76px;max-height:calc(100vh - 90px);overflow:auto;border-radius:12px}
+.of-form .panel h2{font-size:21px!important}
+.of-form .grid{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.of-form .field.full{grid-column:1/-1}
+.of-chips{display:flex;flex-wrap:wrap;gap:6px}
+.of-chips label{display:inline-flex;gap:5px;align-items:center;font-size:12px;font-weight:600;background:#fff;border:1px solid var(--line);padding:5px 10px;border-radius:999px;cursor:pointer}
+.of-chips label:has(input:checked){background:var(--accent-soft);border-color:var(--accent)}
+.of-chips input{margin:0}
+.of-course{display:flex;gap:6px;align-items:center;margin-top:6px}
+.of-course input{padding:7px 9px;border:1px solid var(--line);border-radius:8px;min-width:0}
+.of-course .l{flex:0 0 120px;font-weight:700}
+.of-course .t{flex:1}
+.of-total{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--accent-soft);font-weight:700}
+.of-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.of-row .who{flex:1 1 200px;min-width:0}
+.of-row .who small{display:block;color:var(--muted);font-weight:500}
+.of-form details summary{cursor:pointer;font-weight:700}
+.ofd{background:#fff;color:#1c1610;font:12.5px/1.55 'DM Sans',system-ui,sans-serif;border-radius:6px;box-shadow:0 10px 30px rgba(40,24,8,.14);overflow:hidden;max-width:794px;margin:0 auto}
+.ofd *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ofd-head{background:linear-gradient(135deg,#2a1e13,#120d08);color:#f3e2c0;display:flex;align-items:center;gap:18px;padding:20px 28px;border-bottom:3px solid #c9a462}
+.ofd-head img{height:66px;width:auto;filter:drop-shadow(0 0 5px rgba(255,190,100,.45))}
+.ofd-head .script{font:400 58px/1 'Mrs Saint Delafield','Great Vibes',cursive;color:#ffd894}
+.ofd-ttl{flex:1;min-width:0}
+.ofd-ttl small{display:block;font-size:10px;letter-spacing:.32em;color:#c9a462;font-weight:700}
+.ofd-ttl b{display:block;font:600 25px/1.15 'Cormorant Garamond',serif;color:#fff3dc}
+.ofd-meta{text-align:right;font-size:11px;color:#cdbb9c;line-height:1.6}
+.ofd-meta b{color:#ffd894}
+.ofd-body{padding:20px 28px 26px}
+.ofd h4{font:700 10.5px 'DM Sans',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#a57b3e;margin:20px 0 8px;display:flex;align-items:center;gap:10px;break-after:avoid}
+.ofd h4::after{content:"";flex:1;height:1px;background:#e8dfcf}
+.ofd-intro{margin:0;font:italic 500 15px/1.5 'Cormorant Garamond',serif;color:#3b2f22}
+.ofd-parties{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.ofd-party{background:#faf6ee;border-radius:8px;padding:11px 14px;border-left:3px solid #c9a462}
+.ofd-party small,.ofd-kv small{display:block;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#7d7366;font-weight:700}
+.ofd-party b{display:block;font-size:14px;margin:2px 0}
+.ofd-kv{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 16px}
+.ofd-kv div{font-weight:600}
+.ofd-menu{border:1px solid #e8dfcf;border-radius:8px;padding:4px 16px;break-inside:avoid}
+.ofd-course{display:flex;gap:14px;padding:9px 0;border-bottom:1px dashed #e8dfcf}
+.ofd-course:last-child{border-bottom:0}
+.ofd-course .l{flex:0 0 118px;font:600 16px/1.25 'Cormorant Garamond',serif;color:#a57b3e}
+.ofd-course .t{flex:1;white-space:pre-line}
+.ofd-incl{margin-top:10px}
+.ofd-incl span{display:inline-block;background:#f5ecdc;border-radius:999px;padding:3px 11px;margin:0 6px 6px 0;font-weight:600;font-size:12px}
+.ofd-chef{margin:6px 0 0;font:italic 500 13.5px 'Cormorant Garamond',serif;color:#7d7366}
+.ofd table{width:100%;border-collapse:collapse;break-inside:avoid}
+.ofd th{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:#7d7366;text-align:left;padding:6px 8px;border-bottom:1px solid #e8dfcf}
+.ofd td{padding:8px;border-bottom:1px solid #f1eadc;font-weight:600}
+.ofd th:last-child,.ofd td:last-child{text-align:right}
+.ofd-grand{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#241a11;color:#f3e2c0;border-radius:8px;padding:11px 16px;margin-top:10px;break-inside:avoid}
+.ofd-grand b{font:600 24px 'Cormorant Garamond',serif;color:#ffd894}
+.ofd-note{margin:8px 0 0}
+.ofd ol{padding-left:18px;margin:0}
+.ofd li{margin-bottom:4px}
+.ofd-valid{margin-top:14px;padding:9px 12px;border:1px dashed #c9a462;border-radius:8px;text-align:center;font-weight:600}
+.ofd-sign{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:28px;break-inside:avoid}
+.ofd-sign div{border-top:1px solid #1c1610;padding-top:6px;margin-top:58px;font-size:11.5px}
+.ofd-sign b{display:block;font-size:12.5px}
+.ofd-foot{text-align:center;font-size:10.5px;color:#7d7366;border-top:1px solid #e8dfcf;padding:10px 28px;background:#faf6ee}
+#print-root{display:none}
+@media print{
+  @page{size:A4;margin:10mm}
+  body.of-printing{background:#fff}
+  body.of-printing > :not(#print-root){display:none!important}
+  body.of-printing #print-root{display:block}
+  body.of-printing .ofd{box-shadow:none;border-radius:0;max-width:none}
+}
+@media(max-width:900px){
+  .of-wrap{grid-template-columns:1fr}
+  .of-prev{position:static;max-height:none}
+}
+@media(max-width:560px){
+  .ofd-head{flex-wrap:wrap;padding:16px 18px}
+  .ofd-body{padding:16px 18px 20px}
+  .ofd-parties,.ofd-sign{grid-template-columns:1fr}
+  .ofd-kv{grid-template-columns:1fr 1fr}
+  .ofd-course{flex-direction:column;gap:2px}
+  .ofd-course .l{flex:none}
+  .of-course .l{flex-basis:96px}
+}
 @media(max-width:640px){
   .topbar h1{font-size:17px;width:100%}
   .item-row .in.price{flex:1 1 100px}
@@ -648,6 +730,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   <button class="tab" data-tab="calendar">Takvim</button>
   <button class="tab" data-tab="ann">Duyurular</button>
   <button class="tab" data-tab="campaigns">Kampanyalar</button>
+  <button class="tab" data-tab="offer">Menü Teklifi</button>
   <button class="tab" data-tab="site">İşletme Bilgileri</button>
   <button class="tab" data-tab="bot">WhatsApp Botu</button>
   <button class="tab" data-tab="qr">QR Kod</button>
@@ -1074,6 +1157,32 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   <div class="sl-pane panel hide" id="sl-costs"></div>
   <div class="sl-pane panel hide" id="sl-expenses"></div>
   <p class="hint res-foot">Satış, maliyet ve gider bilgileri şifreli saklanır; yalnızca bu panelden okunabilir.</p>
+</div>
+
+<!-- MENÜ TEKLİFİ -->
+<div class="page hide" id="tab-offer">
+  <div class="panel res-bar">
+    <div class="res-row">
+      <h2 style="margin:0;flex:1">Menü Teklifi</h2>
+      <div class="seg" id="of-kind"><button type="button" data-k="offer">Teklif</button><button type="button" data-k="contract">Sözleşme</button></div>
+    </div>
+    <p class="hint">Belirli günlerde toplu yemek isteyen gruplara (şirket, okul, dernek…) fix menü teklifi veya sözleşmesi hazırlayın. Sağdaki belge siz yazdıkça güncellenir; <b>Yazdır / PDF</b> ile A4 olarak kaydedip gönderebilirsiniz.</p>
+    <div class="row-actions">
+      <button class="btn primary" type="button" id="of-save">Kaydet</button>
+      <button class="btn" type="button" id="of-print">Yazdır / PDF</button>
+      <button class="btn" type="button" id="of-wa">WhatsApp'ta gönder</button>
+      <button class="btn" type="button" id="of-new">Yeni teklif</button>
+    </div>
+  </div>
+  <div class="of-wrap">
+    <div class="of-form" id="of-form"><div class="panel"><p class="res-empty">Yükleniyor…</p></div></div>
+    <div class="of-prev" id="of-prev"></div>
+  </div>
+  <div class="panel">
+    <h2>Kayıtlı teklifler</h2>
+    <div id="of-list"></div>
+  </div>
+  <p class="hint res-foot">Teklifler ve işletme bilgileri şifreli saklanır; yalnızca bu panelden okunabilir.</p>
 </div>
 
 <!-- QR -->
@@ -4775,11 +4884,324 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   setInterval(() => { if(session && !dirty && Date.now() - lastActive > IDLE_MS) logout(); else rememberSession(); }, 60000);
   window.addEventListener('pagehide', rememberSession);
 
+  /* ---------- Menü Teklifi ---------- */
+  // Belirli günlerde toplu yemek isteyen gruplar için fix menü teklifi / sözleşmesi. Teklifler, varsayılan şablon ve
+  // işletmenin resmî bilgileri (unvan, vergi no, IBAN) business.json içinde {offers: {list, tpl, co, seq}} olarak şifreli durur.
+  const OF_DAYS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+  const OF_INCL = ['Su', 'Çay', 'Ekmek', 'Ayran', 'Meşrubat', 'Türk kahvesi', 'Servis personeli', 'Masa düzeni'];
+  const OF_MODES = ['Restoranda servis', 'Adrese teslim', 'Yerinde servis (catering)'];
+  const OF_VAT = {in10: 'KDV (%10) dahil', in20: 'KDV (%20) dahil', ex10: '+ %10 KDV', ex20: '+ %20 KDV', none: 'KDV belirtilmez'};
+  const OF_TERMS = [
+    'Kesin kişi sayısı en geç hizmetten 48 saat önce bildirilir. Bildirilen sayının altında katılım olursa ücretlendirme bildirilen sayı üzerinden yapılır.',
+    'Menüdeki ürünler mevsime ve ürün bulunabilirliğine göre, önceden bilgi verilerek eşdeğer ürünlerle değiştirilebilir.',
+    'Menü dışı istekler (ek içecek, ek porsiyon vb.) ayrıca ücretlendirilir.',
+    'İptal ve gün değişiklikleri en geç 72 saat önce yazılı olarak bildirilir; daha geç yapılan iptallerde o günün bedelinin %50\'si tahsil edilir.',
+    'Gıda alerjisi, vejetaryen veya özel diyet talepleri önceden bildirilmelidir.',
+    'Belirtilen saatler dışındaki uzamalar için ek ücret talep edilebilir.'
+  ];
+  const OF_TPL_KEYS = ['kind', 'courses', 'incl', 'inclExtra', 'price', 'vat', 'payment', 'deposit', 'terms', 'valid', 'mode', 'time', 'days'];
+  let ofCur = null, ofCo = null;
+
+  function ofDefaults(){
+    return {kind: 'offer', mode: OF_MODES[0], time: '12:00 – 13:30', days: [0, 1, 2, 3, 4], valid: 15, price: '', vat: 'in10',
+      courses: [{l: 'Çorba', t: 'Günün çorbası'}, {l: 'Ana yemek', t: ''}, {l: 'Yanında', t: 'Pilav veya makarna'}, {l: 'Salata', t: 'Mevsim salatası'}, {l: 'Tatlı', t: 'Günün tatlısı'}],
+      incl: ['Su', 'Çay', 'Ekmek'], inclExtra: '', deposit: '',
+      payment: 'Hizmet sonrasında düzenlenen fatura karşılığı, 7 gün içinde nakit veya havale/EFT ile ödenir.', terms: OF_TERMS.join('\n')};
+  }
+  function ofStore(){ return (biz && biz.offers) || {}; }
+  function ofNew(){
+    const tpl = JSON.parse(JSON.stringify(Object.assign(ofDefaults(), ofStore().tpl || {})));
+    return Object.assign(tpl, {id: '', no: '', date: todayStr(), client: '', contact: '', phone: '', email: '', address: '', guests: '', start: '', end: '', dates: '', note: ''});
+  }
+  function ofKeep(){ try{ sessionStorage.setItem('yirmi-teklif', JSON.stringify(ofCur)); }catch(e){} }
+  const ofNum = s => +String(s || '').replace(/[^\d,.]/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.') || 0;
+  const ofDate = d => d ? new Date(Core.parseWall(d)).toLocaleDateString('tr-TR', {day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC'}) : '';
+  const ofMoney = n => n.toLocaleString('tr-TR', {minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2}) + ' TL';
+
+  // Dönem verilmişse seçili hafta günlerine denk gelen hizmet günü sayısı; tek gün/dönemsiz teklifte null
+  function ofServiceDays(o){
+    if(!o.start || !o.end || o.end <= o.start) return null;
+    let n = 0;
+    for(let d = o.start, i = 0; d <= o.end && i < 800; d = shiftDay(d, 1), i++) if(o.days.includes((new Date(Core.parseWall(d)).getUTCDay() + 6) % 7)) n++;
+    return n;
+  }
+  function ofCalc(o){
+    const p = ofNum(o.price), g = +o.guests || 0, days = ofServiceDays(o);
+    const rate = /20/.test(o.vat) ? 20 : /10/.test(o.vat) ? 10 : 0, ex = /^ex/.test(o.vat);
+    const perDay = p * g, total = perDay * (days == null ? 1 : days);
+    return {p, g, days, perDay, total, rate, ex, vatAmt: ex ? total * rate / 100 : 0, grand: ex ? total * (1 + rate / 100) : total};
+  }
+  function ofDaysText(o){
+    const d = o.days.slice().sort();
+    if(!d.length) return '';
+    if(d.length === 7) return 'Her gün';
+    if(d.join() === '0,1,2,3,4') return 'Hafta içi her gün';
+    if(d.join() === '5,6') return 'Hafta sonu';
+    return d.map(i => OF_DAYS[i]).join(', ');
+  }
+  function ofWhen(o){
+    if(o.start && o.end && o.end > o.start) return ofDate(o.start) + ' – ' + ofDate(o.end);
+    return ofDate(o.start);
+  }
+  const ofTitle = o => o.kind === 'contract' ? 'Toplu Yemek Hizmet Sözleşmesi' : 'Fix Menü Teklifi';
+  const ofLogo = () => state.site.logo ? previewUrl(state.site.logo) : '';
+
+  function ofDocHtml(o){
+    const s = state.site, co = ofCo || {}, c = ofCalc(o), contract = o.kind === 'contract';
+    const bizName = co.title || s.name || 'Yirmi';
+    const logo = ofLogo();
+    const kv = (k, v) => v ? '<div><small>' + esc(k) + '</small>' + esc(v) + '</div>' : '';
+    const party = (role, name, lines) => '<div class="ofd-party"><small>' + role + '</small><b>' + esc(name || '—') + '</b>' + lines.filter(Boolean).map(l => esc(l)).join('<br>') + '</div>';
+    const courses = o.courses.filter(x => x.l.trim() || x.t.trim());
+    const incl = o.incl.concat(o.inclExtra ? o.inclExtra.split(',').map(x => x.trim()).filter(Boolean) : []);
+    const terms = o.terms.split('\n').map(x => x.trim()).filter(Boolean);
+    const days = ofDaysText(o), period = c.days != null;
+    let h = '<div class="ofd"><header class="ofd-head">' +
+      (logo ? '<img src="' + esc(logo) + '" alt="' + esc(s.name || '') + '">' : '<span class="script">' + esc(s.name || 'Yirmi') + '</span>') +
+      '<div class="ofd-ttl"><small>' + (contract ? 'SÖZLEŞME' : 'TEKLİF') + ' · FİX MENÜ</small><b>' + ofTitle(o) + '</b></div>' +
+      '<div class="ofd-meta">' + (o.no ? 'No: <b>' + esc(o.no) + '</b><br>' : '') + 'Tarih: ' + esc(ofDate(o.date)) + '</div></header><div class="ofd-body">';
+    h += '<p class="ofd-intro">' + (contract
+      ? 'Aşağıda bilgileri yer alan taraflar arasında, belirtilen günlerde ve koşullarda toplu yemek hizmeti verilmesi amacıyla işbu sözleşme düzenlenmiştir.'
+      : 'Sayın ' + esc(o.contact || o.client || 'Yetkili') + ', ' + (o.client ? esc(o.client) + ' için ' : '') + 'hazırladığımız fix menü teklifimizi bilgilerinize sunarız.') + '</p>';
+    h += '<div class="ofd-parties">' +
+      party(contract ? 'Hizmet veren' : 'Teklifi veren', bizName, [co.title && s.name && co.title !== s.name ? s.name : '', s.address, [s.phone, s.email].filter(Boolean).join(' · '), co.tax ? 'Vergi: ' + co.tax : '']) +
+      party(contract ? 'Hizmet alan' : 'Teklif sunulan', o.client, [o.contact ? 'Yetkili: ' + o.contact : '', o.address, [o.phone, o.email].filter(Boolean).join(' · ')]) + '</div>';
+    h += '<h4>Hizmet bilgileri</h4><div class="ofd-kv">' +
+      kv('Hizmet şekli', o.mode) + kv('Kişi sayısı', o.guests ? o.guests + ' kişi' : '') + kv('Saat', o.time) +
+      kv(period ? 'Dönem' : 'Tarih', ofWhen(o)) + kv('Hizmet günleri', period || !o.start ? days : '') + kv('Hizmet günü', period ? c.days + ' gün' : '') +
+      '</div>' + (o.dates ? '<p class="ofd-note"><b>Özel tarihler:</b> ' + esc(o.dates) + '</p>' : '');
+    h += '<h4>Menü</h4><div class="ofd-menu">' + (courses.length ? courses.map(x => '<div class="ofd-course"><span class="l">' + esc(x.l) + '</span><span class="t">' + esc(x.t || '—') + '</span></div>').join('') : '<div class="ofd-course"><span class="t">—</span></div>') + '</div>';
+    if(incl.length) h += '<div class="ofd-incl">' + incl.map(x => '<span>✓ ' + esc(x) + '</span>').join('') + '</div>';
+    if(s.chef && s.chef.name) h += '<p class="ofd-chef">Menü, Şef ' + esc(s.chef.name) + ' yönetimindeki mutfağımızda günlük olarak hazırlanır.</p>';
+    h += '<h4>Fiyat</h4>';
+    if(c.p){
+      h += '<table><tr><th>Kişi başı</th><th>Kişi</th><th>Günlük</th>' + (period ? '<th>Gün</th>' : '') + '<th>Tutar</th></tr><tr><td>' + ofMoney(c.p) + '</td><td>' + (c.g || '—') + '</td><td>' + (c.g ? ofMoney(c.perDay) : '—') + '</td>' +
+        (period ? '<td>' + c.days + '</td>' : '') + '<td>' + (c.g ? ofMoney(c.total) : '—') + '</td></tr>' +
+        (c.ex && c.g ? '<tr><td colspan="' + (period ? 4 : 3) + '">KDV (%' + c.rate + ')</td><td>' + ofMoney(c.vatAmt) + '</td></tr>' : '') + '</table>';
+      h += '<div class="ofd-grand"><span>' + (c.g ? (period ? 'Dönem toplamı' : 'Toplam') : 'Kişi başı') + ' <small>(' + esc(OF_VAT[o.vat] || '') + ')</small></span><b>' + ofMoney(c.g ? c.grand : c.p) + '</b></div>';
+    }else h += '<p class="ofd-note">Kişi başı fiyat: —</p>';
+    if(o.deposit) h += '<p class="ofd-note"><b>Ön ödeme:</b> ' + esc(o.deposit) + '</p>';
+    if(o.payment) h += '<p class="ofd-note"><b>Ödeme:</b> ' + esc(o.payment) + '</p>';
+    if(co.iban) h += '<p class="ofd-note"><b>IBAN:</b> ' + esc(co.iban) + (co.title ? ' (' + esc(co.title) + ')' : '') + '</p>';
+    if(terms.length) h += '<h4>' + (contract ? 'Sözleşme şartları' : 'Koşullar') + '</h4><ol>' + terms.map(t => '<li>' + esc(t) + '</li>').join('') + '</ol>';
+    if(o.note) h += '<h4>Not</h4><p class="ofd-note" style="white-space:pre-line">' + esc(o.note) + '</p>';
+    if(!contract && o.valid) h += '<div class="ofd-valid">Bu teklif ' + esc(ofDate(shiftDay(o.date, +o.valid || 0))) + ' tarihine kadar geçerlidir.</div>';
+    h += '<div class="ofd-sign"><div><b>' + esc(bizName) + ' adına</b>' + esc(co.signer || 'Ad Soyad') + ' · İmza / Kaşe</div>' +
+      '<div><b>' + esc(o.client || (contract ? 'Hizmet alan' : 'Müşteri')) + ' adına</b>' + (contract ? 'Ad Soyad · İmza / Kaşe' : 'Onaylıyorum · Ad Soyad / İmza') + '</div></div>';
+    h += '</div><footer class="ofd-foot">' + [s.name, s.address, s.phone, co.web || location.host].filter(Boolean).map(esc).join(' · ') + '</footer></div>';
+    return h;
+  }
+
+  function ofText(o){
+    const s = state.site, c = ofCalc(o), contract = o.kind === 'contract';
+    const L = ['*' + (s.name || 'Yirmi') + ' · ' + ofTitle(o) + '*' + (o.no ? ' (' + o.no + ')' : '')];
+    if(o.client) L.push((contract ? '' : 'Sayın ') + (o.contact ? o.contact + ' – ' : '') + o.client);
+    L.push('');
+    const when = ofWhen(o), days = c.days != null || !o.start ? ofDaysText(o) : '';
+    if(when) L.push('📅 ' + when + (c.days != null ? ' (' + c.days + ' gün)' : ''));
+    if(days) L.push('🗓 ' + days);
+    if(o.dates) L.push('🗓 Özel tarihler: ' + o.dates);
+    if(o.time) L.push('🕐 ' + o.time);
+    if(o.guests) L.push('👥 ' + o.guests + ' kişi · ' + o.mode);
+    L.push('', '🍽 *Menü*');
+    o.courses.filter(x => x.l.trim() || x.t.trim()).forEach(x => L.push('• ' + (x.l ? x.l + ': ' : '') + (x.t || '—')));
+    const incl = o.incl.concat(o.inclExtra ? o.inclExtra.split(',').map(x => x.trim()).filter(Boolean) : []);
+    if(incl.length) L.push('✅ Dahil: ' + incl.join(', '));
+    if(c.p){
+      L.push('', '💰 Kişi başı *' + ofMoney(c.p) + '* (' + OF_VAT[o.vat] + ')');
+      if(c.g) L.push((c.days != null ? 'Dönem toplamı' : 'Toplam') + ': *' + ofMoney(c.grand) + '*');
+    }
+    if(o.deposit) L.push('Ön ödeme: ' + o.deposit);
+    if(o.payment) L.push('Ödeme: ' + o.payment);
+    if(!contract && o.valid) L.push('', 'Teklif ' + ofDate(shiftDay(o.date, +o.valid || 0)) + ' tarihine kadar geçerlidir.');
+    L.push('', [s.name, s.phone].filter(Boolean).join(' · '));
+    return L.join('\n');
+  }
+
+  function renderOffer(){
+    if(!state || $('#tab-offer').classList.contains('hide')) return;
+    if(!biz){
+      $('#of-form').innerHTML = '<div class="panel"><p class="res-empty">Yükleniyor…</p></div>';
+      loadBiz().then(() => biz ? renderOffer() : $('#of-form').innerHTML = '<div class="panel"><p class="msg err">Kayıtlı teklifler yüklenemedi. Sayfayı yenileyin.</p></div>');
+      return;
+    }
+    if(!ofCo) ofCo = Object.assign({title: '', tax: '', iban: '', signer: '', web: ''}, ofStore().co || {});
+    if(!ofCur){ try{ ofCur = JSON.parse(sessionStorage.getItem('yirmi-teklif')); }catch(e){} }
+    if(!ofCur || !Array.isArray(ofCur.courses)) ofCur = ofNew();
+    renderOfForm(); renderOfPrev(); renderOfList();
+  }
+  function renderOfForm(){
+    const o = ofCur;
+    document.querySelectorAll('#of-kind button').forEach(b => b.classList.toggle('on', b.dataset.k === o.kind));
+    const f = (k, label, attrs, full) => '<div class="field' + (full ? ' full' : '') + '"><label>' + label + '</label><input data-of="' + k + '" value="' + esc(o[k]) + '"' + (attrs || '') + '></div>';
+    const ta = (k, label, rows) => '<div class="field full"><label>' + label + '</label><textarea data-of="' + k + '" rows="' + (rows || 3) + '">' + esc(o[k]) + '</textarea></div>';
+    const sel = (k, label, opts) => '<div class="field"><label>' + label + '</label><select data-of="' + k + '">' + opts.map(([v, t]) => '<option value="' + esc(v) + '"' + (o[k] === v ? ' selected' : '') + '>' + esc(t) + '</option>').join('') + '</select></div>';
+    const items = [];
+    (state.categories || []).forEach(c => (c.items || []).forEach(i => { if(i.name) items.push(i.name); }));
+    const c = ofCalc(o);
+    const co = (k, label, ph) => '<div class="field"><label>' + label + '</label><input data-ofco="' + k + '" value="' + esc(ofCo[k]) + '" placeholder="' + esc(ph || '') + '"></div>';
+    $('#of-form').innerHTML =
+      '<div class="panel"><h2>Müşteri</h2><div class="grid">' +
+        f('client', 'Firma / grup adı', ' placeholder="ör. ABC Tekstil A.Ş."', true) + f('contact', 'Yetkili kişi') + f('phone', 'Telefon', ' type="tel" placeholder="05xx xxx xx xx"') + f('email', 'E-posta', ' type="email"') +
+        f('address', 'Adres', '', true) + '</div></div>' +
+      '<div class="panel"><h2>Hizmet</h2><div class="grid">' +
+        f('date', 'Belge tarihi', ' type="date"') + f('guests', 'Kişi sayısı', ' type="number" min="1" inputmode="numeric"') + f('time', 'Saat') +
+        sel('mode', 'Hizmet şekli', OF_MODES.map(m => [m, m])) +
+        f('start', 'Başlangıç (tek gün için yalnız bunu doldurun)', ' type="date"') + f('end', 'Bitiş', ' type="date"') +
+        '<div class="field full"><label>Hizmet günleri</label><div class="of-chips">' + OF_DAYS.map((d, i) => '<label><input type="checkbox" data-ofday="' + i + '"' + (o.days.includes(i) ? ' checked' : '') + '>' + d + '</label>').join('') + '</div></div>' +
+        f('dates', 'Özel tarihler / açıklama', ' placeholder="ör. Her ayın ilk cuması, 15 Kasım toplantı yemeği"', true) +
+        (o.kind === 'offer' ? f('valid', 'Teklif geçerliliği (gün)', ' type="number" min="0"') : '') + '</div></div>' +
+      '<div class="panel"><h2>Menü</h2><p class="hint">Sol tarafa başlık (Ana yemek…), sağa içerik yazın. Menünüzdeki ürünler öneri olarak çıkar; birden fazla seçenek için “veya” yazabilirsiniz.</p>' +
+        '<datalist id="of-items">' + items.map(n => '<option value="' + esc(n) + '">').join('') + '</datalist>' +
+        o.courses.map((x, i) => '<div class="of-course"><input class="l" data-ofc="' + i + '" data-k="l" value="' + esc(x.l) + '" placeholder="Başlık" aria-label="Başlık"><input class="t" data-ofc="' + i + '" data-k="t" list="of-items" value="' + esc(x.t) + '" placeholder="İçerik" aria-label="İçerik">' +
+          '<button class="btn sm" type="button" data-ofmv="' + i + '" title="Yukarı taşı"' + (i ? '' : ' disabled') + '>↑</button><button class="btn sm danger" type="button" data-ofdel="' + i + '" title="Sil">✕</button></div>').join('') +
+        '<div class="row-actions"><button class="btn sm" type="button" id="of-add">+ Satır ekle</button></div>' +
+        '<h3 class="sub">Fiyata dahil olanlar</h3><div class="of-chips">' + OF_INCL.concat(o.incl.filter(x => !OF_INCL.includes(x))).map(x => '<label><input type="checkbox" data-ofincl="' + esc(x) + '"' + (o.incl.includes(x) ? ' checked' : '') + '>' + esc(x) + '</label>').join('') + '</div>' +
+        '<div class="grid" style="margin-top:8px">' + f('inclExtra', 'Diğer dahil olanlar (virgülle)', ' placeholder="ör. Meyve tabağı, Limonata"', true) + '</div></div>' +
+      '<div class="panel"><h2>Fiyat ve ödeme</h2><div class="grid">' +
+        f('price', 'Kişi başı fiyat (TL)', ' inputmode="decimal" placeholder="ör. 450"') + sel('vat', 'KDV', Object.entries(OF_VAT)) +
+        f('deposit', 'Ön ödeme / kapora', ' placeholder="ör. Toplam tutarın %30\'u sözleşmede"', true) + ta('payment', 'Ödeme koşulları', 2) + '</div>' +
+        '<div class="of-total" id="of-total">' + ofTotalText(c) + '</div></div>' +
+      '<div class="panel"><h2>' + (o.kind === 'contract' ? 'Sözleşme şartları' : 'Koşullar') + '</h2><div class="grid">' +
+        ta('terms', 'Her satır bir madde olarak yazılır', 7) + ta('note', 'Not (isteğe bağlı)', 2) + '</div>' +
+        '<div class="row-actions"><button class="btn sm" type="button" id="of-terms-reset">Varsayılan maddeler</button><button class="btn sm" type="button" id="of-tpl">Bu menü ve şartları varsayılan yap</button></div>' +
+        '<p class="hint">“Varsayılan yap” ile menü, dahil olanlar, fiyat ve şartlar her yeni teklifte hazır gelir.</p></div>' +
+      '<details class="panel"' + (ofCo.title || ofCo.iban ? '' : ' open') + '><summary>Belgede görünecek işletme bilgileri</summary><p class="hint">Bir kez doldurmanız yeterli; Kaydet ile saklanır. Adres ve telefon İşletme Bilgileri sekmesinden gelir.</p><div class="grid" style="margin-top:8px">' +
+        co('title', 'Ticari unvan', 'ör. Yirmi Gıda Turizm Ltd. Şti.') + co('tax', 'Vergi dairesi / no', 'ör. Pamukkale V.D. 1234567890') + co('iban', 'IBAN', 'TR..') + co('signer', 'İmza yetkilisi', 'Ad Soyad') + co('web', 'Web adresi', location.host) +
+        '</div></details>';
+  }
+  function ofTotalText(c){
+    if(!c.p) return 'Kişi başı fiyat girince toplam burada hesaplanır.';
+    if(!c.g) return 'Kişi başı ' + ofMoney(c.p) + ' · kişi sayısını girin.';
+    return c.g + ' kişi × ' + ofMoney(c.p) + ' = ' + ofMoney(c.perDay) + ' / gün' + (c.days != null ? ' · ' + c.days + ' gün → ' + ofMoney(c.total) : '') + (c.ex ? ' · KDV ile ' + ofMoney(c.grand) : '');
+  }
+  function renderOfPrev(){
+    $('#of-prev').innerHTML = ofDocHtml(ofCur);
+    const t = $('#of-total');
+    if(t) t.textContent = ofTotalText(ofCalc(ofCur));
+    ofKeep();
+  }
+  function renderOfList(){
+    const list = ofStore().list || [];
+    $('#of-list').innerHTML = list.length ? list.map(x => {
+      const c = ofCalc(x);
+      return '<div class="of-row"><div class="who"><b>' + esc(x.client || '—') + '</b> <span class="pill ' + (x.kind === 'contract' ? 'on' : 'soon') + '">' + (x.kind === 'contract' ? 'Sözleşme' : 'Teklif') + '</span>' +
+        '<small>' + esc(x.no) + ' · ' + esc(ofDate(x.date)) + (x.guests ? ' · ' + esc(x.guests) + ' kişi' : '') + (c.p && c.g ? ' · ' + ofMoney(c.grand) : '') + '</small></div>' +
+        '<button class="btn sm" type="button" data-ofopen="' + esc(x.id) + '">Aç</button><button class="btn sm" type="button" data-ofcopy="' + esc(x.id) + '">Kopyasını oluştur</button><button class="btn sm danger" type="button" data-ofrm="' + esc(x.id) + '">Sil</button></div>';
+    }).join('') : '<p class="res-empty">Henüz kayıtlı teklif yok. Formu doldurup <b>Kaydet</b>\'e basın.</p>';
+  }
+
+  $('#of-form').addEventListener('input', e => {
+    const t = e.target;
+    if(t.dataset.of){ ofCur[t.dataset.of] = t.value; if(t.dataset.of === 'start' && ofCur.end && ofCur.end < t.value){ ofCur.end = ''; $('#of-form [data-of="end"]').value = ''; } }
+    else if(t.dataset.ofc) ofCur.courses[+t.dataset.ofc][t.dataset.k] = t.value;
+    else if(t.dataset.ofco) ofCo[t.dataset.ofco] = t.value;
+    else if(t.dataset.ofday){ const i = +t.dataset.ofday; ofCur.days = t.checked ? ofCur.days.concat(i) : ofCur.days.filter(x => x !== i); }
+    else if(t.dataset.ofincl){ const v = t.dataset.ofincl; ofCur.incl = t.checked ? ofCur.incl.concat(v) : ofCur.incl.filter(x => x !== v); }
+    else return;
+    renderOfPrev();
+  });
+  $('#of-form').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if(!b) return;
+    if(b.id === 'of-add') ofCur.courses.push({l: '', t: ''});
+    else if(b.dataset.ofdel) ofCur.courses.splice(+b.dataset.ofdel, 1);
+    else if(b.dataset.ofmv){ const i = +b.dataset.ofmv; ofCur.courses.splice(i - 1, 0, ofCur.courses.splice(i, 1)[0]); }
+    else if(b.id === 'of-terms-reset') ofCur.terms = OF_TERMS.join('\n');
+    else if(b.id === 'of-tpl') return ofSaveTpl(b);
+    else return;
+    renderOfForm(); renderOfPrev();
+    if(b.id === 'of-add'){ const ins = document.querySelectorAll('#of-form .of-course .l'); ins[ins.length - 1].focus(); }
+  });
+  $('#of-kind').addEventListener('click', e => {
+    const b = e.target.closest('button[data-k]');
+    if(!b || !ofCur) return;
+    ofCur.kind = b.dataset.k; renderOfForm(); renderOfPrev();
+  });
+  async function ofSaveTpl(btn){
+    btn.disabled = true;
+    try{
+      const tpl = {};
+      OF_TPL_KEYS.forEach(k => tpl[k] = JSON.parse(JSON.stringify(ofCur[k])));
+      await mutateBiz(d => { const s = d.offers || (d.offers = {}); s.tpl = tpl; s.co = Object.assign({}, ofCo); });
+      toast('Varsayılan şablon kaydedildi; yeni teklifler bununla başlar.');
+    }catch(err){ toast(err.status ? ghErrorText(err) : err.message, true, 7000); }
+    btn.disabled = false;
+  }
+  $('#of-save').addEventListener('click', async e => {
+    if(!ofCur) return;
+    if(!ofCur.client.trim()){ toast('Firma / grup adını yazın.', true); const i = $('#of-form [data-of="client"]'); if(i) i.focus(); return; }
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    try{
+      await mutateBiz(d => {
+        const s = d.offers || (d.offers = {});
+        s.list = s.list || [];
+        s.co = Object.assign({}, ofCo);
+        if(!ofCur.no){ s.seq = (s.seq || 0) + 1; ofCur.no = 'FM-' + (ofCur.date || todayStr()).slice(0, 4) + '-' + String(s.seq).padStart(3, '0'); }
+        if(!ofCur.id) ofCur.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        ofCur.saved = new Date().toISOString();
+        const copy = JSON.parse(JSON.stringify(ofCur)), i = s.list.findIndex(x => x.id === ofCur.id);
+        if(i >= 0) s.list[i] = copy; else s.list.unshift(copy);
+        s.list = s.list.slice(0, 300);
+      });
+      renderOfPrev(); renderOfList();
+      toast(ofCur.no + ' kaydedildi.');
+    }catch(err){ toast(err.status ? ghErrorText(err) : err.message, true, 7000); }
+    btn.disabled = false;
+  });
+  $('#of-new').addEventListener('click', () => {
+    if(!ofCur) return;
+    if(ofCur.client && !ofCur.id && !confirm('Kaydedilmemiş teklif silinecek. Yeni teklife geçilsin mi?')) return;
+    ofCur = ofNew(); renderOfForm(); renderOfPrev(); window.scrollTo(0, 0);
+  });
+  $('#of-list').addEventListener('click', async e => {
+    const b = e.target.closest('button');
+    if(!b) return;
+    const list = ofStore().list || [];
+    const x = list.find(r => r.id === (b.dataset.ofopen || b.dataset.ofcopy || b.dataset.ofrm));
+    if(!x) return;
+    if(b.dataset.ofrm){
+      if(!confirm((x.no || '') + ' ' + (x.client || '') + ' silinsin mi?')) return;
+      try{
+        await mutateBiz(d => { d.offers.list = (d.offers.list || []).filter(r => r.id !== x.id); });
+        if(ofCur && ofCur.id === x.id){ ofCur.id = ''; ofCur.no = ''; renderOfPrev(); }
+        renderOfList(); toast('Teklif silindi.');
+      }catch(err){ toast(err.status ? ghErrorText(err) : err.message, true, 7000); }
+      return;
+    }
+    ofCur = JSON.parse(JSON.stringify(x));
+    if(b.dataset.ofcopy) Object.assign(ofCur, {id: '', no: '', date: todayStr(), saved: ''});
+    renderOfForm(); renderOfPrev(); window.scrollTo(0, 0);
+    if(b.dataset.ofcopy) toast('Kopya oluşturuldu; değiştirip kaydedin.');
+  });
+  $('#of-print').addEventListener('click', () => {
+    if(!ofCur) return;
+    let root = $('#print-root');
+    if(!root){ root = document.createElement('div'); root.id = 'print-root'; document.body.appendChild(root); }
+    root.innerHTML = ofDocHtml(ofCur);
+    const title = document.title;
+    document.title = [ofCur.no || 'Teklif', ofCur.client].filter(Boolean).join(' ');   // PDF dosya adı
+    document.body.classList.add('of-printing');
+    const done = () => { document.body.classList.remove('of-printing'); root.innerHTML = ''; document.title = title; window.removeEventListener('afterprint', done); };
+    window.addEventListener('afterprint', done);
+    const img = root.querySelector('img');
+    const go = () => setTimeout(() => window.print(), 60);
+    if(img && !img.complete){ img.onload = img.onerror = go; } else go();
+  });
+  $('#of-wa').addEventListener('click', () => {
+    if(!ofCur) return;
+    let p = String(ofCur.phone || '').replace(/\D/g, '');
+    if(p.startsWith('0')) p = '9' + p; else if(p.length === 10 && p.startsWith('5')) p = '90' + p;
+    window.open('https://wa.me/' + (p.length >= 11 ? p : '') + '?text=' + encodeURIComponent(ofText(ofCur)), '_blank', 'noopener');
+  });
+
   /* ---------- Sekmeler ---------- */
   function showTab(name){
     try{ sessionStorage.setItem('yirmi-admin-sekme', name); }catch(e){}
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-    ['home','res','chats','sales','menu','chef','calendar','ann','campaigns','site','bot','qr','security'].forEach(n => $('#tab-' + n).classList.toggle('hide', n !== name));
+    ['home','res','chats','sales','menu','chef','calendar','ann','campaigns','offer','site','bot','qr','security'].forEach(n => $('#tab-' + n).classList.toggle('hide', n !== name));
+    if(state && name === 'offer') renderOffer();
     if(name === 'chats') csShowTab();
     if(state && name === 'bot') renderBotCfg();
     if(state && name === 'ann') renderAnn();
