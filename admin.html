@@ -651,6 +651,15 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
 .ofd-sign div{border-top:1px solid #1c1610;padding-top:6px;margin-top:58px;font-size:11.5px}
 .ofd-sign b{display:block;font-size:12.5px}
 .ofd-foot{text-align:center;font-size:10.5px;color:#7d7366;border-top:1px solid #e8dfcf;padding:10px 28px;background:#faf6ee}
+.of-secs .of-chips label:not(:has(input:checked)){color:var(--muted);text-decoration:line-through;background:#f6f3ee}
+.of-course .of-n{flex:0 0 22px;text-align:right;color:var(--muted);font-weight:700}
+.ofd-sec{position:relative}
+.ofd-x{position:absolute;top:2px;right:-4px;z-index:2;width:24px;height:24px;border-radius:50%;border:1px solid #e0b4ad;background:#fff;color:var(--danger);font:700 12px/1 'DM Sans',sans-serif;cursor:pointer;
+  display:grid;place-items:center;padding:0;opacity:0;transition:opacity .15s;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.ofd-sec:hover>.ofd-x,.ofd li:hover>.ofd-x,.ofd-x:focus-visible{opacity:1}
+.ofd-x:hover{background:var(--danger);color:#fff}
+.ofd-x.in{position:static;display:inline-grid;width:20px;height:20px;font-size:10px;vertical-align:middle;margin-left:4px}
+@media(hover:none){.ofd-x{opacity:.75}.ofd-x.in{opacity:.6}}
 #print-root{display:none}
 @media print{
   @page{size:A4;margin:10mm}
@@ -1199,6 +1208,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     <div class="row-actions">
       <button class="btn primary" id="qr-make">QR Oluştur</button>
       <button class="btn" id="qr-download">PNG indir</button>
+      <button class="btn" id="qr-review">Google yorum QR'ı</button>
     </div>
     <p class="hint">Bu QR kod sabittir; menüyü panelden ne kadar değiştirirseniz değiştirin aynı QR çalışmaya devam eder. Yeniden basmanız gerekmez.</p>
   </div>
@@ -2478,7 +2488,8 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     const s = state.site.social || {};
     $('#social-fields').innerHTML = Core.SOCIALS.map(x =>
       '<div class="field"><label>' + esc(x.label) + '</label><input data-social="' + x.key + '" value="' + esc(s[x.key]) + '" placeholder="' +
-        ({whatsapp:'0530 000 00 00', google:'https://g.page/r/…', youtube:'@kanal veya adres'}[x.key] || '@kullaniciadi') + '"></div>').join('');
+        ({whatsapp:'0530 000 00 00', google:'https://g.page/r/…/review', youtube:'@kanal veya adres'}[x.key] || '@kullaniciadi') + '">' +
+        (x.key === 'google' ? '<p class="hint">Menüdeki <b>“Google’da Yorum Yaz”</b> alanı ve yandaki <b>Yorum Yap</b> kutusu bu bağlantıyı açar. Doğrudan yorum penceresi açılsın diye Google İşletme Profili’nde <b>“Yorum iste”</b> ile verilen bağlantıyı (g.page/r/…/review) yapıştırın.</p>' : '') + '</div>').join('');
     $('#social-phone').checked = s.showPhone !== false;
     $('#social-map').checked = s.showMap !== false;
   }
@@ -2773,6 +2784,12 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     box.querySelectorAll('img').forEach(img => img.style.width = Math.min(size, 320) + 'px');
   }
   $('#qr-make').addEventListener('click', makeQr);
+  // Masaya / hesap fişine basılacak yorum QR'ı: İşletme Bilgileri'ndeki Google bağlantısını kullanır
+  $('#qr-review').addEventListener('click', () => {
+    const g = Core.socialLinks(state.site).find(l => l.key === 'google');
+    if(!g){ toast('Önce İşletme Bilgileri > Sosyal medya bölümüne Google yorum bağlantısını ekleyin.', true, 6000); return; }
+    $('#qr-url').value = g.href; makeQr();
+  });
   $('#qr-download').addEventListener('click', () => {
     let canvas = $('#qr-box canvas');
     if(!canvas){ makeQr(); canvas = $('#qr-box canvas'); }
@@ -4900,14 +4917,14 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     'Gıda alerjisi, vejetaryen veya özel diyet talepleri önceden bildirilmelidir.',
     'Belirtilen saatler dışındaki uzamalar için ek ücret talep edilebilir.'
   ];
-  const OF_TPL_KEYS = ['kind', 'courses', 'incl', 'inclExtra', 'price', 'vat', 'payment', 'deposit', 'terms', 'valid', 'mode', 'time', 'days'];
+  const OF_TPL_KEYS = ['kind', 'courses', 'incl', 'inclExtra', 'price', 'vat', 'payment', 'deposit', 'terms', 'valid', 'mode', 'time', 'days', 'hide'];
   let ofCur = null, ofCo = null;
 
   function ofDefaults(){
     return {kind: 'offer', mode: OF_MODES[0], time: '12:00 – 13:30', days: [0, 1, 2, 3, 4], valid: 15, price: '', vat: 'in10',
       courses: [{l: 'Çorba', t: 'Günün çorbası'}, {l: 'Ana yemek', t: ''}, {l: 'Yanında', t: 'Pilav veya makarna'}, {l: 'Salata', t: 'Mevsim salatası'}, {l: 'Tatlı', t: 'Günün tatlısı'}],
       incl: ['Su', 'Çay', 'Ekmek'], inclExtra: '', deposit: '',
-      payment: 'Hizmet sonrasında düzenlenen fatura karşılığı, 7 gün içinde nakit veya havale/EFT ile ödenir.', terms: OF_TERMS.join('\n')};
+      payment: 'Hizmet sonrasında düzenlenen fatura karşılığı, 7 gün içinde nakit veya havale/EFT ile ödenir.', terms: OF_TERMS.join('\n'), hide: []};
   }
   function ofStore(){ return (biz && biz.offers) || {}; }
   function ofNew(){
@@ -4947,49 +4964,54 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   const ofTitle = o => o.kind === 'contract' ? 'Toplu Yemek Hizmet Sözleşmesi' : 'Fix Menü Teklifi';
   const ofLogo = () => state.site.logo ? previewUrl(state.site.logo) : '';
 
-  function ofDocHtml(o){
+  // Belgenin bölümleri: her biri formdaki düğmeyle veya önizlemedeki ✕ ile kaldırılabilir (o.hide)
+  const OF_SECS = [['head', 'Teklif no ve tarih'], ['intro', 'Giriş cümlesi'], ['parties', 'Firma bilgileri'], ['service', 'Hizmet bilgileri'], ['menu', 'Menü'],
+    ['incl', 'Dahil olanlar'], ['chef', 'Şef notu'], ['price', 'Fiyat tablosu'], ['total', 'Toplam tutar'], ['payment', 'Ödeme ve IBAN'], ['terms', 'Koşullar'],
+    ['note', 'Not'], ['valid', 'Geçerlilik tarihi'], ['sign', 'İmza alanları'], ['foot', 'Alt bilgi']];
+  const ofOn = (o, k) => !(o.hide || []).includes(k);
+  const ofTerms = o => String(o.terms || '').split('\n').map(x => x.trim()).filter(Boolean);
+  function ofDocHtml(o, edit){
     const s = state.site, co = ofCo || {}, c = ofCalc(o), contract = o.kind === 'contract';
     const bizName = co.title || s.name || 'Yirmi';
     const logo = ofLogo();
+    const x = k => edit ? '<button type="button" class="ofd-x" data-ofhide="' + k + '" title="Belgeden kaldır" aria-label="Belgeden kaldır">✕</button>' : '';
+    const sec = (k, html) => html && ofOn(o, k) ? '<div class="ofd-sec" data-sec="' + k + '">' + x(k) + html + '</div>' : '';
     const kv = (k, v) => v ? '<div><small>' + esc(k) + '</small>' + esc(v) + '</div>' : '';
     const party = (role, name, lines) => '<div class="ofd-party"><small>' + role + '</small><b>' + esc(name || '—') + '</b>' + lines.filter(Boolean).map(l => esc(l)).join('<br>') + '</div>';
     const courses = o.courses.filter(x => x.l.trim() || x.t.trim());
     const incl = o.incl.concat(o.inclExtra ? o.inclExtra.split(',').map(x => x.trim()).filter(Boolean) : []);
-    const terms = o.terms.split('\n').map(x => x.trim()).filter(Boolean);
+    const terms = ofTerms(o);
     const days = ofDaysText(o), period = c.days != null;
     let h = '<div class="ofd"><header class="ofd-head">' +
       (logo ? '<img src="' + esc(logo) + '" alt="' + esc(s.name || '') + '">' : '<span class="script">' + esc(s.name || 'Yirmi') + '</span>') +
       '<div class="ofd-ttl"><small>' + (contract ? 'SÖZLEŞME' : 'TEKLİF') + ' · FİX MENÜ</small><b>' + ofTitle(o) + '</b></div>' +
-      '<div class="ofd-meta">' + (o.no ? 'No: <b>' + esc(o.no) + '</b><br>' : '') + 'Tarih: ' + esc(ofDate(o.date)) + '</div></header><div class="ofd-body">';
-    h += '<p class="ofd-intro">' + (contract
+      (ofOn(o, 'head') ? '<div class="ofd-meta">' + (o.no ? 'No: <b>' + esc(o.no) + '</b><br>' : '') + 'Tarih: ' + esc(ofDate(o.date)) + '</div>' : '') + '</header><div class="ofd-body">';
+    h += sec('intro', '<p class="ofd-intro">' + (contract
       ? 'Aşağıda bilgileri yer alan taraflar arasında, belirtilen günlerde ve koşullarda toplu yemek hizmeti verilmesi amacıyla işbu sözleşme düzenlenmiştir.'
-      : 'Sayın ' + esc(o.contact || o.client || 'Yetkili') + ', ' + (o.client ? esc(o.client) + ' için ' : '') + 'hazırladığımız fix menü teklifimizi bilgilerinize sunarız.') + '</p>';
-    h += '<div class="ofd-parties">' +
+      : 'Sayın ' + esc(o.contact || o.client || 'Yetkili') + ', ' + (o.client ? esc(o.client) + ' için ' : '') + 'hazırladığımız fix menü teklifimizi bilgilerinize sunarız.') + '</p>');
+    h += sec('parties', '<div class="ofd-parties">' +
       party(contract ? 'Hizmet veren' : 'Teklifi veren', bizName, [co.title && s.name && co.title !== s.name ? s.name : '', s.address, [s.phone, s.email].filter(Boolean).join(' · '), co.tax ? 'Vergi: ' + co.tax : '']) +
-      party(contract ? 'Hizmet alan' : 'Teklif sunulan', o.client, [o.contact ? 'Yetkili: ' + o.contact : '', o.address, [o.phone, o.email].filter(Boolean).join(' · ')]) + '</div>';
-    h += '<h4>Hizmet bilgileri</h4><div class="ofd-kv">' +
-      kv('Hizmet şekli', o.mode) + kv('Kişi sayısı', o.guests ? o.guests + ' kişi' : '') + kv('Saat', o.time) +
-      kv(period ? 'Dönem' : 'Tarih', ofWhen(o)) + kv('Hizmet günleri', period || !o.start ? days : '') + kv('Hizmet günü', period ? c.days + ' gün' : '') +
-      '</div>' + (o.dates ? '<p class="ofd-note"><b>Özel tarihler:</b> ' + esc(o.dates) + '</p>' : '');
-    h += '<h4>Menü</h4><div class="ofd-menu">' + (courses.length ? courses.map(x => '<div class="ofd-course"><span class="l">' + esc(x.l) + '</span><span class="t">' + esc(x.t || '—') + '</span></div>').join('') : '<div class="ofd-course"><span class="t">—</span></div>') + '</div>';
-    if(incl.length) h += '<div class="ofd-incl">' + incl.map(x => '<span>✓ ' + esc(x) + '</span>').join('') + '</div>';
-    if(s.chef && s.chef.name) h += '<p class="ofd-chef">Menü, Şef ' + esc(s.chef.name) + ' yönetimindeki mutfağımızda günlük olarak hazırlanır.</p>';
-    h += '<h4>Fiyat</h4>';
+      party(contract ? 'Hizmet alan' : 'Teklif sunulan', o.client, [o.contact ? 'Yetkili: ' + o.contact : '', o.address, [o.phone, o.email].filter(Boolean).join(' · ')]) + '</div>');
+    const kvs = kv('Hizmet şekli', o.mode) + kv('Kişi sayısı', o.guests ? o.guests + ' kişi' : '') + kv('Saat', o.time) +
+      kv(period ? 'Dönem' : 'Tarih', ofWhen(o)) + kv('Hizmet günleri', period || !o.start ? days : '') + kv('Hizmet günü', period ? c.days + ' gün' : '');
+    h += sec('service', kvs || o.dates ? '<h4>Hizmet bilgileri</h4>' + (kvs ? '<div class="ofd-kv">' + kvs + '</div>' : '') + (o.dates ? '<p class="ofd-note"><b>Özel tarihler:</b> ' + esc(o.dates) + '</p>' : '') : '');
+    h += sec('menu', courses.length ? '<h4>Menü</h4><div class="ofd-menu">' + courses.map(x => '<div class="ofd-course"><span class="l">' + esc(x.l) + '</span><span class="t">' + esc(x.t || '—') + '</span></div>').join('') + '</div>' : '');
+    h += sec('incl', incl.length ? '<div class="ofd-incl">' + incl.map(x => '<span>✓ ' + esc(x) + '</span>').join('') + '</div>' : '');
+    h += sec('chef', s.chef && s.chef.name ? '<p class="ofd-chef">Menü, Şef ' + esc(s.chef.name) + ' yönetimindeki mutfağımızda günlük olarak hazırlanır.</p>' : '');
     if(c.p){
-      h += '<table><tr><th>Kişi başı</th><th>Kişi</th><th>Günlük</th>' + (period ? '<th>Gün</th>' : '') + '<th>Tutar</th></tr><tr><td>' + ofMoney(c.p) + '</td><td>' + (c.g || '—') + '</td><td>' + (c.g ? ofMoney(c.perDay) : '—') + '</td>' +
+      h += sec('price', '<h4>Fiyat</h4><table><tr><th>Kişi başı</th><th>Kişi</th><th>Günlük</th>' + (period ? '<th>Gün</th>' : '') + '<th>Tutar</th></tr><tr><td>' + ofMoney(c.p) + '</td><td>' + (c.g || '—') + '</td><td>' + (c.g ? ofMoney(c.perDay) : '—') + '</td>' +
         (period ? '<td>' + c.days + '</td>' : '') + '<td>' + (c.g ? ofMoney(c.total) : '—') + '</td></tr>' +
-        (c.ex && c.g ? '<tr><td colspan="' + (period ? 4 : 3) + '">KDV (%' + c.rate + ')</td><td>' + ofMoney(c.vatAmt) + '</td></tr>' : '') + '</table>';
-      h += '<div class="ofd-grand"><span>' + (c.g ? (period ? 'Dönem toplamı' : 'Toplam') : 'Kişi başı') + ' <small>(' + esc(OF_VAT[o.vat] || '') + ')</small></span><b>' + ofMoney(c.g ? c.grand : c.p) + '</b></div>';
-    }else h += '<p class="ofd-note">Kişi başı fiyat: —</p>';
-    if(o.deposit) h += '<p class="ofd-note"><b>Ön ödeme:</b> ' + esc(o.deposit) + '</p>';
-    if(o.payment) h += '<p class="ofd-note"><b>Ödeme:</b> ' + esc(o.payment) + '</p>';
-    if(co.iban) h += '<p class="ofd-note"><b>IBAN:</b> ' + esc(co.iban) + (co.title ? ' (' + esc(co.title) + ')' : '') + '</p>';
-    if(terms.length) h += '<h4>' + (contract ? 'Sözleşme şartları' : 'Koşullar') + '</h4><ol>' + terms.map(t => '<li>' + esc(t) + '</li>').join('') + '</ol>';
-    if(o.note) h += '<h4>Not</h4><p class="ofd-note" style="white-space:pre-line">' + esc(o.note) + '</p>';
-    if(!contract && o.valid) h += '<div class="ofd-valid">Bu teklif ' + esc(ofDate(shiftDay(o.date, +o.valid || 0))) + ' tarihine kadar geçerlidir.</div>';
-    h += '<div class="ofd-sign"><div><b>' + esc(bizName) + ' adına</b>' + esc(co.signer || 'Ad Soyad') + ' · İmza / Kaşe</div>' +
-      '<div><b>' + esc(o.client || (contract ? 'Hizmet alan' : 'Müşteri')) + ' adına</b>' + (contract ? 'Ad Soyad · İmza / Kaşe' : 'Onaylıyorum · Ad Soyad / İmza') + '</div></div>';
-    h += '</div><footer class="ofd-foot">' + [s.name, s.address, s.phone, co.web || location.host].filter(Boolean).map(esc).join(' · ') + '</footer></div>';
+        (c.ex && c.g ? '<tr><td colspan="' + (period ? 4 : 3) + '">KDV (%' + c.rate + ')</td><td>' + ofMoney(c.vatAmt) + '</td></tr>' : '') + '</table>');
+      h += sec('total', '<div class="ofd-grand"><span>' + (c.g ? (period ? 'Dönem toplamı' : 'Toplam') : 'Kişi başı') + ' <small>(' + esc(OF_VAT[o.vat] || '') + ')</small></span><b>' + ofMoney(c.g ? c.grand : c.p) + '</b></div>');
+    }
+    h += sec('payment', (o.deposit ? '<p class="ofd-note"><b>Ön ödeme:</b> ' + esc(o.deposit) + '</p>' : '') + (o.payment ? '<p class="ofd-note"><b>Ödeme:</b> ' + esc(o.payment) + '</p>' : '') +
+      (co.iban ? '<p class="ofd-note"><b>IBAN:</b> ' + esc(co.iban) + (co.title ? ' (' + esc(co.title) + ')' : '') + '</p>' : ''));
+    h += sec('terms', terms.length ? '<h4>' + (contract ? 'Sözleşme şartları' : 'Koşullar') + '</h4><ol>' + terms.map((t, i) => '<li>' + esc(t) + (edit ? ' <button type="button" class="ofd-x in" data-ofterm="' + i + '" title="Bu maddeyi sil" aria-label="Bu maddeyi sil">✕</button>' : '') + '</li>').join('') + '</ol>' : '');
+    h += sec('note', o.note ? '<h4>Not</h4><p class="ofd-note" style="white-space:pre-line">' + esc(o.note) + '</p>' : '');
+    h += sec('valid', !contract && +o.valid ? '<div class="ofd-valid">Bu teklif ' + esc(ofDate(shiftDay(o.date, +o.valid || 0))) + ' tarihine kadar geçerlidir.</div>' : '');
+    h += sec('sign', '<div class="ofd-sign"><div><b>' + esc(bizName) + ' adına</b>' + esc(co.signer || 'Ad Soyad') + ' · İmza / Kaşe</div>' +
+      '<div><b>' + esc(o.client || (contract ? 'Hizmet alan' : 'Müşteri')) + ' adına</b>' + (contract ? 'Ad Soyad · İmza / Kaşe' : 'Onaylıyorum · Ad Soyad / İmza') + '</div></div>');
+    h += '</div>' + (ofOn(o, 'foot') ? '<footer class="ofd-foot">' + [s.name, s.address, s.phone, co.web || location.host].filter(Boolean).map(esc).join(' · ') + '</footer>' : '') + '</div>';
     return h;
   }
 
@@ -4999,22 +5021,29 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     if(o.client) L.push((contract ? '' : 'Sayın ') + (o.contact ? o.contact + ' – ' : '') + o.client);
     L.push('');
     const when = ofWhen(o), days = c.days != null || !o.start ? ofDaysText(o) : '';
-    if(when) L.push('📅 ' + when + (c.days != null ? ' (' + c.days + ' gün)' : ''));
-    if(days) L.push('🗓 ' + days);
-    if(o.dates) L.push('🗓 Özel tarihler: ' + o.dates);
-    if(o.time) L.push('🕐 ' + o.time);
-    if(o.guests) L.push('👥 ' + o.guests + ' kişi · ' + o.mode);
-    L.push('', '🍽 *Menü*');
-    o.courses.filter(x => x.l.trim() || x.t.trim()).forEach(x => L.push('• ' + (x.l ? x.l + ': ' : '') + (x.t || '—')));
-    const incl = o.incl.concat(o.inclExtra ? o.inclExtra.split(',').map(x => x.trim()).filter(Boolean) : []);
-    if(incl.length) L.push('✅ Dahil: ' + incl.join(', '));
-    if(c.p){
-      L.push('', '💰 Kişi başı *' + ofMoney(c.p) + '* (' + OF_VAT[o.vat] + ')');
-      if(c.g) L.push((c.days != null ? 'Dönem toplamı' : 'Toplam') + ': *' + ofMoney(c.grand) + '*');
+    if(ofOn(o, 'service')){
+      if(when) L.push('📅 ' + when + (c.days != null ? ' (' + c.days + ' gün)' : ''));
+      if(days) L.push('🗓 ' + days);
+      if(o.dates) L.push('🗓 Özel tarihler: ' + o.dates);
+      if(o.time) L.push('🕐 ' + o.time);
+      if(o.guests) L.push('👥 ' + o.guests + ' kişi' + (o.mode ? ' · ' + o.mode : ''));
     }
-    if(o.deposit) L.push('Ön ödeme: ' + o.deposit);
-    if(o.payment) L.push('Ödeme: ' + o.payment);
-    if(!contract && o.valid) L.push('', 'Teklif ' + ofDate(shiftDay(o.date, +o.valid || 0)) + ' tarihine kadar geçerlidir.');
+    const courses = o.courses.filter(x => x.l.trim() || x.t.trim());
+    if(ofOn(o, 'menu') && courses.length){
+      L.push('', '🍽 *Menü*');
+      courses.forEach(x => L.push('• ' + (x.l ? x.l + ': ' : '') + (x.t || '—')));
+    }
+    const incl = o.incl.concat(o.inclExtra ? o.inclExtra.split(',').map(x => x.trim()).filter(Boolean) : []);
+    if(ofOn(o, 'incl') && incl.length) L.push('✅ Dahil: ' + incl.join(', '));
+    if(c.p && (ofOn(o, 'price') || ofOn(o, 'total'))){
+      L.push('', '💰 Kişi başı *' + ofMoney(c.p) + '* (' + OF_VAT[o.vat] + ')');
+      if(c.g && ofOn(o, 'total')) L.push((c.days != null ? 'Dönem toplamı' : 'Toplam') + ': *' + ofMoney(c.grand) + '*');
+    }
+    if(ofOn(o, 'payment')){
+      if(o.deposit) L.push('Ön ödeme: ' + o.deposit);
+      if(o.payment) L.push('Ödeme: ' + o.payment);
+    }
+    if(!contract && +o.valid && ofOn(o, 'valid')) L.push('', 'Teklif ' + ofDate(shiftDay(o.date, +o.valid || 0)) + ' tarihine kadar geçerlidir.');
     L.push('', [s.name, s.phone].filter(Boolean).join(' · '));
     return L.join('\n');
   }
@@ -5041,32 +5070,40 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     (state.categories || []).forEach(c => (c.items || []).forEach(i => { if(i.name) items.push(i.name); }));
     const c = ofCalc(o);
     const co = (k, label, ph) => '<div class="field"><label>' + label + '</label><input data-ofco="' + k + '" value="' + esc(ofCo[k]) + '" placeholder="' + esc(ph || '') + '"></div>';
+    const on = k => ofOn(o, k);
+    const panel = (show, html) => '<div class="panel"' + (show ? '' : ' hidden') + '>' + html + '</div>';
+    const terms = o.terms ? String(o.terms).split('\n') : [];   // boş satırlar da (yeni eklenen madde) formda görünsün
     $('#of-form').innerHTML =
+      '<div class="panel of-secs"><h2>Belgede neler olsun?</h2><p class="hint">İstemediğiniz bölümün işaretini kaldırın; belgeden ve formdan çıkar. Önizlemede bir bölümün üstüne gelip <b>✕</b>\'e basarak da kaldırabilirsiniz.</p>' +
+        '<div class="of-chips" style="margin-top:10px">' + OF_SECS.map(([k, t]) => '<label><input type="checkbox" data-ofsec="' + k + '"' + (on(k) ? ' checked' : '') + '>' + t + '</label>').join('') + '</div>' +
+        ((o.hide || []).length ? '<div class="row-actions"><button class="btn sm" type="button" id="of-show-all">Hepsini geri getir</button></div>' : '') + '</div>' +
       '<div class="panel"><h2>Müşteri</h2><div class="grid">' +
         f('client', 'Firma / grup adı', ' placeholder="ör. ABC Tekstil A.Ş."', true) + f('contact', 'Yetkili kişi') + f('phone', 'Telefon', ' type="tel" placeholder="05xx xxx xx xx"') + f('email', 'E-posta', ' type="email"') +
         f('address', 'Adres', '', true) + '</div></div>' +
-      '<div class="panel"><h2>Hizmet</h2><div class="grid">' +
-        f('date', 'Belge tarihi', ' type="date"') + f('guests', 'Kişi sayısı', ' type="number" min="1" inputmode="numeric"') + f('time', 'Saat') +
-        sel('mode', 'Hizmet şekli', OF_MODES.map(m => [m, m])) +
+      '<div class="panel"><h2>Hizmet</h2><p class="hint">Boş bıraktığınız alan belgede görünmez.</p><div class="grid" style="margin-top:8px">' +
+        f('date', 'Belge tarihi', ' type="date"') + f('guests', 'Kişi sayısı', ' type="number" min="1" inputmode="numeric"') + f('time', 'Saat', ' placeholder="ör. 12:00 – 13:30"') +
+        sel('mode', 'Hizmet şekli', [['', '— yazılmasın']].concat(OF_MODES.map(m => [m, m]))) +
         f('start', 'Başlangıç (tek gün için yalnız bunu doldurun)', ' type="date"') + f('end', 'Bitiş', ' type="date"') +
         '<div class="field full"><label>Hizmet günleri</label><div class="of-chips">' + OF_DAYS.map((d, i) => '<label><input type="checkbox" data-ofday="' + i + '"' + (o.days.includes(i) ? ' checked' : '') + '>' + d + '</label>').join('') + '</div></div>' +
         f('dates', 'Özel tarihler / açıklama', ' placeholder="ör. Her ayın ilk cuması, 15 Kasım toplantı yemeği"', true) +
         (o.kind === 'offer' ? f('valid', 'Teklif geçerliliği (gün)', ' type="number" min="0"') : '') + '</div></div>' +
-      '<div class="panel"><h2>Menü</h2><p class="hint">Sol tarafa başlık (Ana yemek…), sağa içerik yazın. Menünüzdeki ürünler öneri olarak çıkar; birden fazla seçenek için “veya” yazabilirsiniz.</p>' +
+      '<div class="panel"' + (on('menu') || on('incl') ? '' : ' hidden') + '><h2>Menü</h2><p class="hint">Sol tarafa başlık (Ana yemek…), sağa içerik yazın. Menünüzdeki ürünler öneri olarak çıkar; birden fazla seçenek için “veya” yazabilirsiniz.</p>' +
         '<datalist id="of-items">' + items.map(n => '<option value="' + esc(n) + '">').join('') + '</datalist>' +
         o.courses.map((x, i) => '<div class="of-course"><input class="l" data-ofc="' + i + '" data-k="l" value="' + esc(x.l) + '" placeholder="Başlık" aria-label="Başlık"><input class="t" data-ofc="' + i + '" data-k="t" list="of-items" value="' + esc(x.t) + '" placeholder="İçerik" aria-label="İçerik">' +
           '<button class="btn sm" type="button" data-ofmv="' + i + '" title="Yukarı taşı"' + (i ? '' : ' disabled') + '>↑</button><button class="btn sm danger" type="button" data-ofdel="' + i + '" title="Sil">✕</button></div>').join('') +
         '<div class="row-actions"><button class="btn sm" type="button" id="of-add">+ Satır ekle</button></div>' +
         '<h3 class="sub">Fiyata dahil olanlar</h3><div class="of-chips">' + OF_INCL.concat(o.incl.filter(x => !OF_INCL.includes(x))).map(x => '<label><input type="checkbox" data-ofincl="' + esc(x) + '"' + (o.incl.includes(x) ? ' checked' : '') + '>' + esc(x) + '</label>').join('') + '</div>' +
         '<div class="grid" style="margin-top:8px">' + f('inclExtra', 'Diğer dahil olanlar (virgülle)', ' placeholder="ör. Meyve tabağı, Limonata"', true) + '</div></div>' +
-      '<div class="panel"><h2>Fiyat ve ödeme</h2><div class="grid">' +
-        f('price', 'Kişi başı fiyat (TL)', ' inputmode="decimal" placeholder="ör. 450"') + sel('vat', 'KDV', Object.entries(OF_VAT)) +
+      panel(on('price') || on('total') || on('payment'), '<h2>Fiyat ve ödeme</h2><div class="grid">' +
+        f('price', 'Kişi başı fiyat (TL) — boşsa fiyat yazılmaz', ' inputmode="decimal" placeholder="ör. 450"') + sel('vat', 'KDV', Object.entries(OF_VAT)) +
         f('deposit', 'Ön ödeme / kapora', ' placeholder="ör. Toplam tutarın %30\'u sözleşmede"', true) + ta('payment', 'Ödeme koşulları', 2) + '</div>' +
-        '<div class="of-total" id="of-total">' + ofTotalText(c) + '</div></div>' +
-      '<div class="panel"><h2>' + (o.kind === 'contract' ? 'Sözleşme şartları' : 'Koşullar') + '</h2><div class="grid">' +
-        ta('terms', 'Her satır bir madde olarak yazılır', 7) + ta('note', 'Not (isteğe bağlı)', 2) + '</div>' +
-        '<div class="row-actions"><button class="btn sm" type="button" id="of-terms-reset">Varsayılan maddeler</button><button class="btn sm" type="button" id="of-tpl">Bu menü ve şartları varsayılan yap</button></div>' +
-        '<p class="hint">“Varsayılan yap” ile menü, dahil olanlar, fiyat ve şartlar her yeni teklifte hazır gelir.</p></div>' +
+        '<div class="of-total" id="of-total">' + ofTotalText(c) + '</div>') +
+      panel(on('terms') || on('note'), '<h2>' + (o.kind === 'contract' ? 'Sözleşme şartları' : 'Koşullar') + '</h2><p class="hint">İstemediğiniz maddeyi ✕ ile silin, yazısını değiştirmek için üzerine yazın.</p>' +
+        terms.map((t, i) => '<div class="of-course"><span class="of-n">' + (i + 1) + '.</span><input class="t" data-ofterm-in="' + i + '" value="' + esc(t) + '" aria-label="Madde ' + (i + 1) + '"><button class="btn sm danger" type="button" data-oftermdel="' + i + '" title="Maddeyi sil">✕</button></div>').join('') +
+        '<div class="row-actions"><button class="btn sm" type="button" id="of-term-add">+ Madde ekle</button><button class="btn sm" type="button" id="of-terms-reset">Varsayılan maddeler</button></div>' +
+        '<div class="grid" style="margin-top:10px">' + ta('note', 'Not (isteğe bağlı)', 2) + '</div>') +
+      '<div class="panel"><div class="row-actions" style="margin-top:0"><button class="btn sm" type="button" id="of-tpl">Bu ayarları varsayılan yap</button></div>' +
+        '<p class="hint">Menü, dahil olanlar, fiyat, şartlar ve kaldırdığınız bölümler her yeni teklifte aynı şekilde hazır gelir.</p></div>' +
       '<details class="panel"' + (ofCo.title || ofCo.iban ? '' : ' open') + '><summary>Belgede görünecek işletme bilgileri</summary><p class="hint">Bir kez doldurmanız yeterli; Kaydet ile saklanır. Adres ve telefon İşletme Bilgileri sekmesinden gelir.</p><div class="grid" style="margin-top:8px">' +
         co('title', 'Ticari unvan', 'ör. Yirmi Gıda Turizm Ltd. Şti.') + co('tax', 'Vergi dairesi / no', 'ör. Pamukkale V.D. 1234567890') + co('iban', 'IBAN', 'TR..') + co('signer', 'İmza yetkilisi', 'Ad Soyad') + co('web', 'Web adresi', location.host) +
         '</div></details>';
@@ -5077,7 +5114,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     return c.g + ' kişi × ' + ofMoney(c.p) + ' = ' + ofMoney(c.perDay) + ' / gün' + (c.days != null ? ' · ' + c.days + ' gün → ' + ofMoney(c.total) : '') + (c.ex ? ' · KDV ile ' + ofMoney(c.grand) : '');
   }
   function renderOfPrev(){
-    $('#of-prev').innerHTML = ofDocHtml(ofCur);
+    $('#of-prev').innerHTML = ofDocHtml(ofCur, true);
     const t = $('#of-total');
     if(t) t.textContent = ofTotalText(ofCalc(ofCur));
     ofKeep();
@@ -5099,8 +5136,27 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     else if(t.dataset.ofco) ofCo[t.dataset.ofco] = t.value;
     else if(t.dataset.ofday){ const i = +t.dataset.ofday; ofCur.days = t.checked ? ofCur.days.concat(i) : ofCur.days.filter(x => x !== i); }
     else if(t.dataset.ofincl){ const v = t.dataset.ofincl; ofCur.incl = t.checked ? ofCur.incl.concat(v) : ofCur.incl.filter(x => x !== v); }
+    else if(t.dataset.oftermIn){ const raw = String(ofCur.terms || '').split('\n'); raw[+t.dataset.oftermIn] = t.value.replace(/\n/g, ' '); ofCur.terms = raw.join('\n'); }
+    else if(t.dataset.ofsec){ ofShow(t.dataset.ofsec, t.checked); return; }
     else return;
     renderOfPrev();
+  });
+  // Bölümü belgeye geri koy / belgeden kaldır; ilgili form bölümü de açılıp kapanır
+  function ofShow(k, show){
+    const hide = (ofCur.hide || []).filter(x => x !== k);
+    ofCur.hide = show ? hide : hide.concat(k);
+    renderOfForm(); renderOfPrev();
+  }
+  $('#of-prev').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if(!b || !ofCur) return;
+    if(b.dataset.ofhide){
+      ofShow(b.dataset.ofhide, false);
+      toast('“' + (OF_SECS.find(s => s[0] === b.dataset.ofhide) || ['', 'Bölüm'])[1] + '” belgeden kaldırıldı. Geri getirmek için “Belgede neler olsun?” kutusundan işaretleyin.', false, 5000);
+    }else if(b.dataset.ofterm){
+      ofCur.terms = ofTerms(ofCur).filter((_, j) => j !== +b.dataset.ofterm).join('\n');
+      renderOfForm(); renderOfPrev();
+    }
   });
   $('#of-form').addEventListener('click', e => {
     const b = e.target.closest('button');
@@ -5109,10 +5165,14 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     else if(b.dataset.ofdel) ofCur.courses.splice(+b.dataset.ofdel, 1);
     else if(b.dataset.ofmv){ const i = +b.dataset.ofmv; ofCur.courses.splice(i - 1, 0, ofCur.courses.splice(i, 1)[0]); }
     else if(b.id === 'of-terms-reset') ofCur.terms = OF_TERMS.join('\n');
+    else if(b.dataset.oftermdel){ const raw = String(ofCur.terms || '').split('\n'); raw.splice(+b.dataset.oftermdel, 1); ofCur.terms = raw.join('\n'); }
+    else if(b.id === 'of-term-add') ofCur.terms = ofCur.terms ? ofCur.terms + '\n' : '\n';
+    else if(b.id === 'of-show-all') ofCur.hide = [];
     else if(b.id === 'of-tpl') return ofSaveTpl(b);
     else return;
     renderOfForm(); renderOfPrev();
     if(b.id === 'of-add'){ const ins = document.querySelectorAll('#of-form .of-course .l'); ins[ins.length - 1].focus(); }
+    if(b.id === 'of-term-add'){ const ins = document.querySelectorAll('#of-form [data-ofterm-in]'); ins[ins.length - 1].focus(); }
   });
   $('#of-kind').addEventListener('click', e => {
     const b = e.target.closest('button[data-k]');
@@ -5123,7 +5183,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     btn.disabled = true;
     try{
       const tpl = {};
-      OF_TPL_KEYS.forEach(k => tpl[k] = JSON.parse(JSON.stringify(ofCur[k])));
+      OF_TPL_KEYS.forEach(k => { if(ofCur[k] !== undefined) tpl[k] = JSON.parse(JSON.stringify(ofCur[k])); });
       await mutateBiz(d => { const s = d.offers || (d.offers = {}); s.tpl = tpl; s.co = Object.assign({}, ofCo); });
       toast('Varsayılan şablon kaydedildi; yeni teklifler bununla başlar.');
     }catch(err){ toast(err.status ? ghErrorText(err) : err.message, true, 7000); }
