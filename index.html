@@ -384,6 +384,24 @@ body.no-scroll{overflow:hidden}
 .rv-stars a:hover~a{color:var(--line2)}
 .rv-stars a:hover{transform:scale(1.15)}
 .review .cta svg{width:16px;height:16px}
+.rv-sum{display:inline-flex;align-items:center;gap:12px;margin:4px 0 0;font-size:13px;letter-spacing:.06em;color:var(--muted)}
+.rv-sum b{font:400 34px/1 var(--serif);color:var(--gold2);letter-spacing:0}
+.rv-sum .st{color:var(--gold);letter-spacing:2px;font-size:15px}
+.rv-wall{position:relative;margin:34px 0 10px}
+.rv-track{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 2px;padding:4px 2px 14px;scrollbar-width:none;text-align:left}
+.rv-track::-webkit-scrollbar{display:none}
+.rv-card{flex:0 0 min(340px,84%);scroll-snap-align:start;border:1px solid var(--line2);background:linear-gradient(160deg,rgba(198,164,106,.07),transparent 60%);padding:24px 24px 20px;display:flex;flex-direction:column;gap:14px}
+.rv-card .st{color:var(--gold);letter-spacing:3px;font-size:14px}
+.rv-card q{font:italic 400 18px/1.5 var(--serif);color:var(--text);quotes:"“" "”";display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;overflow:hidden}
+.rv-card footer{margin-top:auto;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+.rv-card footer b{display:block;color:var(--text);font-weight:500;font-size:13px}
+.rv-card .av{width:34px;height:34px;border-radius:50%;flex:none;display:grid;place-items:center;border:1px solid var(--gold);color:var(--gold2);font:400 16px var(--serif)}
+.rv-card .g{margin-left:auto;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.rv-nav{display:flex;justify-content:center;gap:10px;margin-top:6px}
+.rv-nav button{width:40px;height:40px;border-radius:50%;border:1px solid var(--line2);background:none;color:var(--gold2);cursor:pointer;font-size:16px;transition:all .3s}
+.rv-nav button:hover{background:var(--gold);color:var(--bg)}
+.rv-ask{margin-top:56px;padding-top:48px;border-top:1px solid var(--line)}
+.review .rv-ask h2{font-size:clamp(26px,3.6vw,38px);margin-top:0}
 .notice{margin:56px auto 0;max-width:820px;padding:20px 24px;border:1px solid var(--line);font-size:12.5px;color:var(--muted);line-height:1.7;text-align:left}
 .foot{padding:90px 18px calc(50px + env(safe-area-inset-bottom,0px));text-align:center;display:flex;flex-direction:column;align-items:center}
 .foot::after{content:"";position:absolute;left:0;right:0;top:0;height:90px;z-index:0;pointer-events:none;background:linear-gradient(var(--bg),transparent)}
@@ -682,10 +700,20 @@ body.no-scroll .social{opacity:0;pointer-events:none}
 
 <section class="review wrap" id="review" hidden>
   <div class="eyebrow">Misafir defteri</div>
-  <h2>Akşamınızı <em>nasıl buldunuz?</em></h2>
-  <p>Birkaç kelimelik yorumunuz bizim için çok değerli. Google'da değerlendirmeniz bir dakikanızı alır.</p>
-  <div class="rv-stars" id="rv-stars" role="group" aria-label="Google'da puan verin"></div>
-  <a class="cta fill" id="rv-go" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>Google'da Yorum Yaz</a>
+  <div id="rv-wall-box" hidden>
+    <h2>Misafirlerimiz <em>ne diyor?</em></h2>
+    <a class="rv-sum" id="rv-sum" target="_blank" rel="noopener"></a>
+    <div class="rv-wall">
+      <div class="rv-track" id="rv-track"></div>
+      <div class="rv-nav" id="rv-nav"><button type="button" data-rvnav="-1" aria-label="Önceki yorum">←</button><button type="button" data-rvnav="1" aria-label="Sonraki yorum">→</button></div>
+    </div>
+  </div>
+  <div id="rv-ask">
+    <h2 id="rv-ask-h">Akşamınızı <em>nasıl buldunuz?</em></h2>
+    <p>Birkaç kelimelik yorumunuz bizim için çok değerli. Google'da değerlendirmeniz bir dakikanızı alır.</p>
+    <div class="rv-stars" id="rv-stars" role="group" aria-label="Google'da puan verin"></div>
+    <a class="cta fill" id="rv-go" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>Google'da Yorum Yaz</a>
+  </div>
 </section>
 
 <footer class="foot fluted">
@@ -1006,14 +1034,41 @@ body.no-scroll .social{opacity:0;pointer-events:none}
   // Google yorum alanı: İşletme Bilgileri > Google bağlantısı doluysa görünür; yıldızların hepsi yorum sayfasını açar
   function renderReview(){
     const g = C.socialLinks(DATA.site).find(l => l.key === 'google');
-    $('#review').hidden = !g;
+    const r = DATA.site.reviews || {}, list = (r.list || []).filter(x => x && String(x.text || '').trim()).slice(0, 10);
+    $('#review').hidden = !g && !list.length;
+    $('#rv-wall-box').hidden = !list.length;
+    $('#rv-ask').hidden = !g;
+    $('#rv-ask').classList.toggle('rv-ask', !!list.length);
     $('#side-review').style.display = g ? '' : 'none';
+    if(list.length){
+      const stars = n => '★'.repeat(Math.max(1, Math.min(5, +n || 5)));
+      const sum = $('#rv-sum');
+      sum.innerHTML = r.rating ? '<b>' + esc(r.rating) + '</b><span class="st">★★★★★</span><span>Google' + (r.count ? ' · ' + esc(r.count) + ' yorum' : '') + '</span>' : '';
+      sum.hidden = !r.rating;
+      if(g) sum.href = g.href; else sum.removeAttribute('href');
+      $('#rv-track').innerHTML = list.map(x => {
+        const name = String(x.name || '').trim() || 'Misafirimiz';
+        return '<article class="rv-card"><span class="st" aria-label="' + (+x.stars || 5) + ' yıldız">' + stars(x.stars) + '</span><q>' + esc(String(x.text).trim()) + '</q>' +
+          '<footer><span class="av">' + esc(name.charAt(0).toLocaleUpperCase('tr')) + '</span><span><b>' + esc(name) + '</b>' + esc(x.date || '') + '</span><span class="g">Google</span></footer></article>';
+      }).join('');
+      $('#rv-nav').hidden = list.length < 2;
+    }
     if(!g) return;
     $('#side-review').href = g.href;
     const star = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>';
     $('#rv-stars').innerHTML = [1, 2, 3, 4, 5].map(n => '<a href="' + esc(g.href) + '" target="_blank" rel="noopener" aria-label="' + n + ' yıldız">' + star + '</a>').join('');
     $('#rv-go').href = g.href;
   }
+  $('#rv-nav').addEventListener('click', e => {
+    const b = e.target.closest('[data-rvnav]'), t = $('#rv-track'), card = t.querySelector('.rv-card');
+    if(!b || !card) return;
+    const step = card.offsetWidth + 18, end = t.scrollWidth - t.clientWidth - 4;
+    const dir = +b.dataset.rvnav;
+    // Sonda ileri / başta geri basınca başa / sona sarar
+    if(dir > 0 && t.scrollLeft >= end) t.scrollTo({left: 0, behavior: 'smooth'});
+    else if(dir < 0 && t.scrollLeft <= 4) t.scrollTo({left: t.scrollWidth, behavior: 'smooth'});
+    else t.scrollBy({left: dir * step, behavior: 'smooth'});
+  });
   $('#social-toggle').addEventListener('click', () => {
     const open = $('#social').classList.toggle('open');
     $('#social-toggle').setAttribute('aria-expanded', open ? 'true' : 'false');

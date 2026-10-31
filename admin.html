@@ -54,6 +54,10 @@ h2{font-size:25px!important}
 /* Genel araçlar */
 .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .toolbar .search{flex:1 1 220px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.rv-row{border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px;display:grid;grid-template-columns:minmax(0,1fr) 110px minmax(0,1fr);gap:8px;align-items:start}
+.rv-row textarea{grid-column:1/-1;min-height:70px}
+.rv-row .row-actions{grid-column:1/-1;margin:0;justify-content:flex-end}
+@media(max-width:560px){.rv-row{grid-template-columns:minmax(0,1fr) 100px}.rv-row [data-rv="date"]{grid-column:1/-1}}
 .switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none;font-weight:700}
 .switch input{appearance:none;width:40px;height:22px;border-radius:999px;background:#d9d2c7;position:relative;cursor:pointer;transition:.15s;flex:none;margin:0}
 .switch input::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.15s}
@@ -1123,6 +1127,16 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       <label class="switch small"><input type="checkbox" id="social-phone"> Telefon (ara) kutucuğu</label>
       <label class="switch small"><input type="checkbox" id="social-map"> Yol tarifi kutucuğu</label>
     </div>
+  </div>
+  <div class="panel">
+    <h2>Google yorumları</h2>
+    <p class="hint">Buraya eklediğiniz yorumlar menüde <b>“Misafirlerimiz ne diyor?”</b> başlığıyla kayan kartlar olarak görünür (en fazla 10). Google Haritalar’da işletmenizi açın, beğendiğiniz yorumun adını, yıldızını ve metnini buraya kopyalayın. Yalnızca gerçek Google yorumlarını ekleyin.</p>
+    <div class="grid" style="margin-top:10px">
+      <div class="field"><label>Google puanınız</label><input data-rvsum="rating" placeholder="ör. 4,8"></div>
+      <div class="field"><label>Toplam yorum sayısı</label><input data-rvsum="count" inputmode="numeric" placeholder="ör. 126"></div>
+    </div>
+    <div id="rv-list" style="margin-top:12px"></div>
+    <div class="row-actions"><button class="btn sm primary" id="rv-add">+ Yorum ekle</button></div>
   </div>
   <div class="panel">
     <h2>Yedekleme</h2>
@@ -2506,6 +2520,45 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     setDirty(true);
   }));
 
+  /* ---------- Google yorumları (menüde kartlar) ---------- */
+  function reviews(){ return state.site.reviews || (state.site.reviews = {list: []}); }
+  function renderReviews(){
+    const r = state.site.reviews || {list: []};
+    document.querySelectorAll('[data-rvsum]').forEach(el => { if(document.activeElement !== el) el.value = r[el.dataset.rvsum] || ''; });
+    $('#rv-list').innerHTML = r.list.length ? r.list.map((x, i) =>
+      '<div class="rv-row" data-ri="' + i + '"><input data-rv="name" value="' + esc(x.name) + '" placeholder="Yorumu yazan (ör. Ayşe K.)">' +
+      '<select data-rv="stars">' + [5, 4, 3, 2, 1].map(n => '<option value="' + n + '"' + ((+x.stars || 5) === n ? ' selected' : '') + '>' + '★'.repeat(n) + '</option>').join('') + '</select>' +
+      '<input data-rv="date" value="' + esc(x.date) + '" placeholder="ör. 2 hafta önce / Ekim 2026">' +
+      '<textarea data-rv="text" placeholder="Yorum metni">' + esc(x.text) + '</textarea>' +
+      '<div class="row-actions"><button class="btn sm" data-rvact="up">▲</button><button class="btn sm" data-rvact="down">▼</button><button class="btn sm danger" data-rvact="del">Sil</button></div></div>').join('')
+      : '<p class="hint">Henüz yorum eklenmedi; menüde yalnızca “Google’da Yorum Yaz” alanı görünür.</p>';
+    $('#rv-add').disabled = r.list.length >= 10;
+  }
+  $('#tab-site').addEventListener('input', e => {
+    const el = e.target;
+    if(el.dataset.rvsum){
+      if(el.value.trim()) reviews()[el.dataset.rvsum] = el.value.trim(); else delete reviews()[el.dataset.rvsum];
+      setDirty(true);
+    } else if(el.dataset.rv){
+      reviews().list[+el.closest('[data-ri]').dataset.ri][el.dataset.rv] = el.dataset.rv === 'stars' ? +el.value : el.value;
+      setDirty(true);
+    }
+  });
+  $('#rv-add').addEventListener('click', () => {
+    reviews().list.push({name: '', stars: 5, date: '', text: ''});
+    renderReviews(); setDirty(true);
+    const rows = document.querySelectorAll('#rv-list [data-ri]');
+    rows[rows.length - 1].querySelector('input').focus();
+  });
+  $('#rv-list').addEventListener('click', e => {
+    const b = e.target.closest('[data-rvact]');
+    if(!b) return;
+    const list = reviews().list, i = +b.closest('[data-ri]').dataset.ri, act = b.dataset.rvact;
+    if(act === 'del'){ if(!confirm('Bu yorum silinsin mi?')) return; list.splice(i, 1); }
+    else { const j = act === 'up' ? i - 1 : i + 1; if(j < 0 || j >= list.length) return; [list[i], list[j]] = [list[j], list[i]]; }
+    renderReviews(); setDirty(true);
+  });
+
   /* ---------- Genel bakış ---------- */
   function alerts(){
     const out = [], n = Core.now();
@@ -2713,6 +2766,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       '<div class="field"><label>' + label + '</label><input data-site="' + k + '" value="' + esc(state.site[k]) + '"></div>'
     ).join('');
     renderSocialFields();
+    renderReviews();
     renderLogo();
   }
   // Üst çubuktaki ve İşletme sekmesindeki logo, menüdekiyle aynı: yüklenen görsel, yoksa el yazısı
