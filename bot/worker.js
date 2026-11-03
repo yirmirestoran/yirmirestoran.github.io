@@ -32,7 +32,7 @@
  *   GRAPH_VERSION     (isteğe bağlı) Meta Graph API sürümü, varsayılan v23.0
  */
 
-const VERSION = '2026-10-29c';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
+const VERSION = '2026-11-03a';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
 const SESSION_MS = 30 * 60e3;          // bu kadar sessiz kalan sohbet baştan başlar
 const HUMAN_MS = 12 * 3600e3;          // "yetkili" istenince bot bu süre susar
 const WINDOW_MS = 23.5 * 3600e3;       // WhatsApp/Instagram 24 saat mesajlaşma penceresi (pay bırakılarak)
@@ -296,6 +296,8 @@ async function waRedirect(url, env){
 // {closedUntil: null | 'YYYY-MM-DD' | 'always', note}
 async function outdoorState(env){ return (await getSetting(env, 'outdoor')) || {closedUntil: null, note: ''}; }
 function outdoorClosedOn(o, date){ return !!(o && o.closedUntil) && (o.closedUntil === 'always' || date <= o.closedUntil); }
+// Panelden ya da personelin "bot kapat" komutuyla askıya alınır: müşterilere otomatik cevap gitmez, mesajlar yalnızca panele düşer
+async function pausedState(env){ return (await getSetting(env, 'paused')) || {on: false}; }
 
 /* ---------- İşletme bilgileri (menu.json) ---------- */
 let siteCache = null, siteAt = 0;
@@ -525,6 +527,8 @@ async function onMessage(env, m){
   const team = !staff && m.channel === 'wa' && groupNumbers(env).includes(m.uid);
   const logIt = !(staff || team) || !!(s && s.test);   // personelin bota yazdığı komutlar sohbet listesine girmez
   if(logIt) await logMsg(env, key, 'in', m.media ? '[' + (MEDIA_LABEL[m.mediaType] || 'dosya') + ']' : (m.text || ''));
+  // Bot askıdaysa müşteriye hiçbir otomatik mesaj gitmez; mesaj panelde okunmamış olarak bekler
+  if(!staff && !team && (await pausedState(env)).on) return;
   if(!staff && !team){
     const f = await floodCheck(env, key, now, !m.choice);
     if(f === 'warn'){
@@ -892,6 +896,7 @@ const STAFF_HELP = '👋 *Personel komutları*\n' +
   '• *dış kapat süresiz* – siz açana kadar kapalı\n' +
   '• *dış aç* – dış alanı aç\n' +
   '• *durum* – bot durumu\n' +
+  '• *bot kapat* / *bot aç* – müşterilere otomatik cevabı durdur / yeniden başlat\n' +
   '• *izle aç* / *izle kapat* – müşterilerin bota yazdığı her mesajın kopyası size gelsin\n' +
   '• *test* – botu müşteri gibi deneyin\n' +
   '• *bekleyen* – onay bekleyen talepler, düğmeleriyle\n' +
@@ -917,6 +922,16 @@ async function staffCommand(ctx){
     say(ctx, 'İzleme kapandı. Yeni rezervasyon ve yetkili bildirimleri gelmeye devam eder.');
     return null;
   }
+  if(/^bot (kapat|kapa|durdur|dur)$/.test(t)){
+    await setSetting(env, 'paused', {on: true, t: Date.now(), by: 'WhatsApp'});
+    say(ctx, '⏸ Bot askıya alındı: müşterilere WhatsApp ve Instagram\'dan otomatik cevap gitmeyecek. Mesajlar yönetim panelindeki Sohbetler sekmesine düşer. Açmak için *bot aç*.');
+    return null;
+  }
+  if(/^bot (ac|acik|baslat)$/.test(t)){
+    await setSetting(env, 'paused', {on: false});
+    say(ctx, '▶️ Bot yeniden açıldı; müşterilere otomatik cevap veriyor.');
+    return null;
+  }
   if(t === 'test'){
     ctx.notes.push('🧪 Test modu açıldı: artık müşteri gibi konuşabilirsiniz. Çıkmak için *personel* yazın.');
     return greet(ctx, {test: true});
@@ -939,7 +954,7 @@ async function staffCommand(ctx){
     const waiting = await D.prepare('SELECT COUNT(*) AS n FROM requests WHERE imported = 0').first();
     const day = await D.prepare('SELECT COUNT(*) AS n FROM requests WHERE created > ?').bind(Date.now() - 864e5).first();
     const bn = await ensureBotNumber(env);
-    say(ctx, '📊 *Bot durumu*\n' +
+    say(ctx, '📊 *Bot durumu*\n' + ((await pausedState(env)).on ? '• ⏸ *Bot askıda* — müşterilere otomatik cevap gitmiyor (*bot aç* ile açılır)\n' : '') +
       (bn ? '• Bot numarası: ' + (bn.live ? 'aktif ✅ https://wa.me/' + String(bn.number).replace(/\D/g, '') :
         'henüz açılmadı' + (bn.nameStatus ? ' (ad incelemesi: ' + bn.nameStatus + ')' : '') + (bn.error ? ' — ' + bn.error : '')) + '\n' : '') +
       '• Dış alan: ' + (outdoorClosedOn(o, today) ? 'kapalı (' + (o.closedUntil === 'always' ? 'siz açana kadar' : dateLong(o.closedUntil) + ' dahil') + ')' : 'açık') + '\n' +
@@ -1233,14 +1248,14 @@ async function api(req, url, env){
         staff: staffNumbers(env).length, outdoor: await outdoorState(env), botNumber: await ensureBotNumber(env), msgs: await monthCount(env)});
     case '/api/inbox': {
       const r = await D.prepare('SELECT data FROM requests WHERE imported = 0 ORDER BY created LIMIT 50').all();
-      return json({requests: r.results.map(x => JSON.parse(x.data)), outdoor: await outdoorState(env), msgs: await monthCount(env), waiting: await waitingChats(env)});
+      return json({requests: r.results.map(x => JSON.parse(x.data)), outdoor: await outdoorState(env), msgs: await monthCount(env), waiting: await waitingChats(env), paused: await pausedState(env)});
     }
     case '/api/status':
       return json(await botStatus(env));
     case '/api/chats': {
       const since = +url.searchParams.get('since') || 0;
       const r = await D.prepare(CHAT_SELECT + ' WHERE ch.last_t > ?1 ORDER BY ch.last_t DESC LIMIT 80').bind(since).all();
-      return json({now: Date.now(), chats: r.results.map(chatRow), waiting: await waitingChats(env)});
+      return json({now: Date.now(), chats: r.results.map(chatRow), waiting: await waitingChats(env), paused: await pausedState(env)});
     }
     case '/api/chat': {
       const k = url.searchParams.get('k') || '', after = +url.searchParams.get('after') || 0;
@@ -1278,7 +1293,9 @@ async function api(req, url, env){
         if(u && u !== 'always' && !validDate(u)) return json({error: 'Geçersiz tarih'}, 400);
         await setSetting(env, 'outdoor', {closedUntil: u || null, note: clean(body.outdoor && body.outdoor.note, 80)});
       }
-      return json({outdoor: await outdoorState(env)});
+      if(post && body.paused !== undefined)
+        await setSetting(env, 'paused', body.paused ? {on: true, t: Date.now(), by: clean(body.by, 40) || 'Panel'} : {on: false});
+      return json({outdoor: await outdoorState(env), paused: await pausedState(env)});
     }
     case '/api/notify':
       if(!post) break;
@@ -1306,7 +1323,9 @@ function chatRow(r){
 }
 // Personelin cevap vermesi beklenen (devralınmış ve okunmamış mesajı olan) sohbet sayısı
 async function waitingChats(env){
-  const r = await (await db(env)).prepare("SELECT s.data FROM chats ch JOIN sessions s ON s.k = ch.k WHERE ch.unread > 0 AND s.data LIKE '%\"human\":%'").all();
+  // Bot askıdayken okunmamış her sohbet personel bekliyor sayılır
+  if((await pausedState(env)).on) return (await (await db(env)).prepare('SELECT COUNT(*) AS n FROM chats WHERE unread > 0').first()).n;
+  const r =await (await db(env)).prepare("SELECT s.data FROM chats ch JOIN sessions s ON s.k = ch.k WHERE ch.unread > 0 AND s.data LIKE '%\"human\":%'").all();
   const now = Date.now();
   return r.results.filter(x => { try{ return JSON.parse(x.data).human > now; }catch(e){ return false; } }).length;
 }
@@ -1346,7 +1365,7 @@ async function botStatus(env){
   }
   const today = await D.prepare('SELECT COUNT(*) AS n FROM chats WHERE last_t > ?').bind(Date.now() - 864e5).first();
   return {whatsapp: wa, instagram: ig, today: today.n, waiting: await waitingChats(env), msgs: await monthCount(env),
-    staff: staffNumbers(env).length, mirror: !!(await getSetting(env, 'mirror')), outdoor: await outdoorState(env)};
+    staff: staffNumbers(env).length, mirror: !!(await getSetting(env, 'mirror')), outdoor: await outdoorState(env), paused: await pausedState(env)};
 }
 
 const whenText = b => (validDate(b.date) ? dateLong(b.date) : '') + (parseHM(b.time) != null ? ' · ' + b.time : '');

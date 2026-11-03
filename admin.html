@@ -452,6 +452,13 @@ h2{font-size:25px!important}
 @media (max-width:640px){ .bc-row{grid-template-columns:minmax(0,1fr);gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line)} }
 .bc-q{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
 /* Sohbetler */
+.bp-box{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.bp-box.paused{background:#fff4e5;border-color:#f0b35a}
+.bp-box .bp-ico{font-size:28px;line-height:1}
+.bp-box .bp-tx{flex:1 1 260px;min-width:0}
+.bp-box .bp-tx b{font-size:15px}
+.bp-box .bp-tx p{margin:3px 0 0}
+.tab-badge.bp-badge{background:#e67e22}
 .tab-badge{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:#c0392b;color:#fff;font-size:11px;line-height:18px;margin-left:5px;font-weight:700;text-align:center}
 .cs-status{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;padding:12px}
 .cs-card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;min-width:0}
@@ -476,8 +483,8 @@ h2{font-size:25px!important}
 .cs-st{font-style:normal;font-size:10.5px;font-weight:700;border-radius:999px;padding:1px 7px;background:#fdf3df;color:#8a6417}
 .cs-view{display:flex;flex-direction:column;min-width:0;min-height:0;background:#efeae2}
 .cs-empty{margin:auto;color:var(--muted);padding:20px;text-align:center}
-.cs-head{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line)}
-.cs-who{flex:1;min-width:0;display:flex;flex-direction:column}
+.cs-head{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line)}
+.cs-who{flex:1 1 160px;min-width:0;display:flex;flex-direction:column}
 .cs-who small{color:var(--muted);overflow-wrap:anywhere}
 .cs-back{display:none}
 .cs-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:6px;min-height:0}
@@ -745,7 +752,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   <button class="tab" data-tab="campaigns">Kampanyalar</button>
   <button class="tab" data-tab="offer">Menü Teklifi</button>
   <button class="tab" data-tab="site">İşletme Bilgileri</button>
-  <button class="tab" data-tab="bot">WhatsApp Botu</button>
+  <button class="tab" data-tab="bot">WhatsApp Botu<span class="tab-badge bp-badge hide" id="bot-paused-badge">Askıda</span></button>
   <button class="tab" data-tab="qr">QR Kod</button>
   <button class="tab" data-tab="security">Güvenlik</button>
 </div>
@@ -1231,6 +1238,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
 
 <!-- GÜVENLİK -->
 <div class="page hide" id="tab-chats">
+  <div class="panel bp-box hide" data-bp></div>
   <div class="panel cs-status" id="cs-status"></div>
   <div class="panel cs-wrap" id="cs-wrap">
     <div class="cs-side">
@@ -1246,6 +1254,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
 </div>
 
 <div class="page hide" id="tab-bot">
+  <div class="panel bp-box hide" data-bp></div>
   <div class="panel">
     <h2>WhatsApp / Instagram Botu</h2>
     <p class="hint">Botun müşteriye sorduğu soruları ve seçenekleri buradan değiştirin. <b>Kaydet ve Yayınla</b>'ya bastıktan birkaç dakika sonra bota yansır. Yayınlamadan önce <b>Simülatörde dene</b> ile nasıl göründüğüne bakabilirsiniz; simülatör açıkken burada yaptığınız değişiklikler oraya anında düşer.</p>
@@ -3709,6 +3718,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       renderRes();
       toast(isNew ? 'Rezervasyon kaydedildi.' : 'Rezervasyon güncellendi.');
       botNotify(rec, before);
+      if(isNew && rec.chat) csSendResConfirm(rec);
     }catch(err){
       toast(err.status ? ghErrorText(err) : err.message, true, 7000);
     }finally{
@@ -3726,6 +3736,16 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       toast('Rezervasyon silindi.');
     }catch(err){ toast(err.status ? ghErrorText(err) : err.message, true, 7000); }
   });
+  function resConfirmText(r){
+    const site = state.site || {};
+    const items = (r.preorder || {}).items || [];
+    let msg = 'Merhaba ' + (String(r.name || '').replace(/^@/, '').split(' ')[0] || '') + ',\n' + dayName(r.date) + ' saat ' + r.time + ' için ' + r.guests + ' kişilik rezervasyonunuz ' +
+      (r.status === 'pending' ? 'alınmıştır' : 'onaylanmıştır') + '.';
+    if((r.tables || []).length) msg += '\nMasa: ' + tableLabels(r) + ' (' + Core.floorById(r.area).name + ')';
+    if(items.length) msg += '\nÖn siparişiniz: ' + items.map(i => i.qty + 'x ' + i.name).join(', ') + (r.preorder.readyAt ? ' — ' + r.preorder.readyAt + '\'de hazır olacak.' : '');
+    msg += '\nSizi ağırlamayı dört gözle bekliyoruz.\n' + (site.name || 'Yirmi') + (site.city ? ' ' + site.city : '') + (site.phone ? '\n' + site.phone : '');
+    return msg;
+  }
   // Müşteriye WhatsApp'tan onay mesajı: bot bağlıysa bot numarasından otomatik gider;
   // gönderilemezse düğme "Kendi WhatsApp'ımdan gönder"e döner ve hazır mesajla WhatsApp açılır
   $('#resf-wa').addEventListener('click', async e => {
@@ -3736,13 +3756,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     if(phone.startsWith('0')) phone = '9' + phone;
     else if(phone.length === 10) phone = '90' + phone;
     if(phone.length < 11) return toast('Geçerli bir telefon numarası girin.', true);
-    const site = state.site || {};
-    const items = r.preorder.items;
-    let msg = 'Merhaba ' + (r.name.split(' ')[0] || '') + ',\n' + dayName(r.date) + ' saat ' + r.time + ' için ' + r.guests + ' kişilik rezervasyonunuz ' +
-      (r.status === 'pending' ? 'alınmıştır' : 'onaylanmıştır') + '.';
-    if(r.tables.length) msg += '\nMasa: ' + tableLabels(r) + ' (' + Core.floorById(r.area).name + ')';
-    if(items.length) msg += '\nÖn siparişiniz: ' + items.map(i => i.qty + 'x ' + i.name).join(', ') + (r.preorder.readyAt ? ' — ' + r.preorder.readyAt + '\'de hazır olacak.' : '');
-    msg += '\nSizi ağırlamayı dört gözle bekliyoruz.\n' + (site.name || 'Yirmi') + (site.city ? ' ' + site.city : '') + (site.phone ? '\n' + site.phone : '');
+    const msg = resConfirmText(r);
     if(resWaManual || !botOn()) return window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank', 'noopener');
     btn.disabled = true;
     try{
@@ -3835,6 +3849,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       const d = await botApi('GET', '/api/inbox');
       botErr = ''; botOutdoor = d.outdoor || null; botMsgs = d.msgs;
       csSetWaiting(d.waiting);
+      setBotPaused(d.paused);
       const reqs = (d.requests || []).filter(q => q && q.ref && q.date && q.time);
       let added = [], decided = [];
       if(reqs.length){
@@ -4057,6 +4072,44 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     return s < 60 ? 'şimdi' : s < 3600 ? Math.floor(s / 60) + ' dk' : s < 86400 ? Math.floor(s / 3600) + ' sa' : Math.floor(s / 86400) + ' gün';
   }
   const csAgoLong = t => !t ? 'henüz yok' : csAgo(t) === 'şimdi' ? 'az önce' : csAgo(t) + ' önce';
+  /* ---------- Botu askıya alma ---------- */
+  // Askıdayken bot WhatsApp ve Instagram'da müşterilere hiç cevap vermez; mesajlar Sohbetler'e düşer, rezervasyonlar elle girilir.
+  // botPaused: undefined = henüz bilinmiyor, null = Cloudflare'deki bot kodu bu özelliği tanımıyor (worker.js güncellenmeli)
+  let botPaused;
+  function setBotPaused(p){ botPaused = p && typeof p === 'object' ? p : null; renderBotPause(); }
+  function renderBotPause(){
+    const p = botPaused, on = !!(p && p.on);
+    $('#bot-paused-badge').classList.toggle('hide', !on);
+    document.querySelectorAll('[data-bp]').forEach(box => {
+      box.classList.toggle('hide', !botOn() || p === undefined);
+      box.classList.toggle('paused', on);
+      box.innerHTML = p === null
+        ? '<span class="bp-ico">⚠️</span><div class="bp-tx"><b>Botu askıya alma kullanılamıyor</b><p class="hint">Cloudflare\'deki bot kodu eski. <code>bot/worker.js</code> dosyasını Cloudflare\'de güncelleyince bu düğme çalışır.</p></div>'
+        : on
+        ? '<span class="bp-ico">⏸</span><div class="bp-tx"><b>Bot askıda — müşterilere otomatik cevap gitmiyor</b><p class="hint">WhatsApp ve Instagram\'dan gelen mesajlar burada okunmamış olarak bekler. Cevabı siz yazın, rezervasyonu sohbetteki <b>📋 Rezervasyon oluştur</b> ile girin.' +
+            (p.t ? ' Askıya alınma: ' + esc(new Date(p.t).toLocaleString('tr-TR', {day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'})) + (p.by ? ' (' + esc(p.by) + ')' : '') : '') + '</p></div>' +
+            '<button type="button" class="btn primary" data-bpset="0">▶️ Botu yeniden başlat</button>'
+        : '<span class="bp-ico">🤖</span><div class="bp-tx"><b>Bot açık — müşterilere otomatik cevap veriyor</b><p class="hint">Bir süre cevapları ve rezervasyonları elle yönetmek isterseniz botu askıya alın. Personel WhatsApp\'tan <b>bot kapat</b> / <b>bot aç</b> da yazabilir.</p></div>' +
+            '<button type="button" class="btn danger" data-bpset="1">⏸ Botu askıya al</button>';
+    });
+  }
+  async function loadBotPause(){
+    if(!botOn()) return renderBotPause();
+    try{ setBotPaused((await botApi('GET', '/api/settings')).paused); }catch(e){}
+  }
+  document.addEventListener('click', async e => {
+    const b = e.target.closest('[data-bpset]');
+    if(!b) return;
+    const on = b.dataset.bpset === '1';
+    if(on && !confirm('Bot askıya alınsın mı?\n\nWhatsApp ve Instagram\'a yazan müşterilere hiçbir otomatik cevap gitmez; mesajlar Sohbetler sekmesine düşer ve cevabı sizin yazmanız gerekir.')) return;
+    b.disabled = true;
+    try{
+      setBotPaused((await botApi('POST', '/api/settings', {paused: on})).paused);
+      toast(on ? '⏸ Bot askıya alındı. Gelen mesajlar Sohbetler sekmesinde bekleyecek.' : '▶️ Bot yeniden açıldı; müşterilere otomatik cevap veriyor.', false, 6000);
+      csStatusAt = 0;
+    }catch(err){ toast(err.message, true, 8000); b.disabled = false; }
+  });
+
   function csTime(t){
     const d = new Date(t), hm = d.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'});
     return d.toDateString() === new Date().toDateString() ? hm : d.toLocaleDateString('tr-TR', {day: 'numeric', month: 'short'}) + ' ' + hm;
@@ -4075,7 +4128,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
 
   async function csLoadStatus(){
     if(!botOn()) return renderCsStatus();
-    try{ csStatus = await botApi('GET', '/api/status'); csStatusAt = Date.now(); csSetWaiting(csStatus.waiting); }
+    try{ csStatus = await botApi('GET', '/api/status'); csStatusAt = Date.now(); csSetWaiting(csStatus.waiting); setBotPaused(csStatus.paused); }
     catch(e){ csStatus = {error: e.message}; }
     renderCsStatus();
   }
@@ -4135,7 +4188,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   const csDigits = s => String(s || '').replace(/\D/g, '').slice(-10);
   function csResFor(c){
     const today = todayStr();
-    return (resList || []).filter(r => r.bot && (r.bot.key ? r.bot.key === c.k :
+    return (resList || []).filter(r => r.chat === c.k || r.bot && (r.bot.key ? r.bot.key === c.k :
         c.channel === 'ig' ? !!r.bot.igUser && r.bot.igUser === c.name : !!c.phone && csDigits(r.phone) === csDigits(c.phone)))
       .filter(r => r.date >= today || r.status === 'pending')
       .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time)).slice(0, 3);
@@ -4145,17 +4198,18 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     return '<div class="cs-res">' + list.map(r => {
       const d = r.date.split('-').reverse().slice(0, 2).join('.');
       return '<div class="cs-ri"><div class="cs-rt"><b>📋 ' + esc(d + ' · ' + r.time + ' · ' + r.guests + ' kişi') + '</b>' +
-          '<small>' + esc(tableLabels(r) + (r.bot.occasion ? ' · 🎉 ' + r.bot.occasion : '') + ' · #' + r.bot.ref) + '</small></div>' +
+          '<small>' + esc(tableLabels(r) + (r.bot ? (r.bot.occasion ? ' · 🎉 ' + r.bot.occasion : '') + ' · #' + r.bot.ref : ' · elle girildi')) + '</small></div>' +
         '<span class="pill ' + (r.status === 'pending' ? 'soon' : r.status === 'cancelled' || r.status === 'noshow' ? 'off' : 'on') + '">' + esc(RES_STATUS_LABEL[r.status] || r.status) + '</span>' +
         (r.status === 'pending' ? '<button type="button" class="btn sm primary" data-csr="confirmed" data-id="' + esc(r.id) + '">✅ Onayla</button>' +
           '<button type="button" class="btn sm" data-csr="cancelled" data-id="' + esc(r.id) + '">❌ Reddet</button>' : '') +
-        '<button type="button" class="btn sm" data-csr="open" data-ref="' + esc(r.bot.ref) + '">Aç</button></div>';
+        (r.bot ? '<button type="button" class="btn sm" data-csr="open" data-ref="' + esc(r.bot.ref) + '">Aç</button>'
+          : '<button type="button" class="btn sm" data-csr="edit" data-id="' + esc(r.id) + '">Aç</button>') + '</div>';
     }).join('') + '</div>';
   }
   function renderCsView(force){
     const c = csOpen && csChats.get(csOpen);
     const cres = c ? csResFor(c) : [];
-    const sig = c ? [c.k, c.state, c.step, c.windowOpen, csLastId, csMsgs.length, cres.map(r => r.id + r.status + r.tables).join()].join('|') : '';
+    const sig = c ? [c.k, c.state, c.step, c.windowOpen, !!(botPaused && botPaused.on), csLastId, csMsgs.length, cres.map(r => r.id + r.status + r.tables).join()].join('|') : '';
     if(!force && sig === csSig) return;
     csSig = sig;
     $('#cs-wrap').classList.toggle('open', !!csOpen);
@@ -4164,10 +4218,11 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     // Yazılmakta olan mesaj ve kaydırma konumu korunur
     const old = $('#cs-text'), draft = old ? old.value : '', focused = old && document.activeElement === old;
     const box = $('#cs-msgs'), atBottom = !box || box.scrollHeight - box.scrollTop - box.clientHeight < 60;
-    const st = c.state === 'human' ? 'Personelde (bot susuyor)' : c.state === 'done' ? 'Talep alındı' : c.step ? 'Bot · ' + (CS_STEP[c.step] || c.step) : 'Bot';
+    const st = botPaused && botPaused.on ? 'Bot askıda' : c.state === 'human' ? 'Personelde (bot susuyor)' :c.state === 'done' ? 'Talep alındı' : c.step ? 'Bot · ' + (CS_STEP[c.step] || c.step) : 'Bot';
     v.innerHTML = '<div class="cs-head"><button type="button" class="btn sm cs-back" data-cs="back" aria-label="Listeye dön">‹</button>' +
         '<div class="cs-who"><b>' + esc(csTitle(c)) + '</b><small>' + chName(c.channel) +
           (c.phone ? ' · <a href="tel:' + esc(c.phone.replace(/[^\d+]/g, '')) + '">' + esc(c.phone) + '</a>' : '') + (c.code ? ' · #' + esc(c.code) : '') + ' · ' + esc(st) + '</small></div>' +
+        '<button type="button" class="btn sm primary" data-cs="res">📋 Rezervasyon oluştur</button>' +
         (c.state === 'human' ? '<button type="button" class="btn sm" data-cs="bot">🤖 Bota devret</button>' : '<button type="button" class="btn sm primary" data-cs="human">🙋 Devral</button>') + '</div>' +
       csResHtml(cres) +
       '<div class="cs-msgs" id="cs-msgs">' + (csMsgs.length ? csMsgs.map(csMsgHtml).join('') : '<div class="cs-empty">Mesaj yok.</div>') + '</div>' +
@@ -4200,6 +4255,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       d.chats.forEach(c => { if(csOpen === c.k) c.unread = 0; csChats.set(c.k, c); if(c.lastT > csSince) csSince = c.lastT; });
       csErr = '';
       csSetWaiting(d.waiting);
+      setBotPaused(d.paused);
       renderCsList();
       if(csOpen) await csLoadMsgs();
       if(Date.now() - csStatusAt > 60000) csLoadStatus();
@@ -4210,6 +4266,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   }
   function csShowTab(){
     renderCsStatus();
+    renderBotPause();
     if(!botOn()){ $('#cs-items').innerHTML = '<p class="res-empty">Bot bağlı değil.</p>'; return; }
     csFullAt = 0; csStatusAt = 0;
     // Sohbetin üstünde müşterinin talebini göstermek için rezervasyonlar gerekir
@@ -4236,6 +4293,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     if(rb){
       const act = rb.dataset.csr;
       if(act === 'open') return openBotRequest(rb.dataset.ref);
+      if(act === 'edit'){ const r = (resList || []).find(x => x.id === rb.dataset.id); return r && openResForm(r); }
       if(act === 'cancelled' && !confirm('Talep reddedilsin mi? Müşteriye uygun masa kalmadığı mesajı gider.')) return;
       rb.disabled = true;
       await updateRes(rb.dataset.id, {status: act}, act === 'confirmed' ? 'Rezervasyon onaylandı.' : 'Talep reddedildi.');
@@ -4245,6 +4303,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     const a = e.target.closest('[data-cs]');
     if(!a) return;
     if(a.dataset.cs === 'back'){ csOpen = null; renderCsView(true); renderCsList(); return; }
+    if(a.dataset.cs === 'res') return csNewRes(csChats.get(csOpen));
     a.disabled = true;
     try{
       await botApi('POST', '/api/chat/mode', {k: csOpen, mode: a.dataset.cs});
@@ -4252,6 +4311,28 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       await csLoadMsgs();
     }catch(err){ toast(err.message, true, 7000); a.disabled = false; }
   });
+  // Sohbetten elle rezervasyon: ad, telefon ve kanal sohbetten dolar; kayıt sohbete bağlanır ve sohbetin üstünde görünür
+  function csNewRes(c){
+    if(!c) return;
+    const ig = c.channel === 'ig';
+    openResForm(null, {name: ig ? (c.name ? '@' + c.name : '') : c.name, phone: c.phone, source: ig ? 'instagram' : 'whatsapp',
+      note: ig && c.name ? 'Instagram: @' + c.name : '', chat: c.k});
+  }
+  // Kaydedilen rezervasyonun onayı aynı sohbetten (restoranın WhatsApp / Instagram hesabından) müşteriye gönderilir
+  async function csSendResConfirm(rec){
+    renderCsView(true);
+    const c = csChats.get(rec.chat);
+    if(!c || !botOn()) return;
+    if(!c.windowOpen) return setTimeout(() => toast('Müşteri 24 saatten uzun süredir yazmadığı için onay mesajı sohbetten gönderilemez' + (c.phone ? '; telefonla arayabilirsiniz.' : '.'), true, 9000), 1200);
+    const text = resConfirmText(rec);
+    if(!confirm('Müşteriye sohbetten onay mesajı gönderilsin mi?\n\n' + text)) return;
+    try{
+      await botApi('POST', '/api/chat/send', {k: rec.chat, text});
+      toast('✓ Onay mesajı müşteriye ' + chName(c.channel) + ' üzerinden gönderildi.');
+      if(csOpen === rec.chat) await csLoadMsgs();
+    }catch(err){ toast('Onay mesajı gönderilemedi: ' + err.message, true, 9000); }
+    renderCsView(true);
+  }
   async function csSend(){
     const ta = $('#cs-text'), text = ta && ta.value.trim();
     if(!text || !csOpen) return;
@@ -5344,7 +5425,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     ['home','res','chats','sales','menu','chef','calendar','ann','campaigns','offer','site','bot','qr','security'].forEach(n => $('#tab-' + n).classList.toggle('hide', n !== name));
     if(state && name === 'offer') renderOffer();
     if(name === 'chats') csShowTab();
-    if(state && name === 'bot') renderBotCfg();
+    if(state && name === 'bot'){ renderBotCfg(); loadBotPause(); }
     if(state && name === 'ann') renderAnn();
     if(name === 'qr' && !$('#qr-url').value){ $('#qr-url').value = defaultMenuUrl(); if($('#qr-url').value) makeQr(); }
     if(state && name === 'home') renderDash();
