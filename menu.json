@@ -268,7 +268,8 @@
           "calorieEstimated": true,
           "allergens": [],
           "traceWarning": "",
-          "id": "mezeler--kok-sebze-pilaki"
+          "id": "mezeler--kok-sebze-pilaki",
+          "hidden": true
         },
         {
           "name": "Yoğurtlu Köz Patlıcan",
@@ -1116,7 +1117,7 @@
         },
         {
           "name": "Hanchalar 9Tat Tatlı Şarap 50 cl",
-          "price": "1.500 TL",
+          "price": "1.800 TL",
           "description": "Chardonnay, Sauvignon Blanc, Merlot, Öküzgözü ve Boğazkere üzümlerinden üretilmiştir.",
           "calories": "15 cl: 165",
           "calorieEstimated": true,
