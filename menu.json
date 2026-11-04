@@ -705,7 +705,7 @@
         },
         {
           "name": "Coca-Cola",
-          "price": "150 TL",
+          "price": "200 TL",
           "description": "",
           "calories": "330 ml: 139",
           "calorieEstimated": true,
@@ -715,7 +715,7 @@
         },
         {
           "name": "Coca-Cola Zero",
-          "price": "150 TL",
+          "price": "200 TL",
           "description": "",
           "calories": "330 ml: 1",
           "calorieEstimated": true,
@@ -725,7 +725,7 @@
         },
         {
           "name": "Fanta",
-          "price": "150 TL",
+          "price": "200 TL",
           "description": "",
           "calories": "330 ml: 99",
           "calorieEstimated": true,
@@ -735,7 +735,7 @@
         },
         {
           "name": "Sprite",
-          "price": "150 TL",
+          "price": "200 TL",
           "description": "",
           "calories": "330 ml: 43",
           "calorieEstimated": true,
@@ -745,7 +745,7 @@
         },
         {
           "name": "Fuse Tea Limon",
-          "price": "150 TL",
+          "price": "200 TL",
           "description": "",
           "calories": "330 ml: 73",
           "calorieEstimated": true,
@@ -755,7 +755,7 @@
         },
         {
           "name": "Fuse Tea Şeftali",
-          "price": "150 TL",
+          "price": "200 TL",
           "description": "",
           "calories": "330 ml: 66",
           "calorieEstimated": true,
@@ -765,7 +765,7 @@
         },
         {
           "name": "Fuse Tea Mango Ananas",
-          "price": "150 TL",
+          "price": "200 TL",
           "description": "",
           "calories": "330 ml: 112",
           "calorieEstimated": true,
@@ -825,7 +825,7 @@
         },
         {
           "name": "Şalgam Bardak",
-          "price": "120 TL",
+          "price": "150 TL",
           "description": "",
           "calories": "200 ml: 10",
           "calorieEstimated": true,
