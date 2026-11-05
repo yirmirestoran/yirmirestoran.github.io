@@ -233,7 +233,8 @@
             "nuts"
           ],
           "traceWarning": "",
-          "id": "mezeler--levrek-marin"
+          "id": "mezeler--levrek-marin",
+          "hidden": true
         },
         {
           "name": "Köz Biber Ezmesi",
