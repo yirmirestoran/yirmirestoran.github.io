@@ -33,79 +33,6 @@
   },
   "categories": [
     {
-      "id": "sefin-seckisi",
-      "title": "Şefin Seçkisi",
-      "subtitle": "Şefin her gün özenle seçtiği beş meze, tek tabakta.",
-      "items": [
-        {
-          "name": "Akya Pastırma",
-          "price": "",
-          "description": "Sızma zeytinyağı, kırmızı soğan, limon suyu",
-          "calories": "180",
-          "calorieEstimated": true,
-          "allergens": [
-            "fish"
-          ],
-          "traceWarning": "",
-          "id": "sefin-seckisi--somon-pastirma"
-        },
-        {
-          "name": "Güllü Kuru Cacık",
-          "price": "",
-          "description": "Süzme yoğurt, gül suyu, gül yaprağı, salatalık",
-          "calories": "140",
-          "calorieEstimated": true,
-          "allergens": [
-            "milk"
-          ],
-          "traceWarning": "",
-          "id": "sefin-seckisi--gullu-kuru-cacik"
-        },
-        {
-          "name": "Tarama",
-          "price": "",
-          "description": "Balık yumurtası, lime zest, sızma zeytinyağı",
-          "calories": "230",
-          "calorieEstimated": true,
-          "allergens": [
-            "gluten",
-            "fish"
-          ],
-          "traceWarning": "",
-          "id": "sefin-seckisi--tarama"
-        },
-        {
-          "name": "Ciğer Pate",
-          "price": "",
-          "description": "Dana ciğer, soğan, sarımsak, krema",
-          "calories": "260",
-          "calorieEstimated": true,
-          "allergens": [
-            "milk"
-          ],
-          "traceWarning": "",
-          "id": "sefin-seckisi--ciger-pate",
-          "image": "images/ciger-pate-mur7l39y.jpg"
-        },
-        {
-          "name": "Mantar Düksel",
-          "price": "",
-          "description": "Kültür mantarı, istiridye mantarı, kestane mantarı, soğan, sarımsak",
-          "calories": "170",
-          "calorieEstimated": true,
-          "allergens": [
-            "milk"
-          ],
-          "traceWarning": "",
-          "id": "sefin-seckisi--mantar-duksel"
-        }
-      ],
-      "setPrice": "5 Meze  ·  675 TL",
-      "layout": "list",
-      "cover": "images/kapak-sefin-seckisi-mur22pse.jpg",
-      "hidden": true
-    },
-    {
       "id": "mezeler",
       "title": "Mezeler",
       "subtitle": "Ege'nin bereketi, mevsimin en taze halleri.",
@@ -344,10 +271,93 @@
           ],
           "traceWarning": "",
           "id": "mezeler--yeni-urun"
+        },
+        {
+          "name": "Bal Kabağı Sinkonto",
+          "price": "380",
+          "description": "İsotlu yoğurt bal kabağı tane nar ve balzemik",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "mezeler--yeni-urun-2"
         }
       ],
       "layout": "list",
       "cover": "images/kapak-mezeler-mur3vn94.jpg"
+    },
+    {
+      "id": "sefin-seckisi",
+      "title": "Şefin Seçkisi",
+      "subtitle": "Şefin her gün özenle seçtiği beş meze, tek tabakta.",
+      "items": [
+        {
+          "name": "Akya Pastırma",
+          "price": "",
+          "description": "Sızma zeytinyağı, kırmızı soğan, limon suyu",
+          "calories": "180",
+          "calorieEstimated": true,
+          "allergens": [
+            "fish"
+          ],
+          "traceWarning": "",
+          "id": "sefin-seckisi--somon-pastirma"
+        },
+        {
+          "name": "Güllü Kuru Cacık",
+          "price": "",
+          "description": "Süzme yoğurt, gül suyu, gül yaprağı, salatalık",
+          "calories": "140",
+          "calorieEstimated": true,
+          "allergens": [
+            "milk"
+          ],
+          "traceWarning": "",
+          "id": "sefin-seckisi--gullu-kuru-cacik"
+        },
+        {
+          "name": "Tarama",
+          "price": "",
+          "description": "Balık yumurtası, lime zest, sızma zeytinyağı",
+          "calories": "230",
+          "calorieEstimated": true,
+          "allergens": [
+            "gluten",
+            "fish"
+          ],
+          "traceWarning": "",
+          "id": "sefin-seckisi--tarama"
+        },
+        {
+          "name": "Ciğer Pate",
+          "price": "",
+          "description": "Dana ciğer, soğan, sarımsak, krema",
+          "calories": "260",
+          "calorieEstimated": true,
+          "allergens": [
+            "milk"
+          ],
+          "traceWarning": "",
+          "id": "sefin-seckisi--ciger-pate",
+          "image": "images/ciger-pate-mur7l39y.jpg"
+        },
+        {
+          "name": "Mantar Düksel",
+          "price": "",
+          "description": "Kültür mantarı, istiridye mantarı, kestane mantarı, soğan, sarımsak",
+          "calories": "170",
+          "calorieEstimated": true,
+          "allergens": [
+            "milk"
+          ],
+          "traceWarning": "",
+          "id": "sefin-seckisi--mantar-duksel"
+        }
+      ],
+      "setPrice": "5 Meze  ·  675 TL",
+      "layout": "list",
+      "cover": "images/kapak-sefin-seckisi-mur22pse.jpg",
+      "hidden": true
     },
     {
       "id": "salatalar",
