@@ -32,7 +32,7 @@
  *   GRAPH_VERSION     (isteğe bağlı) Meta Graph API sürümü, varsayılan v23.0
  */
 
-const VERSION = '2026-11-03a';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
+const VERSION = '2026-11-06a';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
 const SESSION_MS = 30 * 60e3;          // bu kadar sessiz kalan sohbet baştan başlar
 const HUMAN_MS = 12 * 3600e3;          // "yetkili" istenince bot bu süre susar
 const WINDOW_MS = 23.5 * 3600e3;       // WhatsApp/Instagram 24 saat mesajlaşma penceresi (pay bırakılarak)
@@ -1161,7 +1161,12 @@ const graphVer = env => env.GRAPH_VERSION || 'v23.0';
 async function graph(url, token, body){
   const r = await fetch(url, {method: 'POST', headers: {'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json'}, body: JSON.stringify(body)});
   const j = await r.json().catch(() => ({}));
-  if(!r.ok){ const e = new Error((j.error && j.error.message) || 'HTTP ' + r.status); e.code = j.error && j.error.code; throw e; }
+  if(!r.ok){
+    // Meta'nın kısa mesajı ("Parameter value is not valid" vb.) tek başına sebebi söylemez; ayrıntı ve hata kodu da eklenir
+    const er = j.error || {}, det = (er.error_data && er.error_data.details) || er.error_user_msg || '';
+    const e = new Error((er.message || 'HTTP ' + r.status) + (det && det !== er.message ? ' — ' + det : '') + (er.code ? ' (kod ' + er.code + ')' : ''));
+    e.code = er.code; throw e;
+  }
   return j;
 }
 function send(env, channel, uid, msg){ return channel === 'wa' ? waSend(env, uid, msg) : igSend(env, uid, msg); }
