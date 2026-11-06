@@ -32,7 +32,7 @@
  *   GRAPH_VERSION     (isteğe bağlı) Meta Graph API sürümü, varsayılan v23.0
  */
 
-const VERSION = '2026-11-06a';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
+const VERSION = '2026-11-06b';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
 const SESSION_MS = 30 * 60e3;          // bu kadar sessiz kalan sohbet baştan başlar
 const HUMAN_MS = 12 * 3600e3;          // "yetkili" istenince bot bu süre susar
 const WINDOW_MS = 23.5 * 3600e3;       // WhatsApp/Instagram 24 saat mesajlaşma penceresi (pay bırakılarak)
@@ -1170,6 +1170,9 @@ async function graph(url, token, body){
   return j;
 }
 function send(env, channel, uid, msg){ return channel === 'wa' ? waSend(env, uid, msg) : igSend(env, uid, msg); }
+// WhatsApp kullanıcı adı kullanan müşterilerde numara yerine "TR.123…" biçiminde kimlik (BSUID) gelir;
+// Meta bu kimliğe "to" ile değil "recipient" ile gönderilmesini ister (yoksa #131009 Parameter value is not valid)
+const waAddr = to => /^\d{6,15}$/.test(String(to)) ? {to: String(to)} : {recipient: String(to)};
 // En fazla 3 kısa seçenek → düğme; daha fazlası → açılır liste (en fazla 10 satır)
 const waUrl = async (env, to) => 'https://graph.facebook.com/' + graphVer(env) + '/' + (await waPid(env, to)) + '/messages';
 async function waSend(env, to, msg){
@@ -1182,7 +1185,7 @@ async function waSend(env, to, msg){
   else payload = {type: 'interactive', interactive: {type: 'list', body: {text},
     action: {button: cut(msg.button || 'Seçenekler', 20), sections: [{title: 'Seçenekler',
       rows: opts.slice(0, 10).map(o => Object.assign({id: o.id, title: cut(o.title, 24)}, o.desc ? {description: cut(o.desc, 72)} : {}))}]}}};
-  return waPost(env, to, Object.assign({messaging_product: 'whatsapp', recipient_type: 'individual', to}, payload));
+  return waPost(env, to, Object.assign({messaging_product: 'whatsapp', recipient_type: 'individual'}, waAddr(to), payload));
 }
 // Her başarılı gönderim aylık sayaca eklenir (personel "durum" yazınca görür)
 async function waPost(env, to, body){
@@ -1191,14 +1194,13 @@ async function waPost(env, to, body){
   return j;
 }
 async function waReact(env, to, messageId, emoji){
-  return waPost(env, to, {messaging_product: 'whatsapp', recipient_type: 'individual', to, type: 'reaction', reaction: {message_id: messageId, emoji}});
+  return waPost(env, to, Object.assign({messaging_product: 'whatsapp', recipient_type: 'individual'}, waAddr(to), {type: 'reaction', reaction: {message_id: messageId, emoji}}));
 }
 async function waTemplate(env, to, name, params){
-  return waPost(env, to, {
-    messaging_product: 'whatsapp', to, type: 'template',
+  return waPost(env, to, Object.assign({messaging_product: 'whatsapp'}, waAddr(to), {type: 'template',
     template: {name, language: {code: env.TEMPLATE_LANG || 'tr'},
       components: params.length ? [{type: 'body', parameters: params.map(p => ({type: 'text', text: oneLine(p)}))}] : []}
-  });
+  }));
 }
 async function igSend(env, to, msg){
   // Instagram kalın yazı (*…*) desteklemez; hızlı yanıt düğmeleri en fazla 13 adet, 20 karakter
