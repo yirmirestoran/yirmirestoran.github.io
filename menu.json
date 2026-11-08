@@ -1227,5 +1227,19 @@
   ],
   "campaigns": [],
   "events": [],
-  "announcements": []
+  "announcements": [
+    {
+      "id": "dmw84ilqc",
+      "title": "Bizi Instagram’da takip edin",
+      "text": "Etkinlikler, yeni lezzetler ve sürprizlerden ilk siz haberdar olun.",
+      "image": "images/afis-bizi-instagram-da-takip-edin-mw84j25d.jpg",
+      "link": "https://www.instagram.com/yirmirestoran/",
+      "button": "Takip Et",
+      "from": "2026-11-08T20:46",
+      "to": "2026-11-09T20:46",
+      "published": true,
+      "popup": true,
+      "whatsapp": true
+    }
+  ]
 }
