@@ -452,12 +452,13 @@ h2{font-size:25px!important}
 @media (max-width:640px){ .bc-row{grid-template-columns:minmax(0,1fr);gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line)} }
 .bc-q{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
 /* Sohbetler */
-.bp-box{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.bp-box.paused{background:#fff4e5;border-color:#f0b35a}
-.bp-box .bp-ico{font-size:28px;line-height:1}
-.bp-box .bp-tx{flex:1 1 260px;min-width:0}
-.bp-box .bp-tx b{font-size:15px}
-.bp-box .bp-tx p{margin:3px 0 0}
+.bp-box{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:10px;padding:12px}
+.bp-card{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;min-width:0}
+.bp-card.paused{background:#fff4e5;border-color:#f0b35a}
+.bp-card .bp-ico{font-size:26px;line-height:1}
+.bp-card .bp-tx{flex:1 1 180px;min-width:0}
+.bp-card .bp-tx b{font-size:15px}
+.bp-card .bp-tx p{margin:3px 0 0}
 .tab-badge.bp-badge{background:#e67e22}
 .tab-badge{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:#c0392b;color:#fff;font-size:11px;line-height:18px;margin-left:5px;font-weight:700;text-align:center}
 .cs-status{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;padding:12px}
@@ -4073,25 +4074,32 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   }
   const csAgoLong = t => !t ? 'henüz yok' : csAgo(t) === 'şimdi' ? 'az önce' : csAgo(t) + ' önce';
   /* ---------- Botu askıya alma ---------- */
-  // Askıdayken bot WhatsApp ve Instagram'da müşterilere hiç cevap vermez; mesajlar Sohbetler'e düşer, rezervasyonlar elle girilir.
-  // botPaused: undefined = henüz bilinmiyor, null = Cloudflare'deki bot kodu bu özelliği tanımıyor (worker.js güncellenmeli)
+  // Askıdaki kanalda bot müşterilere hiç cevap vermez; mesajlar Sohbetler'e düşer, rezervasyonlar elle girilir.
+  // botPaused: undefined = henüz bilinmiyor, null = bot kodu askıya almayı tanımıyor, {on} = kanalları ayıramayan eski bot kodu, {wa, ig} = güncel
   let botPaused;
+  const BP_CHANNELS = [['wa', 'WhatsApp'], ['ig', 'Instagram']];
+  const botPausedOn = ch => !!botPaused && !!(botPaused.wa ? botPaused[ch].on : botPaused.on);
   function setBotPaused(p){ botPaused = p && typeof p === 'object' ? p : null; renderBotPause(); }
+  function bpCard(ch, name, p){
+    const label = name + ' botu', on = !!p.on, when = p.t ? ' Askıya alınma: ' + esc(new Date(p.t).toLocaleString('tr-TR', {day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'})) + (p.by ? ' (' + esc(p.by) + ')' : '') : '';
+    return '<div class="bp-card' + (on ? ' paused' : '') + '"><span class="bp-ico">' + (on ? '⏸' : '🤖') + '</span><div class="bp-tx"><b>' + label + (on ? ' askıda' : ' açık') + '</b><p class="hint">' +
+      (on ? 'Otomatik cevap gitmiyor; mesajlar burada bekler. Cevabı siz yazın, rezervasyonu sohbetteki <b>📋 Rezervasyon oluştur</b> ile girin.' + when : 'Müşterilere otomatik cevap veriyor.') + '</p></div>' +
+      '<button type="button" class="btn ' + (on ? 'primary' : 'danger') + '" data-bpset="' + (on ? 0 : 1) + '" data-bpch="' + ch + '" data-bpname="' + label + '">' + (on ? '▶️ Yeniden başlat' : '⏸ Askıya al') + '</button></div>';
+  }
   function renderBotPause(){
-    const p = botPaused, on = !!(p && p.on);
-    $('#bot-paused-badge').classList.toggle('hide', !on);
+    const p = botPaused, off = BP_CHANNELS.filter(([ch]) => botPausedOn(ch));
+    $('#bot-paused-badge').textContent = off.length === 1 ? off[0][1] + ' askıda' : 'Askıda';
+    $('#bot-paused-badge').classList.toggle('hide', !off.length);
     document.querySelectorAll('[data-bp]').forEach(box => {
       box.classList.toggle('hide', !botOn() || p === undefined);
-      box.classList.toggle('paused', on);
       box.innerHTML = p === null
-        ? '<span class="bp-ico">⚠️</span><div class="bp-tx"><b>Botu askıya alma kullanılamıyor</b><p class="hint">Cloudflare\'deki bot kodu eski. <code>bot/worker.js</code> dosyasını Cloudflare\'de güncelleyince bu düğme çalışır.</p></div>'
-        : on
-        ? '<span class="bp-ico">⏸</span><div class="bp-tx"><b>Bot askıda — müşterilere otomatik cevap gitmiyor</b><p class="hint">WhatsApp ve Instagram\'dan gelen mesajlar burada okunmamış olarak bekler. Cevabı siz yazın, rezervasyonu sohbetteki <b>📋 Rezervasyon oluştur</b> ile girin.' +
-            (p.t ? ' Askıya alınma: ' + esc(new Date(p.t).toLocaleString('tr-TR', {day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'})) + (p.by ? ' (' + esc(p.by) + ')' : '') : '') + '</p></div>' +
-            '<button type="button" class="btn primary" data-bpset="0">▶️ Botu yeniden başlat</button>'
-        : '<span class="bp-ico">🤖</span><div class="bp-tx"><b>Bot açık — müşterilere otomatik cevap veriyor</b><p class="hint">Bir süre cevapları ve rezervasyonları elle yönetmek isterseniz botu askıya alın. Personel WhatsApp\'tan <b>bot kapat</b> / <b>bot aç</b> da yazabilir.</p></div>' +
-            '<button type="button" class="btn danger" data-bpset="1">⏸ Botu askıya al</button>';
+        ? '<div class="bp-card"><span class="bp-ico">⚠️</span><div class="bp-tx"><b>Botu askıya alma kullanılamıyor</b><p class="hint">Cloudflare\'deki bot kodu eski. <code>bot/worker.js</code> dosyasını Cloudflare\'de güncelleyince bu düğme çalışır.</p></div></div>'
+        : p && p.wa ? BP_CHANNELS.map(([ch, name]) => bpCard(ch, name, p[ch])).join('')
+        : p ? '<div class="bp-card' + (p.on ? ' paused' : '') + '"><span class="bp-ico">⚠️</span><div class="bp-tx"><b>' + (p.on ? 'İki bot da askıda' : 'İki bot da açık') + '</b><p class="hint">Kanalları ayrı ayrı yönetmek için <code>bot/worker.js</code> dosyasını Cloudflare\'de güncelleyin. O zamana kadar bu düğme iki kanalı birlikte değiştirir.</p></div>' +
+            '<button type="button" class="btn ' + (p.on ? 'primary' : 'danger') + '" data-bpset="' + (p.on ? 0 : 1) + '" data-bpname="WhatsApp ve Instagram botu">' + (p.on ? '▶️ Yeniden başlat' : '⏸ Askıya al') + '</button></div>'
+        : '';
     });
+    if(csOpen) renderCsView();
   }
   async function loadBotPause(){
     if(!botOn()) return renderBotPause();
@@ -4100,12 +4108,12 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   document.addEventListener('click', async e => {
     const b = e.target.closest('[data-bpset]');
     if(!b) return;
-    const on = b.dataset.bpset === '1';
-    if(on && !confirm('Bot askıya alınsın mı?\n\nWhatsApp ve Instagram\'a yazan müşterilere hiçbir otomatik cevap gitmez; mesajlar Sohbetler sekmesine düşer ve cevabı sizin yazmanız gerekir.')) return;
+    const on = b.dataset.bpset === '1', name = b.dataset.bpname;
+    if(on && !confirm(name + ' askıya alınsın mı?\n\nOradan yazan müşterilere hiçbir otomatik cevap gitmez; mesajlar Sohbetler sekmesine düşer ve cevabı sizin yazmanız gerekir.')) return;
     b.disabled = true;
     try{
-      setBotPaused((await botApi('POST', '/api/settings', {paused: on})).paused);
-      toast(on ? '⏸ Bot askıya alındı. Gelen mesajlar Sohbetler sekmesinde bekleyecek.' : '▶️ Bot yeniden açıldı; müşterilere otomatik cevap veriyor.', false, 6000);
+      setBotPaused((await botApi('POST', '/api/settings', {paused: on, channel: b.dataset.bpch})).paused);
+      toast(on ? '⏸ ' + name + ' askıya alındı. Gelen mesajlar Sohbetler sekmesinde bekleyecek.' : '▶️ ' + name + ' yeniden açıldı; müşterilere otomatik cevap veriyor.', false, 6000);
       csStatusAt = 0;
     }catch(err){ toast(err.message, true, 8000); b.disabled = false; }
   });
@@ -4209,7 +4217,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   function renderCsView(force){
     const c = csOpen && csChats.get(csOpen);
     const cres = c ? csResFor(c) : [];
-    const sig = c ? [c.k, c.state, c.step, c.windowOpen, !!(botPaused && botPaused.on), csLastId, csMsgs.length, cres.map(r => r.id + r.status + r.tables).join()].join('|') : '';
+    const sig = c ? [c.k, c.state, c.step, c.windowOpen, botPausedOn(c.channel), csLastId, csMsgs.length, cres.map(r => r.id + r.status + r.tables).join()].join('|') : '';
     if(!force && sig === csSig) return;
     csSig = sig;
     $('#cs-wrap').classList.toggle('open', !!csOpen);
@@ -4218,7 +4226,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     // Yazılmakta olan mesaj ve kaydırma konumu korunur
     const old = $('#cs-text'), draft = old ? old.value : '', focused = old && document.activeElement === old;
     const box = $('#cs-msgs'), atBottom = !box || box.scrollHeight - box.scrollTop - box.clientHeight < 60;
-    const st = botPaused && botPaused.on ? 'Bot askıda' : c.state === 'human' ? 'Personelde (bot susuyor)' :c.state === 'done' ? 'Talep alındı' : c.step ? 'Bot · ' + (CS_STEP[c.step] || c.step) : 'Bot';
+    const st = botPausedOn(c.channel) ? 'Bot askıda' : c.state === 'human' ? 'Personelde (bot susuyor)' :c.state === 'done' ? 'Talep alındı' : c.step ? 'Bot · ' + (CS_STEP[c.step] || c.step) : 'Bot';
     v.innerHTML = '<div class="cs-head"><button type="button" class="btn sm cs-back" data-cs="back" aria-label="Listeye dön">‹</button>' +
         '<div class="cs-who"><b>' + esc(csTitle(c)) + '</b><small>' + chName(c.channel) +
           (c.phone ? ' · <a href="tel:' + esc(c.phone.replace(/[^\d+]/g, '')) + '">' + esc(c.phone) + '</a>' : '') + (c.code ? ' · #' + esc(c.code) : '') + ' · ' + esc(st) + '</small></div>' +

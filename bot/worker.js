@@ -32,7 +32,7 @@
  *   GRAPH_VERSION     (isteğe bağlı) Meta Graph API sürümü, varsayılan v23.0
  */
 
-const VERSION = '2026-11-06b';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
+const VERSION = '2026-11-08a';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
 const SESSION_MS = 30 * 60e3;          // bu kadar sessiz kalan sohbet baştan başlar
 const HUMAN_MS = 12 * 3600e3;          // "yetkili" istenince bot bu süre susar
 const WINDOW_MS = 23.5 * 3600e3;       // WhatsApp/Instagram 24 saat mesajlaşma penceresi (pay bırakılarak)
@@ -296,8 +296,18 @@ async function waRedirect(url, env){
 // {closedUntil: null | 'YYYY-MM-DD' | 'always', note}
 async function outdoorState(env){ return (await getSetting(env, 'outdoor')) || {closedUntil: null, note: ''}; }
 function outdoorClosedOn(o, date){ return !!(o && o.closedUntil) && (o.closedUntil === 'always' || date <= o.closedUntil); }
-// Panelden ya da personelin "bot kapat" komutuyla askıya alınır: müşterilere otomatik cevap gitmez, mesajlar yalnızca panele düşer
-async function pausedState(env){ return (await getSetting(env, 'paused')) || {on: false}; }
+// WhatsApp ve Instagram botu ayrı ayrı askıya alınır: askıdaki kanalda müşterilere otomatik cevap gitmez, mesajlar yalnızca panele düşer
+// {wa: {on, t, by}, ig: {on, t, by}} — eski kayıt {on: true} iki kanalın da askıda olduğu anlamına gelir
+async function pausedState(env){
+  const p = (await getSetting(env, 'paused')) || {}, old = {on: !!p.on, t: p.t, by: p.by};
+  return p.wa || p.ig ? {wa: p.wa || {on: false}, ig: p.ig || {on: false}} : {wa: old, ig: old};
+}
+async function setPaused(env, channels, on, by){
+  const p = await pausedState(env);
+  channels.forEach(ch => { p[ch] = on ? {on: true, t: Date.now(), by} : {on: false}; });
+  await setSetting(env, 'paused', p);
+  return p;
+}
 
 /* ---------- İşletme bilgileri (menu.json) ---------- */
 let siteCache = null, siteAt = 0;
@@ -528,7 +538,7 @@ async function onMessage(env, m){
   const logIt = !(staff || team) || !!(s && s.test);   // personelin bota yazdığı komutlar sohbet listesine girmez
   if(logIt) await logMsg(env, key, 'in', m.media ? '[' + (MEDIA_LABEL[m.mediaType] || 'dosya') + ']' : (m.text || ''));
   // Bot askıdaysa müşteriye hiçbir otomatik mesaj gitmez; mesaj panelde okunmamış olarak bekler
-  if(!staff && !team && (await pausedState(env)).on) return;
+  if(!staff && !team && (await pausedState(env))[m.channel].on) return;
   if(!staff && !team){
     const f = await floodCheck(env, key, now, !m.choice);
     if(f === 'warn'){
@@ -896,7 +906,8 @@ const STAFF_HELP = '👋 *Personel komutları*\n' +
   '• *dış kapat süresiz* – siz açana kadar kapalı\n' +
   '• *dış aç* – dış alanı aç\n' +
   '• *durum* – bot durumu\n' +
-  '• *bot kapat* / *bot aç* – müşterilere otomatik cevabı durdur / yeniden başlat\n' +
+  '• *bot kapat* / *bot aç* – WhatsApp ve Instagram botunu birlikte durdur / başlat\n' +
+  '• *whatsapp kapat* / *whatsapp aç* · *instagram kapat* / *instagram aç* – yalnızca o kanalı durdur / başlat\n' +
   '• *izle aç* / *izle kapat* – müşterilerin bota yazdığı her mesajın kopyası size gelsin\n' +
   '• *test* – botu müşteri gibi deneyin\n' +
   '• *bekleyen* – onay bekleyen talepler, düğmeleriyle\n' +
@@ -922,14 +933,13 @@ async function staffCommand(ctx){
     say(ctx, 'İzleme kapandı. Yeni rezervasyon ve yetkili bildirimleri gelmeye devam eder.');
     return null;
   }
-  if(/^bot (kapat|kapa|durdur|dur)$/.test(t)){
-    await setSetting(env, 'paused', {on: true, t: Date.now(), by: 'WhatsApp'});
-    say(ctx, '⏸ Bot askıya alındı: müşterilere WhatsApp ve Instagram\'dan otomatik cevap gitmeyecek. Mesajlar yönetim panelindeki Sohbetler sekmesine düşer. Açmak için *bot aç*.');
-    return null;
-  }
-  if(/^bot (ac|acik|baslat)$/.test(t)){
-    await setSetting(env, 'paused', {on: false});
-    say(ctx, '▶️ Bot yeniden açıldı; müşterilere otomatik cevap veriyor.');
+  const pc = /^(bot|whatsapp|wa|instagram|ig)(?: botu?)? (kapat|kapa|durdur|dur|ac|acik|baslat)$/.exec(t);
+  if(pc){
+    const channels = pc[1] === 'bot' ? ['wa', 'ig'] : /^(whatsapp|wa)$/.test(pc[1]) ? ['wa'] : ['ig'];
+    const on = !/^(ac|acik|baslat)$/.test(pc[2]), label = channels.map(channelName).join(' ve ');
+    await setPaused(env, channels, on, 'WhatsApp');
+    say(ctx, on ? '⏸ ' + label + ' botu askıya alındı: oradan yazan müşterilere otomatik cevap gitmeyecek. Mesajlar yönetim panelindeki Sohbetler sekmesine düşer.'
+      : '▶️ ' + label + ' botu yeniden açıldı; müşterilere otomatik cevap veriyor.');
     return null;
   }
   if(t === 'test'){
@@ -954,7 +964,7 @@ async function staffCommand(ctx){
     const waiting = await D.prepare('SELECT COUNT(*) AS n FROM requests WHERE imported = 0').first();
     const day = await D.prepare('SELECT COUNT(*) AS n FROM requests WHERE created > ?').bind(Date.now() - 864e5).first();
     const bn = await ensureBotNumber(env);
-    say(ctx, '📊 *Bot durumu*\n' + ((await pausedState(env)).on ? '• ⏸ *Bot askıda* — müşterilere otomatik cevap gitmiyor (*bot aç* ile açılır)\n' : '') +
+    say(ctx, '📊 *Bot durumu*\n' + (await pausedLine(env)) +
       (bn ? '• Bot numarası: ' + (bn.live ? 'aktif ✅ https://wa.me/' + String(bn.number).replace(/\D/g, '') :
         'henüz açılmadı' + (bn.nameStatus ? ' (ad incelemesi: ' + bn.nameStatus + ')' : '') + (bn.error ? ' — ' + bn.error : '')) + '\n' : '') +
       '• Dış alan: ' + (outdoorClosedOn(o, today) ? 'kapalı (' + (o.closedUntil === 'always' ? 'siz açana kadar' : dateLong(o.closedUntil) + ' dahil') + ')' : 'açık') + '\n' +
@@ -983,6 +993,10 @@ async function staffCommand(ctx){
   return null;
 }
 // Bottan gelen (test olmayan) talepler; decided: personel WhatsApp'tan ya da panelden karar verdi mi
+async function pausedLine(env){
+  const p = await pausedState(env), off = ['wa', 'ig'].filter(ch => p[ch].on).map(channelName);
+  return off.length ? '• ⏸ *' + off.join(' ve ') + ' botu askıda* — oradan yazan müşterilere otomatik cevap gitmiyor\n' : '';
+}
 async function botRequests(env){
   const r = await (await db(env)).prepare('SELECT data, notified FROM requests WHERE created > ? ORDER BY created DESC LIMIT 300').bind(Date.now() - 60 * 864e5).all();
   return r.results.map(x => {
@@ -1301,7 +1315,7 @@ async function api(req, url, env){
         await setSetting(env, 'outdoor', {closedUntil: u || null, note: clean(body.outdoor && body.outdoor.note, 80)});
       }
       if(post && body.paused !== undefined)
-        await setSetting(env, 'paused', body.paused ? {on: true, t: Date.now(), by: clean(body.by, 40) || 'Panel'} : {on: false});
+        await setPaused(env, body.channel === 'wa' || body.channel === 'ig' ? [body.channel] : ['wa', 'ig'], !!body.paused, clean(body.by, 40) || 'Panel');
       return json({outdoor: await outdoorState(env), paused: await pausedState(env)});
     }
     case '/api/notify':
@@ -1330,11 +1344,13 @@ function chatRow(r){
 }
 // Personelin cevap vermesi beklenen (devralınmış ve okunmamış mesajı olan) sohbet sayısı
 async function waitingChats(env){
-  // Bot askıdayken okunmamış her sohbet personel bekliyor sayılır
-  if((await pausedState(env)).on) return (await (await db(env)).prepare('SELECT COUNT(*) AS n FROM chats WHERE unread > 0').first()).n;
-  const r =await (await db(env)).prepare("SELECT s.data FROM chats ch JOIN sessions s ON s.k = ch.k WHERE ch.unread > 0 AND s.data LIKE '%\"human\":%'").all();
-  const now = Date.now();
-  return r.results.filter(x => { try{ return JSON.parse(x.data).human > now; }catch(e){ return false; } }).length;
+  // Botu askıda olan kanalda okunmamış her sohbet personel bekliyor sayılır
+  const p = await pausedState(env), now = Date.now();
+  const r = await (await db(env)).prepare('SELECT ch.k, s.data FROM chats ch LEFT JOIN sessions s ON s.k = ch.k WHERE ch.unread > 0').all();
+  return r.results.filter(x => {
+    if(p[x.k.slice(0, 2)].on) return true;
+    try{ return JSON.parse(x.data).human > now; }catch(e){ return false; }
+  }).length;
 }
 // Panelden müşteriye mesaj: bot o müşteriye 12 saat karışmaz
 async function panelSend(env, b){
