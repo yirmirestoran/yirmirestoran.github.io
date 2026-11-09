@@ -427,6 +427,138 @@
       "cover": "images/kapak-salatalar-mur34gou.jpg"
     },
     {
+      "id": "tatlilar",
+      "title": "Tatlılar",
+      "subtitle": "Sofranın tatlı finali.",
+      "items": [
+        {
+          "name": "Leblebili Sıcak Helva",
+          "price": "400 TL",
+          "description": "Serinhisar leblebisi, tahin helvası",
+          "calories": "560",
+          "calorieEstimated": true,
+          "allergens": [
+            "sesame"
+          ],
+          "traceWarning": "",
+          "id": "tatlilar--leblebili-sicak-helva"
+        },
+        {
+          "name": "Fıstıklı İrmik Helvası",
+          "price": "700 TL",
+          "description": "Antep fıstığı, sade dondurma, tahin, gül yaprağı",
+          "calories": "720",
+          "calorieEstimated": true,
+          "allergens": [
+            "gluten",
+            "milk",
+            "nuts",
+            "sesame"
+          ],
+          "traceWarning": "",
+          "id": "tatlilar--fistikli-irmik-helvasi"
+        },
+        {
+          "name": "Mevsim Meyveleri",
+          "price": "300 TL",
+          "description": "",
+          "calories": "180",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "tatlilar--mevsim-meyveleri",
+          "image": "images/mevsim-meyveleri-mvjoetnc.jpg"
+        }
+      ],
+      "layout": "list",
+      "cover": "images/kapak-tatlilar-mur94sc9.jpg"
+    },
+    {
+      "id": "ana-yemekler",
+      "title": "Ana Yemekler",
+      "subtitle": "Közün ve sabrın imzası.",
+      "items": [
+        {
+          "name": "Kuzu Şiş",
+          "price": "1.045 TL",
+          "description": "Kuzu but, köz chili biber, bebek patates, tablacı salatası",
+          "calories": "820",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "ana-yemekler--kuzu-sis"
+        },
+        {
+          "name": "Kuzu Pirzola",
+          "price": "1.250 TL",
+          "description": "Köz chili biber, bebek patates, tablacı salatası",
+          "calories": "950",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "ana-yemekler--kuzu-pirzola",
+          "image": "images/kuzu-pirzola-mvjoed3t.jpg"
+        },
+        {
+          "name": "Zırh Kıyma Kebabı",
+          "price": "845 TL",
+          "description": "Köz chili biber, bebek patates, tablacı salatası, acılı / acısız",
+          "calories": "850",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "ana-yemekler--zirh-kiyma-kebabi"
+        },
+        {
+          "name": "Dana Bonfile",
+          "price": "1.650 TL",
+          "description": "Köz chili biber, bebek patates, tablacı salatası, et sos",
+          "calories": "780",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "ana-yemekler--dana-bonfile",
+          "image": "images/dana-bonfile-mvjoeicv.jpg"
+        },
+        {
+          "name": "Tavuk Kanat",
+          "price": "795 TL",
+          "description": "Köz chili biber, bebek patates, tablacı salatası",
+          "calories": "900",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "ana-yemekler--tavuk-kanat"
+        },
+        {
+          "name": "Tavuk Şiş",
+          "price": "695 TL",
+          "description": "Tavuk kalça, köz chili biber, bebek patates, tablacı salatası",
+          "calories": "760",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "ana-yemekler--tavuk-sis"
+        },
+        {
+          "name": "Levrek",
+          "price": "990 TL",
+          "description": "Levrek fileto, patates pavé, nane, limon zest, zencefilli vinigret",
+          "calories": "650",
+          "calorieEstimated": true,
+          "allergens": [
+            "fish",
+            "milk"
+          ],
+          "traceWarning": "",
+          "id": "ana-yemekler--levrek",
+          "image": "images/levrek-mvjoenqg.jpg"
+        }
+      ],
+      "layout": "list",
+      "cover": "images/kapak-ana-yemekler-mur3gwni.jpg"
+    },
+    {
       "id": "ara-sicaklar",
       "title": "Ara Sıcaklar",
       "subtitle": "Sofranın sıcak sohbetleri.",
@@ -554,7 +686,7 @@
         },
         {
           "name": "Meyhane Klasiği",
-          "price": "480 TL",
+          "price": "500",
           "description": "Patates,Patlıcan,Taze Soğan,Çarlistan",
           "calories": "",
           "calorieEstimated": true,
@@ -565,138 +697,6 @@
       ],
       "layout": "list",
       "cover": "images/kapak-ara-sicaklar-mur3672d.jpg"
-    },
-    {
-      "id": "ana-yemekler",
-      "title": "Ana Yemekler",
-      "subtitle": "Közün ve sabrın imzası.",
-      "items": [
-        {
-          "name": "Kuzu Şiş",
-          "price": "1.045 TL",
-          "description": "Kuzu but, köz chili biber, bebek patates, tablacı salatası",
-          "calories": "820",
-          "calorieEstimated": true,
-          "allergens": [],
-          "traceWarning": "",
-          "id": "ana-yemekler--kuzu-sis"
-        },
-        {
-          "name": "Kuzu Pirzola",
-          "price": "1.250 TL",
-          "description": "Köz chili biber, bebek patates, tablacı salatası",
-          "calories": "950",
-          "calorieEstimated": true,
-          "allergens": [],
-          "traceWarning": "",
-          "id": "ana-yemekler--kuzu-pirzola",
-          "image": "images/kuzu-pirzola-mvjoed3t.jpg"
-        },
-        {
-          "name": "Zırh Kıyma Kebabı",
-          "price": "845 TL",
-          "description": "Köz chili biber, bebek patates, tablacı salatası, acılı / acısız",
-          "calories": "850",
-          "calorieEstimated": true,
-          "allergens": [],
-          "traceWarning": "",
-          "id": "ana-yemekler--zirh-kiyma-kebabi"
-        },
-        {
-          "name": "Dana Bonfile",
-          "price": "1.650 TL",
-          "description": "Köz chili biber, bebek patates, tablacı salatası, et sos",
-          "calories": "780",
-          "calorieEstimated": true,
-          "allergens": [],
-          "traceWarning": "",
-          "id": "ana-yemekler--dana-bonfile",
-          "image": "images/dana-bonfile-mvjoeicv.jpg"
-        },
-        {
-          "name": "Tavuk Kanat",
-          "price": "795 TL",
-          "description": "Köz chili biber, bebek patates, tablacı salatası",
-          "calories": "900",
-          "calorieEstimated": true,
-          "allergens": [],
-          "traceWarning": "",
-          "id": "ana-yemekler--tavuk-kanat"
-        },
-        {
-          "name": "Tavuk Şiş",
-          "price": "695 TL",
-          "description": "Tavuk kalça, köz chili biber, bebek patates, tablacı salatası",
-          "calories": "760",
-          "calorieEstimated": true,
-          "allergens": [],
-          "traceWarning": "",
-          "id": "ana-yemekler--tavuk-sis"
-        },
-        {
-          "name": "Levrek",
-          "price": "990 TL",
-          "description": "Levrek fileto, patates pavé, nane, limon zest, zencefilli vinigret",
-          "calories": "650",
-          "calorieEstimated": true,
-          "allergens": [
-            "fish",
-            "milk"
-          ],
-          "traceWarning": "",
-          "id": "ana-yemekler--levrek",
-          "image": "images/levrek-mvjoenqg.jpg"
-        }
-      ],
-      "layout": "list",
-      "cover": "images/kapak-ana-yemekler-mur3gwni.jpg"
-    },
-    {
-      "id": "tatlilar",
-      "title": "Tatlılar",
-      "subtitle": "Sofranın tatlı finali.",
-      "items": [
-        {
-          "name": "Leblebili Sıcak Helva",
-          "price": "400 TL",
-          "description": "Serinhisar leblebisi, tahin helvası",
-          "calories": "560",
-          "calorieEstimated": true,
-          "allergens": [
-            "sesame"
-          ],
-          "traceWarning": "",
-          "id": "tatlilar--leblebili-sicak-helva"
-        },
-        {
-          "name": "Fıstıklı İrmik Helvası",
-          "price": "700 TL",
-          "description": "Antep fıstığı, sade dondurma, tahin, gül yaprağı",
-          "calories": "720",
-          "calorieEstimated": true,
-          "allergens": [
-            "gluten",
-            "milk",
-            "nuts",
-            "sesame"
-          ],
-          "traceWarning": "",
-          "id": "tatlilar--fistikli-irmik-helvasi"
-        },
-        {
-          "name": "Mevsim Meyveleri",
-          "price": "300 TL",
-          "description": "",
-          "calories": "180",
-          "calorieEstimated": true,
-          "allergens": [],
-          "traceWarning": "",
-          "id": "tatlilar--mevsim-meyveleri",
-          "image": "images/mevsim-meyveleri-mvjoetnc.jpg"
-        }
-      ],
-      "layout": "list",
-      "cover": "images/kapak-tatlilar-mur94sc9.jpg"
     },
     {
       "id": "alkolsuz-icecekler",
