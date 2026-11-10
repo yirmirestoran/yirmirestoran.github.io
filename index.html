@@ -411,6 +411,9 @@ body.no-scroll{overflow:hidden}
 .foot .foot-social{position:relative;z-index:1}
 .foot .foot-social a{background:rgba(18,13,8,.85);border-color:rgba(255,214,150,.35)}
 .foot p{position:relative;z-index:1;margin:22px 0 0;color:#24180a;font-weight:700;font-size:10.5px;letter-spacing:.3em;text-transform:uppercase}
+.foot .foot-by{white-space:nowrap}
+.foot .foot-by a{color:inherit;text-transform:none;letter-spacing:.12em;text-decoration:underline;text-decoration-color:rgba(36,24,10,.35);text-underline-offset:3px;transition:text-decoration-color .3s}
+.foot .foot-by a:hover{text-decoration-color:currentColor}
 /* Set menü fiyatı (Şefin Seçkisi) */
 .set-price{display:inline-flex;align-items:center;gap:14px;margin-top:22px;padding:12px 26px;border:1px solid var(--gold);font:500 15px/1 var(--sans);color:var(--gold2);letter-spacing:.12em}
 .set-price small{font:500 9.5px/1 var(--sans);letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
@@ -720,7 +723,7 @@ body.no-scroll .social{opacity:0;pointer-events:none}
   <div class="plaque"><div class="logo" data-logo></div></div>
   <div class="bye" id="foot-bye">Afiyet olsun</div>
   <div class="foot-social" id="foot-social"></div>
-  <p id="foot-hours"></p>
+  <p><span id="foot-hours"></span><span class="foot-by"> · <a href="https://devbatu.github.io" target="_blank" rel="noopener">by Devbatu</a></span></p>
 </footer>
 
 <nav class="social" id="social" aria-label="Sosyal medya" hidden>
