@@ -1497,7 +1497,7 @@ body.no-scroll .social{opacity:0;pointer-events:none}
       '<div class="sd-body"><div class="sd-eyebrow">' + esc(d.eyebrow) + '</div>' +
       '<h2>' + d.title + '</h2><p>' + esc(d.text) + '</p>' +
       (d.quote ? '<blockquote>“' + esc(d.quote) + '”</blockquote>' + (d.ata ? '<cite>Mustafa Kemal Atatürk</cite>' : '') : '') +
-      '<div class="sd-sign">' + esc((site.name || 'Yirmi') + ' Restoran ailesi') + '</div><div class="sd-btns">' +
+      '<div class="sd-sign">' + esc([site.name || 'Yirmi', site.city || 'Denizli'].join(' ') + ' ailesi') + '</div><div class="sd-btns">' +
       (reserve ? '<a class="sd-ok fill" href="' + esc(reserve.href) + '"' + (reserve.target ? ' target="_blank" rel="noopener"' : '') + '>Rezervasyon yap</a>' : '') +
       '<button class="sd-ok">' + esc(d.button || 'Menüye geç') + '</button></div></div></div>';
     document.body.appendChild(el);

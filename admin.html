@@ -188,6 +188,11 @@ h2{font-size:25px!important}
 .lg.ev,.cchip.ev{background:#1c1a18;color:#fff}
 .lg.camp{background:var(--accent)}
 .lg.off{border:1px dashed #999}
+.lg.sd{background:#e30a17}
+.cchip.sd{background:#e30a17;color:#fff}
+.cchip.sd.mourn{background:#111;color:#fff}
+.cchip.sd.warm{background:#f5ecdc;color:#7a5520;border:1px solid #e3cfa6}
+.cchip.sd.dim{opacity:.45}
 .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
 .cal-dow{font-size:11px;font-weight:800;color:var(--muted);text-align:center;padding:4px 0;text-transform:uppercase;letter-spacing:.06em}
 .cal-cell{min-height:96px;border:1px solid var(--line);border-radius:10px;padding:5px;background:#fff;cursor:pointer;display:flex;flex-direction:column;gap:3px;text-align:left;font:inherit;min-width:0}
@@ -760,7 +765,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   <button class="tab" data-tab="calendar">Takvim</button>
   <button class="tab" data-tab="ann">Duyurular</button>
   <button class="tab" data-tab="campaigns">Kampanyalar</button>
-  <button class="tab" data-tab="offer">Menü Teklifi</button>
+  <button class="tab" data-tab="offer">Menü Teklifi</button><button class="tab" data-tab="days">Özel Günler</button>
   <button class="tab" data-tab="site">İşletme Bilgileri</button>
   <button class="tab" data-tab="bot">WhatsApp Botu<span class="tab-badge bp-badge hide" id="bot-paused-badge">Askıda</span></button>
   <button class="tab" data-tab="qr">QR Kod</button>
@@ -876,11 +881,21 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       <span style="flex:1"></span>
       <button class="btn primary" id="ev-add">+ Etkinlik / duyuru ekle</button>
     </div>
-    <div class="cal-legend"><span><i class="lg ev"></i>Etkinlik / duyuru</span><span><i class="lg camp"></i>Kampanya</span><span><i class="lg off"></i>Yayında değil</span></div>
+    <div class="cal-legend"><span><i class="lg ev"></i>Etkinlik / duyuru</span><span><i class="lg camp"></i>Kampanya</span><span><i class="lg off"></i>Yayında değil</span><span><i class="lg sd"></i>Özel gün</span></div>
     <div class="cal-grid" id="cal-grid"></div>
   </div>
   <div class="panel" id="cal-day"></div>
   <div class="panel"><h2>Tüm etkinlik ve duyurular</h2><div id="ev-list"></div></div>
+</div>
+
+<!-- ÖZEL GÜNLER -->
+<div class="page hide" id="tab-days">
+  <div class="panel">
+    <h2>Özel günler</h2>
+    <p class="hint">Bayram, anma ve kutlama günleri en yakın tarihten başlayarak sıralı; Takvim sekmesinde de görünürler. Bu günlerde menü açılınca o güne özel bir pencere çıkar, köşede küçük bir rozet kalır. Her yıl kendiliğinden tekrar eder. İstemediğiniz günün işaretini kaldırın; <b>Önizle</b> ile nasıl göründüğüne bakabilirsiniz.</p>
+    <label class="switch" style="margin:10px 0"><input type="checkbox" id="sd-all"> Özel gün pencerelerini göster</label>
+    <div id="sd-list"></div>
+  </div>
 </div>
 
 <!-- DUYURULAR -->
@@ -1154,12 +1169,6 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     </div>
     <div id="rv-list" style="margin-top:12px"></div>
     <div class="row-actions"><button class="btn sm primary" id="rv-add">+ Yorum ekle</button></div>
-  </div>
-  <div class="panel">
-    <h2>Özel günler</h2>
-    <p class="hint">Bayram, anma ve kutlama günlerinde menü açılınca o güne özel bir pencere çıkar, köşede küçük bir rozet kalır. Her yıl kendiliğinden tekrar eder. İstemediğiniz günün işaretini kaldırın; <b>Önizle</b> ile nasıl göründüğüne bakabilirsiniz.</p>
-    <label class="switch" style="margin:10px 0"><input type="checkbox" id="sd-all"> Özel gün pencerelerini göster</label>
-    <div id="sd-list"></div>
   </div>
   <div class="panel">
     <h2>Yedekleme</h2>
@@ -2284,8 +2293,9 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       const day = start + i * DAY_MS;
       const inMonth = new Date(day).getUTCMonth() === calMonth.m;
       if(i >= 35 && !inMonth) break;
-      const {evs, camps} = dayItems(day);
-      const chips = evs.map(ev => '<span class="cchip ' + (ev.published === false ? 'off' : 'ev') + '" title="' + esc(evLine(ev)) + '">' + esc(evLine(ev)) + '</span>')
+      const {evs, camps} = dayItems(day), sd = calSpecial(day);
+      const chips = (sd ? ['<span class="cchip sd ' + sd.kind + (sd.off ? ' dim' : '') + '" title="' + esc(sd.name + (sd.off ? ' (menüde kapalı)' : '')) + '">' + esc(sd.badge.join(' · ')) + '</span>'] : [])
+        .concat(evs.map(ev => '<span class="cchip ' + (ev.published === false ? 'off' : 'ev') + '" title="' + esc(evLine(ev)) + '">' + esc(evLine(ev)) + '</span>'))
         .concat(camps.map(x => '<span class="cchip camp" title="' + esc(x.c.title + ' · ' + x.info.time) + '">% ' + esc(Core.discountLabel(x.c)) + '</span>'));
       let rs = '';
       if(resList){
@@ -2305,15 +2315,22 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     renderDayPanel();
     renderEventList();
   }
+  // Takvimdeki özel gün (menüde kapatılmış olsa da soluk görünür)
+  function calSpecial(day){
+    const d = Core.specialDay({}, isoDay(day));
+    return d && Object.assign(d, {off: state.site.specialDays === false || (state.site.specialDaysOff || []).includes(d.key)});
+  }
   function renderDayPanel(){
     const day = selDay, n = Core.now();
-    const {evs, camps} = dayItems(day);
+    const {evs, camps} = dayItems(day), sd = calSpecial(day);
     const title = fmtDay(day, {day:'numeric', month:'long', weekday:'long'}) + (day === n.dayStart ? ' · Bugün' : '');
     $('#cal-day').innerHTML = '<div class="cal-head" style="margin:0"><h2 style="margin:0;text-align:left">' + esc(title) + '</h2><span style="flex:1"></span>' +
         '<button class="btn sm" data-dact="resday">Rezervasyonlara git</button>' +
         '<button class="btn primary sm" data-dact="add">+ Bu güne etkinlik ekle</button></div>' +
       dayResHtml(isoDay(day)) +
-      (!evs.length && !camps.length ? '<p class="hint">Bu gün için planlanmış etkinlik veya kampanya yok.</p>' : '') +
+      (sd ? '<div class="day-item"><span class="lg sd"></span><div class="tx"><b>' + esc(sd.name) + '</b><small>Özel gün · ' + (sd.off ? 'menüde kapalı' : 'menü açılınca pencere ve köşede rozet çıkar') + '</small></div>' +
+        '<a class="btn sm" href="index.html?gun=' + sd.date + '" target="_blank" rel="noopener">Önizle</a><button class="btn sm" data-dact="tab" data-tab="days">Özel günler</button></div>' : '') +
+      (!evs.length && !camps.length && !sd ? '<p class="hint">Bu gün için planlanmış etkinlik veya kampanya yok.</p>' : '') +
       evs.map(ev => { const t = Core.eventType(ev); return '<div class="day-item"><span class="lg ' + (ev.published === false ? 'off' : 'ev') + '"></span><div class="tx"><b>' + t.icon + ' ' + esc(ev.title) + '</b>' +
         '<small>' + esc(t.label) + ' · ' + esc(ev.start ? ev.start + (ev.end ? '–' + ev.end : '') : 'Tüm gün') + (ev.repeat === 'weekly' ? ' · her hafta' : '') + (ev.popup ? ' · popup' : '') + (ev.published === false ? ' · yayında değil' : '') + '</small></div>' +
         '<button class="btn sm" data-dact="edit" data-id="' + esc(ev.id) + '">Düzenle</button></div>'; }).join('') +
@@ -2551,7 +2568,8 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     const fmt = d => new Date(Core.parseWall(d)).toLocaleDateString('tr-TR', {day: 'numeric', month: 'long', year: 'numeric', weekday: 'long', timeZone: 'UTC'});
     const next = Object.fromEntries(Core.upcomingSpecialDays(today).reverse().map(x => [x.sd.key, x]));
     $('#sd-all').checked = all;
-    $('#sd-list').innerHTML = '<div class="sd-rows">' + Core.SPECIAL_DAYS.map(sd => {
+    const order = Core.SPECIAL_DAYS.slice().sort((a, b) => ((next[a.key] || {}).date || '9999').localeCompare((next[b.key] || {}).date || '9999'));
+    $('#sd-list').innerHTML = '<div class="sd-rows">' + order.map(sd => {
       const n = next[sd.key];
       return '<label class="sd-row' + (all ? '' : ' dim') + '"><input type="checkbox" data-sd="' + sd.key + '"' + (off.includes(sd.key) ? '' : ' checked') + (all ? '' : ' disabled') + '>' +
         '<span class="sd-ic">' + (sd.kind === 'flag' ? '<svg viewBox="0 0 30 20" width="26" height="17" aria-hidden="true"><rect width="30" height="20" rx="2" fill="#e30a17"/><circle cx="11" cy="10" r="5" fill="#fff"/><circle cx="12.3" cy="10" r="4" fill="#e30a17"/><circle cx="17" cy="10" r="1.7" fill="#fff"/></svg>' : sd.kind === 'mourn' ? '🖤' : sd.icon) + '</span>' +
@@ -2820,7 +2838,6 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     ).join('');
     renderSocialFields();
     renderReviews();
-    renderSpecialDays();
     renderLogo();
   }
   // Üst çubuktaki ve İşletme sekmesindeki logo, menüdekiyle aynı: yüklenen görsel, yoksa el yazısı
@@ -5474,8 +5491,9 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   function showTab(name){
     try{ sessionStorage.setItem('yirmi-admin-sekme', name); }catch(e){}
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-    ['home','res','chats','sales','menu','chef','calendar','ann','campaigns','offer','site','bot','qr','security'].forEach(n => $('#tab-' + n).classList.toggle('hide', n !== name));
+    ['home','res','chats','sales','menu','chef','calendar','ann','campaigns','offer','days','site','bot','qr','security'].forEach(n => $('#tab-' + n).classList.toggle('hide', n !== name));
     if(state && name === 'offer') renderOffer();
+    if(state && name === 'days') renderSpecialDays();
     if(name === 'chats') csShowTab();
     if(state && name === 'bot'){ renderBotCfg(); loadBotPause(); }
     if(state && name === 'ann') renderAnn();
