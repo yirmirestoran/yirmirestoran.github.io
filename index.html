@@ -793,7 +793,7 @@ body.no-scroll .social{opacity:0;pointer-events:none}
   const introStart = Date.now();
   fetch('menu.json?v=' + Date.now(), {cache:'no-store'})
     .then(r => { if(!r.ok) throw new Error(r.status); return r.json(); })
-    .then(d => { DATA = C.prepare(d); renderAll(); })
+    .then(d => { DATA = C.prepare(d); renderAll(); document.dispatchEvent(new CustomEvent('yirmi:data', {detail: DATA})); })
     .catch(() => { $('#sections').innerHTML = '<div class="loading">Menü yüklenemedi. Lütfen sayfayı yenileyin.</div>'; })
     .finally(() => setTimeout(() => { $('#intro').classList.add('done'); document.body.classList.remove('no-scroll'); }, Math.max(0, 1800 - (Date.now() - introStart))));
 
@@ -1431,76 +1431,100 @@ body.no-scroll .social{opacity:0;pointer-events:none}
 })();
 </script>
 
-<!-- 29 Ekim Cumhuriyet Bayramı: yalnızca 29.10.2026 (Türkiye saati) gösterilir; önizleme: ?ata=1 -->
+<!-- Özel günler (bayramlar, anma günleri, anneler günü…): takvim assets/core.js → SPECIAL_DAYS; yalnızca o gün (Türkiye saati) gösterilir.
+     Önizleme: ?gun=11-10 (ay-gün) ya da ?gun=2027-03-09; ?ata=1 → 29 Ekim. Yönetim paneli → İşletme Bilgileri → Özel günler'den kapatılabilir. -->
 <style>
-#ata-pop{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,6,4,.78);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;transition:opacity .4s var(--ease)}
-#ata-pop.in{opacity:1}
-#ata-pop .ata-card{position:relative;width:min(420px,100%);max-height:calc(100dvh - 32px);overflow:auto;background:var(--bg2);border:1px solid var(--line2);border-radius:18px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.6);transform:translateY(14px) scale(.98);transition:transform .5s var(--ease)}
-#ata-pop.in .ata-card{transform:none}
-#ata-pop .ata-flag{display:block;width:100%;height:auto;aspect-ratio:2/1}
-#ata-pop .ata-photo{width:150px;height:190px;margin:-60px auto 0;border-radius:12px;overflow:hidden;border:3px solid var(--bg2);box-shadow:0 0 0 1px var(--gold3),0 14px 34px rgba(0,0,0,.55);position:relative}
-#ata-pop .ata-photo img{width:100%;height:100%;object-fit:cover;object-position:50% 12%;filter:grayscale(1) contrast(1.05)}
-#ata-pop .ata-body{padding:18px 24px 26px}
-#ata-pop .ata-eyebrow{font:600 11px/1 var(--sans);letter-spacing:.24em;text-transform:uppercase;color:#e30a17}
-#ata-pop h2{font:500 34px/1.1 var(--serif);margin:10px 0 6px;color:var(--text)}
-#ata-pop h2 em{font-style:italic;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-#ata-pop p{font:300 14px/1.65 var(--sans);color:var(--muted);margin:0 0 6px}
-#ata-pop blockquote{margin:14px 0 4px;font:italic 400 19px/1.4 var(--serif);color:var(--gold2)}
-#ata-pop cite{display:block;font:500 11px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--faint);font-style:normal}
-#ata-pop .ata-sign{margin-top:16px;font:400 13px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--text)}
-#ata-pop .ata-x{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,.45);color:#fff;font-size:20px;line-height:36px;cursor:pointer;z-index:1}
-#ata-pop .ata-ok{margin-top:18px;padding:12px 26px;border:1px solid var(--gold);border-radius:999px;background:transparent;color:var(--gold2);font:500 12px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;cursor:pointer}
-#ata-badge{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:9000;display:flex;align-items:center;gap:10px;padding:6px 14px 6px 6px;border:1px solid var(--line2);border-radius:999px;background:rgba(19,16,12,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--text);cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.45);font:500 11px/1.25 var(--sans);letter-spacing:.08em;text-align:left;animation:ataIn .6s var(--ease) both}
-#ata-badge img{width:46px;height:46px;border-radius:50%;object-fit:cover;object-position:50% 10%;filter:grayscale(1);border:2px solid #e30a17}
-#ata-badge b{display:block;font:500 17px/1.1 var(--serif);letter-spacing:0;color:var(--gold2)}
-@keyframes ataIn{from{opacity:0;transform:translateY(20px)}}
-@media (max-width:420px){#ata-pop h2{font-size:29px}#ata-badge{padding-right:12px}#ata-badge img{width:40px;height:40px}}
+#sd-pop{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,6,4,.78);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;transition:opacity .4s var(--ease)}
+#sd-pop.in{opacity:1}
+#sd-pop .sd-card{position:relative;width:min(420px,100%);max-height:calc(100dvh - 32px);overflow:auto;background:var(--bg2);border:1px solid var(--line2);border-radius:18px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.6);transform:translateY(14px) scale(.98);transition:transform .5s var(--ease)}
+#sd-pop.in .sd-card{transform:none}
+#sd-pop .sd-flag{display:block;width:100%;height:auto;aspect-ratio:2/1}
+#sd-pop .sd-band{position:relative;aspect-ratio:2/1;display:grid;place-items:center;overflow:hidden}
+#sd-pop .sd-band.mourn{background:radial-gradient(120% 90% at 50% 0%,#2a2622 0%,#0d0c0b 60%,#050505 100%)}
+#sd-pop .sd-band.mourn span{font:300 64px/1 var(--serif);letter-spacing:.06em;color:rgba(255,255,255,.12);margin-top:-30px}
+#sd-pop .sd-band.mourn::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:linear-gradient(transparent,rgba(255,255,255,.18),transparent)}
+#sd-pop .sd-band.warm{aspect-ratio:auto;padding:34px 0 26px;background:radial-gradient(90% 120% at 50% 0%,rgba(230,190,120,.35),transparent 70%),linear-gradient(180deg,#2a1f12,var(--bg2))}
+#sd-pop .sd-band.warm span{font-size:58px;line-height:1;filter:drop-shadow(0 8px 20px rgba(0,0,0,.45))}
+#sd-pop .sd-photo{width:150px;height:190px;margin:-60px auto 0;border-radius:12px;overflow:hidden;border:3px solid var(--bg2);box-shadow:0 0 0 1px var(--gold3),0 14px 34px rgba(0,0,0,.55);position:relative}
+#sd-pop .mourn+.sd-photo{box-shadow:0 0 0 1px rgba(255,255,255,.25),0 14px 34px rgba(0,0,0,.7)}
+#sd-pop .sd-photo img{width:100%;height:100%;object-fit:cover;object-position:50% 12%;filter:grayscale(1) contrast(1.05)}
+#sd-pop .sd-body{padding:18px 24px 26px}
+#sd-pop .sd-eyebrow{font:600 11px/1.3 var(--sans);letter-spacing:.24em;text-transform:uppercase;color:#e30a17}
+#sd-pop .k-mourn .sd-eyebrow{color:var(--muted)}
+#sd-pop .k-warm .sd-eyebrow{color:var(--gold)}
+#sd-pop h2{font:500 34px/1.1 var(--serif);margin:10px 0 6px;color:var(--text)}
+#sd-pop h2 em{font-style:italic;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+#sd-pop .k-mourn h2 em{background:none;color:var(--text)}
+#sd-pop p{font:300 14px/1.65 var(--sans);color:var(--muted);margin:0 0 6px}
+#sd-pop blockquote{margin:14px 0 4px;font:italic 400 19px/1.4 var(--serif);color:var(--gold2)}
+#sd-pop .k-mourn blockquote{color:var(--text)}
+#sd-pop cite{display:block;font:500 11px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--faint);font-style:normal}
+#sd-pop .sd-sign{margin-top:16px;font:400 13px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--text)}
+#sd-pop .sd-x{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,.45);color:#fff;font-size:20px;line-height:36px;cursor:pointer;z-index:1}
+#sd-pop .sd-btns{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:18px}
+#sd-pop .sd-ok{padding:12px 26px;border:1px solid var(--gold);border-radius:999px;background:transparent;color:var(--gold2);font:500 12px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;cursor:pointer;text-decoration:none}
+#sd-pop .sd-ok.fill{background:var(--gold);color:var(--bg)}
+#sd-pop .k-mourn .sd-ok{border-color:var(--line2);color:var(--text)}
+#sd-badge{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:9000;display:flex;align-items:center;gap:10px;padding:6px 14px 6px 6px;border:1px solid var(--line2);border-radius:999px;background:rgba(19,16,12,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--text);cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.45);font:500 11px/1.25 var(--sans);letter-spacing:.08em;text-align:left;animation:sdIn .6s var(--ease) both}
+#sd-badge img,#sd-badge i{width:46px;height:46px;border-radius:50%;object-fit:cover;object-position:50% 10%;filter:grayscale(1);border:2px solid #e30a17;flex:none}
+#sd-badge.mourn img{border-color:#111;box-shadow:0 0 0 1px rgba(255,255,255,.35)}
+#sd-badge i{display:grid;place-items:center;font-style:normal;font-size:22px;filter:none;border-color:var(--gold);background:#2a1f12}
+#sd-badge b{display:block;font:500 17px/1.1 var(--serif);letter-spacing:0;color:var(--gold2)}
+#sd-badge.mourn b{color:var(--text)}
+@keyframes sdIn{from{opacity:0;transform:translateY(20px)}}
+@media (max-width:420px){#sd-pop h2{font-size:29px}#sd-badge{padding-right:12px}#sd-badge img,#sd-badge i{width:40px;height:40px}}
 </style>
 <script>
 (() => {
-  const preview = /[?&]ata=1\b/.test(location.search);
-  let today = '';
-  try{ today = new Intl.DateTimeFormat('en-CA', {timeZone: 'Europe/Istanbul', year: 'numeric', month: '2-digit', day: '2-digit'}).format(new Date()); }catch(e){}
-  if(!preview && today !== '2026-10-29') return;
+  const C = window.YirmiCore;
+  const q = new URLSearchParams(location.search), preview = q.get('gun') || (q.get('ata') === '1' ? '10-29' : '');
+  let date = C.todayStr();
+  if(preview) date = /^\d{2}-\d{2}$/.test(preview) ? date.slice(0, 4) + '-' + preview : preview;
   const IMG = 'assets/ataturk.jpg';
-  const FLAG = '<svg class="ata-flag" viewBox="0 0 1200 600" aria-hidden="true"><rect width="1200" height="600" fill="#e30a17"/>' +
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[c]);
+  const FLAG = '<svg class="sd-flag" viewBox="0 0 1200 600" aria-hidden="true"><rect width="1200" height="600" fill="#e30a17"/>' +
     '<g transform="translate(-200 -100)"><circle cx="425" cy="400" r="200" fill="#fff"/><circle cx="475" cy="400" r="160" fill="#e30a17"/>' +
     '<polygon fill="#fff" points="583.334,400 764.235,458.779 652.431,304.894 652.431,495.106 764.235,341.221"/></g></svg>';
-  const age = 2026 - 1923;
 
-  function open(){
-    if(document.getElementById('ata-pop')) return;
+  function open(d, site){
+    if(document.getElementById('sd-pop')) return;
+    const head = d.kind === 'flag' ? FLAG : d.kind === 'mourn' ? '<div class="sd-band mourn"><span>09.05</span></div>' : '<div class="sd-band warm"><span>' + d.icon + '</span></div>';
+    const reserve = d.reserve && document.getElementById('i-reserve');
     const el = document.createElement('div');
-    el.id = 'ata-pop'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', '29 Ekim Cumhuriyet Bayramı');
-    el.innerHTML = '<div class="ata-card"><button class="ata-x" aria-label="Kapat">×</button>' + FLAG +
-      '<div class="ata-photo"><img src="' + IMG + '" alt="Mustafa Kemal Atatürk"></div>' +
-      '<div class="ata-body"><div class="ata-eyebrow">29 Ekim 1923 – 29 Ekim 2026</div>' +
-      '<h2>Cumhuriyet Bayramımız <em>kutlu olsun</em></h2>' +
-      '<p>Cumhuriyetimizin ' + age + '. yılını gururla kutluyor; başta Gazi Mustafa Kemal Atatürk olmak üzere tüm kahramanlarımızı saygı ve minnetle anıyoruz.</p>' +
-      '<blockquote>“Ne mutlu Türküm diyene!”</blockquote><cite>Mustafa Kemal Atatürk</cite>' +
-      '<div class="ata-sign">Yirmi Restoran ailesi</div>' +
-      '<button class="ata-ok">Menüye geç</button></div></div>';
+    el.id = 'sd-pop'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', d.name);
+    el.innerHTML = '<div class="sd-card k-' + d.kind + '"><button class="sd-x" aria-label="Kapat">×</button>' + head +
+      (d.ata ? '<div class="sd-photo"><img src="' + IMG + '" alt="Mustafa Kemal Atatürk"></div>' : '') +
+      '<div class="sd-body"><div class="sd-eyebrow">' + esc(d.eyebrow) + '</div>' +
+      '<h2>' + d.title + '</h2><p>' + esc(d.text) + '</p>' +
+      (d.quote ? '<blockquote>“' + esc(d.quote) + '”</blockquote>' + (d.ata ? '<cite>Mustafa Kemal Atatürk</cite>' : '') : '') +
+      '<div class="sd-sign">' + esc((site.name || 'Yirmi') + ' Restoran ailesi') + '</div><div class="sd-btns">' +
+      (reserve ? '<a class="sd-ok fill" href="' + esc(reserve.href) + '"' + (reserve.target ? ' target="_blank" rel="noopener"' : '') + '>Rezervasyon yap</a>' : '') +
+      '<button class="sd-ok">' + esc(d.button || 'Menüye geç') + '</button></div></div></div>';
     document.body.appendChild(el);
     const prev = document.documentElement.style.overflow;
     document.documentElement.style.overflow = 'hidden';
     requestAnimationFrame(() => el.classList.add('in'));
-    const close = () => { el.classList.remove('in'); document.documentElement.style.overflow = prev; setTimeout(() => el.remove(), 400); document.removeEventListener('keydown', esc); };
-    const esc = e => { if(e.key === 'Escape') close(); };
-    document.addEventListener('keydown', esc);
-    el.addEventListener('click', e => { if(e.target === el || e.target.closest('.ata-x, .ata-ok')) close(); });
+    const close = () => { el.classList.remove('in'); document.documentElement.style.overflow = prev; setTimeout(() => el.remove(), 400); document.removeEventListener('keydown', onKey); };
+    const onKey = e => { if(e.key === 'Escape') close(); };
+    document.addEventListener('keydown', onKey);
+    el.addEventListener('click', e => { if(e.target === el || e.target.closest('.sd-x, button.sd-ok, a.sd-ok')) close(); });
   }
 
-  function start(){
+  // Menü verisi gelince (panelden kapatılmış günler için site ayarları gerekir) çalışır
+  document.addEventListener('yirmi:data', e => {
+    const site = (e.detail && e.detail.site) || {};
+    const d = C.specialDay(preview ? {} : site, date);
+    if(!d || document.getElementById('sd-badge')) return;
     const b = document.createElement('button');
-    b.id = 'ata-badge'; b.setAttribute('aria-label', '29 Ekim Cumhuriyet Bayramı mesajı');
-    b.innerHTML = '<img src="' + IMG + '" alt=""><span><b>29 Ekim</b>Cumhuriyet Bayramı</span>';
-    b.addEventListener('click', open);
+    b.id = 'sd-badge'; b.className = d.kind; b.setAttribute('aria-label', d.name + ' mesajı');
+    b.innerHTML = (d.ata ? '<img src="' + IMG + '" alt="">' : '<i aria-hidden="true">' + d.icon + '</i>') + '<span><b>' + esc(d.badge[0]) + '</b>' + esc(d.badge[1]) + '</span>';
+    b.addEventListener('click', () => open(d, site));
     document.body.appendChild(b);
     let seen = false;
-    try{ seen = !preview && sessionStorage.getItem('yirmi-29ekim'); sessionStorage.setItem('yirmi-29ekim', '1'); }catch(e){}
-    if(!seen) setTimeout(open, 600);
-  }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+    const key = 'yirmi-ozelgun-' + d.key + '-' + date;
+    try{ seen = !preview && sessionStorage.getItem(key); sessionStorage.setItem(key, '1'); }catch(err){}
+    if(!seen) setTimeout(() => open(d, site), 600);
+  });
 })();
 </script>
 </body>

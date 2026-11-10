@@ -54,6 +54,15 @@ h2{font-size:25px!important}
 /* Genel araçlar */
 .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .toolbar .search{flex:1 1 220px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.sd-rows{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:8px}
+.sd-row{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:#fff;cursor:pointer;min-width:0}
+.sd-row.dim{opacity:.5}
+.sd-row input{width:18px;height:18px;flex:none;margin:0}
+.sd-row .sd-ic{font-size:20px;width:26px;text-align:center;flex:none}
+.sd-row .sd-tx{flex:1;min-width:0}
+.sd-row .sd-tx b{display:block;font-size:13.5px}
+.sd-row .sd-tx small{color:var(--muted);font-size:12px}
+.sd-row .sd-tx .sd-today{display:inline;color:var(--ok);font-size:12px}
 .rv-row{border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px;display:grid;grid-template-columns:minmax(0,1fr) 110px minmax(0,1fr);gap:8px;align-items:start}
 .rv-row textarea{grid-column:1/-1;min-height:70px}
 .rv-row .row-actions{grid-column:1/-1;margin:0;justify-content:flex-end}
@@ -1145,6 +1154,12 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     </div>
     <div id="rv-list" style="margin-top:12px"></div>
     <div class="row-actions"><button class="btn sm primary" id="rv-add">+ Yorum ekle</button></div>
+  </div>
+  <div class="panel">
+    <h2>Özel günler</h2>
+    <p class="hint">Bayram, anma ve kutlama günlerinde menü açılınca o güne özel bir pencere çıkar, köşede küçük bir rozet kalır. Her yıl kendiliğinden tekrar eder. İstemediğiniz günün işaretini kaldırın; <b>Önizle</b> ile nasıl göründüğüne bakabilirsiniz.</p>
+    <label class="switch" style="margin:10px 0"><input type="checkbox" id="sd-all"> Özel gün pencerelerini göster</label>
+    <div id="sd-list"></div>
   </div>
   <div class="panel">
     <h2>Yedekleme</h2>
@@ -2530,6 +2545,34 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     setDirty(true);
   }));
 
+  /* ---------- Özel günler (takvim assets/core.js → SPECIAL_DAYS) ---------- */
+  function renderSpecialDays(){
+    const s = state.site, off = s.specialDaysOff || [], all = s.specialDays !== false, today = Core.todayStr();
+    const fmt = d => new Date(Core.parseWall(d)).toLocaleDateString('tr-TR', {day: 'numeric', month: 'long', year: 'numeric', weekday: 'long', timeZone: 'UTC'});
+    const next = Object.fromEntries(Core.upcomingSpecialDays(today).reverse().map(x => [x.sd.key, x]));
+    $('#sd-all').checked = all;
+    $('#sd-list').innerHTML = '<div class="sd-rows">' + Core.SPECIAL_DAYS.map(sd => {
+      const n = next[sd.key];
+      return '<label class="sd-row' + (all ? '' : ' dim') + '"><input type="checkbox" data-sd="' + sd.key + '"' + (off.includes(sd.key) ? '' : ' checked') + (all ? '' : ' disabled') + '>' +
+        '<span class="sd-ic">' + (sd.kind === 'flag' ? '<svg viewBox="0 0 30 20" width="26" height="17" aria-hidden="true"><rect width="30" height="20" rx="2" fill="#e30a17"/><circle cx="11" cy="10" r="5" fill="#fff"/><circle cx="12.3" cy="10" r="4" fill="#e30a17"/><circle cx="17" cy="10" r="1.7" fill="#fff"/></svg>' : sd.kind === 'mourn' ? '🖤' : sd.icon) + '</span>' +
+        '<span class="sd-tx"><b>' + esc(sd.name) + '</b><small>' + (n ? (n.date === today ? '<b class="sd-today">Bugün</b> · ' : '') + esc(fmt(n.date)) + (n.days > 1 ? ' · ' + n.days + ' gün' : '')
+          : 'Tarihi henüz eklenmedi (Diyanet takvimi açıklanınca eklenmeli)') + '</small></span>' +
+        (n ? '<a class="btn sm" href="index.html?gun=' + n.date + '" target="_blank" rel="noopener">Önizle</a>' : '') + '</label>';
+    }).join('') + '</div>';
+  }
+  $('#sd-all').addEventListener('change', e => {
+    if(e.target.checked) delete state.site.specialDays; else state.site.specialDays = false;
+    renderSpecialDays(); setDirty(true);
+  });
+  $('#sd-list').addEventListener('change', e => {
+    const k = e.target.dataset.sd;
+    if(!k) return;
+    const off = new Set(state.site.specialDaysOff || []);
+    if(e.target.checked) off.delete(k); else off.add(k);
+    if(off.size) state.site.specialDaysOff = [...off]; else delete state.site.specialDaysOff;
+    setDirty(true);
+  });
+
   /* ---------- Google yorumları (menüde kartlar) ---------- */
   function reviews(){ return state.site.reviews || (state.site.reviews = {list: []}); }
   function renderReviews(){
@@ -2777,6 +2820,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     ).join('');
     renderSocialFields();
     renderReviews();
+    renderSpecialDays();
     renderLogo();
   }
   // Üst çubuktaki ve İşletme sekmesindeki logo, menüdekiyle aynı: yüklenen görsel, yoksa el yazısı

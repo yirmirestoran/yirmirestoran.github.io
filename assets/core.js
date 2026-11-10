@@ -481,6 +481,90 @@
   }
   function formatTL(n){ return (Math.round(n * 100) / 100).toLocaleString('tr-TR') + ' TL'; }
 
+  /* ---------- Özel günler ---------- */
+  // Menü o gün açılınca kutlama / anma penceresi gösterir, köşede rozet kalır. Tarihler her yıl kendiliğinden tekrar eder.
+  // kind: flag (bayraklı milli bayram) · mourn (anma, siyah) · warm (kutlama, altın). ata: Atatürk fotoğrafı.
+  // Metinlerde {y} yıl, {n} kaçıncı yıl (since'ten bu yana). reserve: pencerede "Rezervasyon yap" düğmesi.
+  // Dini bayramlar ay takvimine göre her yıl kaydığı için Diyanet takvimiyle yıl yıl yazılır: [ilk gün, gün sayısı]
+  const RELIGIOUS_DAYS = {
+    2026: {ramazan: ['2026-03-20', 3], kurban: ['2026-05-27', 4]},
+    2027: {ramazan: ['2027-03-09', 3], kurban: ['2027-05-16', 4]}
+  };
+  const nthSunday = (y, mon, n) => { const first = new Date(Date.UTC(y, mon - 1, 1)).getUTCDay(); return 1 + (7 - first) % 7 + (n - 1) * 7; };
+  const SPECIAL_DAYS = [
+    {key: 'yilbasi', md: '01-01', name: 'Yılbaşı', kind: 'warm', icon: '✨', badge: ['1 Ocak', 'Mutlu yıllar'], eyebrow: '1 Ocak {y}',
+      title: 'Yeni yılınız <em>kutlu olsun</em>', text: '{y} yılının size ve sevdiklerinize sağlık, huzur ve güzel sofralar getirmesini dileriz.'},
+    {key: 'sevgililer', md: '02-14', name: 'Sevgililer Günü', kind: 'warm', icon: '❤', badge: ['14 Şubat', 'Sevgililer Günü'], eyebrow: '14 Şubat', reserve: true,
+      title: 'Sevgililer Gününüz <em>kutlu olsun</em>', text: 'Bu akşam sevdiğinizle güzel bir sofrada buluşmaya ne dersiniz? Masanızı şimdiden ayırtabilirsiniz.'},
+    {key: 'kadinlar', md: '03-08', name: 'Dünya Kadınlar Günü', kind: 'warm', icon: '💐', badge: ['8 Mart', 'Kadınlar Günü'], eyebrow: '8 Mart',
+      title: 'Dünya Kadınlar Günü <em>kutlu olsun</em>', text: 'Hayatımıza emek, güç ve zarafet katan tüm kadınların Dünya Kadınlar Günü’nü kutlarız.'},
+    {key: 'canakkale', md: '03-18', name: '18 Mart Çanakkale Zaferi', kind: 'flag', ata: true, since: 1915, badge: ['18 Mart', 'Çanakkale Zaferi'], eyebrow: '18 Mart 1915 – 18 Mart {y}',
+      title: 'Çanakkale Zaferi’nin <em>{n}. yılı</em>', text: 'Çanakkale Zaferi’nin {n}. yıl dönümünde başta Gazi Mustafa Kemal Atatürk olmak üzere tüm şehitlerimizi rahmet, minnet ve saygıyla anıyoruz.',
+      quote: 'Ben size taarruzu emretmiyorum, ölmeyi emrediyorum.'},
+    {key: '23nisan', md: '04-23', name: '23 Nisan Ulusal Egemenlik ve Çocuk Bayramı', kind: 'flag', ata: true, since: 1920, badge: ['23 Nisan', 'Çocuk Bayramı'], eyebrow: '23 Nisan 1920 – 23 Nisan {y}',
+      title: 'Ulusal Egemenlik ve Çocuk Bayramımız <em>kutlu olsun</em>', text: 'Türkiye Büyük Millet Meclisi’nin açılışının {n}. yılında, bu bayramı çocuklarımıza armağan eden Gazi Mustafa Kemal Atatürk’ü saygı ve minnetle anıyoruz.',
+      quote: 'Küçük hanımlar, küçük beyler! Sizler hepiniz geleceğin bir gülü, yıldızı ve ikbal ışığısınız.'},
+    {key: '1mayis', md: '05-01', name: '1 Mayıs Emek ve Dayanışma Günü', kind: 'warm', icon: '🌿', badge: ['1 Mayıs', 'Emek ve Dayanışma'], eyebrow: '1 Mayıs',
+      title: 'Emek ve Dayanışma Günü <em>kutlu olsun</em>', text: 'Emeğiyle hayatımıza değer katan herkesin 1 Mayıs Emek ve Dayanışma Günü’nü kutlarız.'},
+    {key: 'anneler', on: y => '05-' + String(nthSunday(y, 5, 2)).padStart(2, '0'), name: 'Anneler Günü (Mayıs’ın 2. pazarı)', kind: 'warm', icon: '🌷', badge: ['Anneler Günü', 'Kutlu olsun'], eyebrow: 'Anneler Günü', reserve: true,
+      title: 'Anneler Gününüz <em>kutlu olsun</em>', text: 'Bugün annelerinizi güzel bir sofrada ağırlamak için masanızı ayırtabilirsiniz. Tüm annelerin gününü kutlarız.'},
+    {key: '19mayis', md: '05-19', name: '19 Mayıs Gençlik ve Spor Bayramı', kind: 'flag', ata: true, since: 1919, badge: ['19 Mayıs', 'Gençlik ve Spor Bayramı'], eyebrow: '19 Mayıs 1919 – 19 Mayıs {y}',
+      title: 'Gençlik ve Spor Bayramımız <em>kutlu olsun</em>', text: 'Atatürk’ün Samsun’a çıkışının {n}. yılında Atatürk’ü Anma, Gençlik ve Spor Bayramımızı kutluyor, Gazi Mustafa Kemal Atatürk’ü saygı ve minnetle anıyoruz.',
+      quote: 'Ey Türk gençliği! Birinci vazifen, Türk istiklalini, Türk Cumhuriyetini ilelebet muhafaza ve müdafaa etmektir.'},
+    {key: 'babalar', on: y => '06-' + String(nthSunday(y, 6, 3)).padStart(2, '0'), name: 'Babalar Günü (Haziran’ın 3. pazarı)', kind: 'warm', icon: '☕', badge: ['Babalar Günü', 'Kutlu olsun'], eyebrow: 'Babalar Günü', reserve: true,
+      title: 'Babalar Gününüz <em>kutlu olsun</em>', text: 'Bugün babalarınızla güzel bir sofrada buluşmak için masanızı ayırtabilirsiniz. Tüm babaların gününü kutlarız.'},
+    {key: '15temmuz', md: '07-15', name: '15 Temmuz Demokrasi ve Milli Birlik Günü', kind: 'flag', since: 2016, badge: ['15 Temmuz', 'Milli Birlik Günü'], eyebrow: '15 Temmuz 2016',
+      title: 'Demokrasi ve Milli Birlik <em>Günü</em>', text: '15 Temmuz şehitlerimizi rahmetle, gazilerimizi minnetle anıyoruz.'},
+    {key: '30agustos', md: '08-30', name: '30 Ağustos Zafer Bayramı', kind: 'flag', ata: true, since: 1922, badge: ['30 Ağustos', 'Zafer Bayramı'], eyebrow: '30 Ağustos 1922 – 30 Ağustos {y}',
+      title: 'Zafer Bayramımız <em>kutlu olsun</em>', text: 'Büyük Zafer’in {n}. yılında başta Başkomutan Gazi Mustafa Kemal Atatürk olmak üzere tüm şehit ve gazilerimizi saygı ve minnetle anıyoruz.',
+      quote: 'Ordular! İlk hedefiniz Akdeniz’dir. İleri!'},
+    {key: '29ekim', md: '10-29', name: '29 Ekim Cumhuriyet Bayramı', kind: 'flag', ata: true, since: 1923, badge: ['29 Ekim', 'Cumhuriyet Bayramı'], eyebrow: '29 Ekim 1923 – 29 Ekim {y}',
+      title: 'Cumhuriyet Bayramımız <em>kutlu olsun</em>', text: 'Cumhuriyetimizin {n}. yılını gururla kutluyor; başta Gazi Mustafa Kemal Atatürk olmak üzere tüm kahramanlarımızı saygı ve minnetle anıyoruz.',
+      quote: 'Ne mutlu Türküm diyene!'},
+    {key: '10kasim', md: '11-10', name: '10 Kasım Atatürk’ü Anma Günü', kind: 'mourn', ata: true, since: 1938, badge: ['10 Kasım', 'Saygıyla anıyoruz'], eyebrow: '10 Kasım 1938 · 09.05',
+      title: 'Seni <em>özlemle</em> anıyoruz', text: 'Cumhuriyetimizin kurucusu Gazi Mustafa Kemal Atatürk’ü, aramızdan ayrılışının {n}. yılında saygı, sevgi ve özlemle anıyoruz.',
+      quote: 'Benim naçiz vücudum elbet bir gün toprak olacaktır, fakat Türkiye Cumhuriyeti ilelebet payidar kalacaktır.', button: 'Saygıyla'},
+    {key: 'ogretmenler', md: '11-24', name: '24 Kasım Öğretmenler Günü', kind: 'warm', icon: '📚', badge: ['24 Kasım', 'Öğretmenler Günü'], eyebrow: '24 Kasım',
+      title: 'Öğretmenler Günü <em>kutlu olsun</em>', text: 'Başöğretmenimiz Gazi Mustafa Kemal Atatürk başta olmak üzere tüm öğretmenlerimizin gününü saygıyla kutlarız.'},
+    {key: 'yilsonu', md: '12-31', name: 'Yılbaşı gecesi', kind: 'warm', icon: '🥂', badge: ['31 Aralık', 'Yılbaşı gecesi'], eyebrow: '31 Aralık', reserve: true,
+      title: 'Yeni yıla <em>birlikte</em> girelim', text: 'Yılın son akşamını güzel bir sofrada kutlamak için masanızı şimdiden ayırtabilirsiniz.'},
+    {key: 'ramazan', religious: 'ramazan', name: 'Ramazan Bayramı', kind: 'warm', icon: '🌙', badge: ['Ramazan Bayramı', 'Mübarek olsun'], eyebrow: 'Ramazan Bayramı · {g}. gün',
+      title: 'Ramazan Bayramınız <em>mübarek olsun</em>', text: 'Bayramın size ve sevdiklerinize sağlık, huzur ve bereket getirmesini dileriz.'},
+    {key: 'kurban', religious: 'kurban', name: 'Kurban Bayramı', kind: 'warm', icon: '🌙', badge: ['Kurban Bayramı', 'Mübarek olsun'], eyebrow: 'Kurban Bayramı · {g}. gün',
+      title: 'Kurban Bayramınız <em>mübarek olsun</em>', text: 'Bayramın size ve sevdiklerinize sağlık, huzur ve bereket getirmesini dileriz.'}
+  ];
+  // Verilen günün (YYYY-MM-DD) özel gününün tarihi; dini bayramda kaçıncı gün olduğu (g) da döner
+  function specialDayDates(sd, y){
+    if(sd.religious){
+      const r = (RELIGIOUS_DAYS[y] || {})[sd.religious];
+      if(!r) return [];
+      const t0 = parseWall(r[0]);
+      return Array.from({length: r[1]}, (_, i) => new Date(t0 + i * DAY_MS).toISOString().slice(0, 10));
+    }
+    return [y + '-' + (sd.on ? sd.on(y) : sd.md)];
+  }
+  // site.specialDays === false ise hiçbiri, site.specialDaysOff içindeki anahtarlar gösterilmez
+  function specialDay(site, date){
+    site = site || {};
+    if(site.specialDays === false) return null;
+    const y = +date.slice(0, 4), off = site.specialDaysOff || [];
+    for(const sd of SPECIAL_DAYS){
+      if(off.includes(sd.key)) continue;
+      const g = specialDayDates(sd, y).indexOf(date);
+      if(g < 0) continue;
+      const fill = s => String(s || '').replace(/\{y\}/g, y).replace(/\{n\}/g, sd.since ? y - sd.since : '').replace(/\{g\}/g, g + 1);
+      return Object.assign({}, sd, {date, eyebrow: fill(sd.eyebrow), title: fill(sd.title), text: fill(sd.text), badge: sd.badge.map(fill)});
+    }
+    return null;
+  }
+  // Bugünden itibaren gelecek özel günler (yönetim paneli listesi için)
+  function upcomingSpecialDays(fromDate, count){
+    const y = +fromDate.slice(0, 4), out = [];
+    [y, y + 1].forEach(yy => SPECIAL_DAYS.forEach(sd => { const d = specialDayDates(sd, yy); if(d.length && d[d.length - 1] >= fromDate) out.push({sd, date: d[0], days: d.length}); }));
+    return out.sort((a, b) => a.date.localeCompare(b.date)).slice(0, count || 40);
+  }
+  const todayStr = () => new Date(now().wall).toISOString().slice(0, 10);
+
   global.YirmiCore = {
     FLOORS, floorById, tableById, setFloorTables, defaultFloorTables, parsePrice, formatTL,
     ALLERGENS, ALLERGEN_LABELS, DAYS, slugify, prepare, findItem,
@@ -489,6 +573,7 @@
     campaignState, describeSchedule, campaignTargets, applyDiscount, discountLabel, priceInfo, formatCountdown, newCampaign,
     campaignOnDay, EVENT_TYPES, eventType, eventDays, eventWindow, upcomingEvents, newEvent,
     announcementState, newAnnouncement, posterSlides, posterInfo, mapsUrl, SOCIALS, socialLinks,
-    openState, chefInfo, isDefaultChefPhoto
+    openState, chefInfo, isDefaultChefPhoto,
+    SPECIAL_DAYS, RELIGIOUS_DAYS, specialDay, upcomingSpecialDays, todayStr
   };
 })(window);
