@@ -1059,7 +1059,8 @@
             "sulfites"
           ],
           "traceWarning": "",
-          "id": "saraplar--hanchalar-okuzgozu-syrah-ficili-2016-75-cl"
+          "id": "saraplar--hanchalar-okuzgozu-syrah-ficili-2016-75-cl",
+          "hidden": true
         },
         {
           "name": "Hanchalar Cabernet-Merlot Fıçılı 2019 75 cl",
@@ -1071,7 +1072,8 @@
             "sulfites"
           ],
           "traceWarning": "",
-          "id": "saraplar--hanchalar-cabernet-merlot-ficili-2019-75-cl"
+          "id": "saraplar--hanchalar-cabernet-merlot-ficili-2019-75-cl",
+          "hidden": true
         },
         {
           "name": "Hanchalar Syrah Fıçılı 75 cl",
@@ -1095,7 +1097,8 @@
             "sulfites"
           ],
           "traceWarning": "",
-          "id": "saraplar--hanchalar-cal-karasi-kirmizi-ficili-2020-75-cl"
+          "id": "saraplar--hanchalar-cal-karasi-kirmizi-ficili-2020-75-cl",
+          "hidden": true
         },
         {
           "name": "Hanchalar Öküzgözü & Syrah 75 cl",
@@ -1131,7 +1134,8 @@
             "sulfites"
           ],
           "traceWarning": "",
-          "id": "saraplar--hanchalar-cal-karasi-kirmizi-75-cl"
+          "id": "saraplar--hanchalar-cal-karasi-kirmizi-75-cl",
+          "hidden": true
         },
         {
           "name": "Hanchalar 9Tat Tatlı Şarap 50 cl",
@@ -1167,7 +1171,8 @@
             "sulfites"
           ],
           "traceWarning": "",
-          "id": "saraplar--hanchalar-chardonnay-75-cl"
+          "id": "saraplar--hanchalar-chardonnay-75-cl",
+          "hidden": true
         },
         {
           "name": "Hanchalar Sauvignon Blanc 75 cl",
@@ -1179,7 +1184,8 @@
             "sulfites"
           ],
           "traceWarning": "",
-          "id": "saraplar--hanchalar-sauvignon-blanc-75-cl"
+          "id": "saraplar--hanchalar-sauvignon-blanc-75-cl",
+          "hidden": true
         },
         {
           "name": "Hanchalar Narince 75 cl",
@@ -1191,7 +1197,8 @@
             "sulfites"
           ],
           "traceWarning": "",
-          "id": "saraplar--hanchalar-narince-75-cl"
+          "id": "saraplar--hanchalar-narince-75-cl",
+          "hidden": true
         },
         {
           "name": "Şampanya Beyaz 75 cl",
@@ -1227,7 +1234,8 @@
             "sulfites"
           ],
           "traceWarning": "",
-          "id": "saraplar--hanchalar-premium-75-cl"
+          "id": "saraplar--hanchalar-premium-75-cl",
+          "hidden": true
         }
       ],
       "layout": "list"
