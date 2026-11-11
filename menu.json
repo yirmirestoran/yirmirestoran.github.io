@@ -944,7 +944,8 @@
           "calorieEstimated": true,
           "allergens": [],
           "traceWarning": "",
-          "id": "rakilar--beylerbeyi-incirden"
+          "id": "rakilar--beylerbeyi-incirden",
+          "hidden": true
         },
         {
           "name": "Beylerbeyi Margaz",
@@ -954,7 +955,8 @@
           "calorieEstimated": true,
           "allergens": [],
           "traceWarning": "",
-          "id": "rakilar--beylerbeyi-margaz"
+          "id": "rakilar--beylerbeyi-margaz",
+          "hidden": true
         },
         {
           "name": "Beylerbeyi Kalecik Karası",
@@ -964,7 +966,8 @@
           "calorieEstimated": true,
           "allergens": [],
           "traceWarning": "",
-          "id": "rakilar--beylerbeyi-kalecik-karasi"
+          "id": "rakilar--beylerbeyi-kalecik-karasi",
+          "hidden": true
         },
         {
           "name": "Beylerbeyi Mavi",
@@ -1034,7 +1037,8 @@
           "calorieEstimated": true,
           "allergens": [],
           "traceWarning": "",
-          "id": "rakilar--kulup-raki"
+          "id": "rakilar--kulup-raki",
+          "hidden": true
         }
       ],
       "layout": "list",
