@@ -1196,6 +1196,7 @@ body.no-scroll .social{opacity:0;pointer-events:none}
     if(e.target.id === 'posters' || e.target.classList.contains('pst-slide') || e.target.classList.contains('pst-track') || e.target.classList.contains('pst-foot')) closeLayer();
   });
   function openingPosters(){
+    if(document.documentElement.classList.contains('heat')) return;
     const n = C.now();
     const slides = allSlides(n, true);
     if(!slides.length) return;
@@ -1434,6 +1435,62 @@ body.no-scroll .social{opacity:0;pointer-events:none}
 })();
 </script>
 
+<!-- Ziyaret istatistikleri: ziyaret, kaynak, tıklanan yerler ve kaydırma derinliği bot sunucusuna (/t) gider; yönetim paneli → İstatistikler.
+     Çerez yok, cihazda bir şey saklanmaz. Yönetim panelini açmış tarayıcı, "Do Not Track" açık olanlar ve ?notrack=1 sayılmaz.
+     ?heat=1: panelin ısı haritası için sayfa açılır pencereler olmadan, sayılmadan açılır. -->
+<style>.heat #intro,.heat .social,.heat #sd-badge,.heat #sd-pop{display:none!important}</style>
+<script>
+(() => {
+  const q = new URLSearchParams(location.search);
+  if(q.get('heat') === '1') document.documentElement.classList.add('heat');
+  let off = q.get('notrack') === '1' || q.get('heat') === '1' || navigator.doNotTrack === '1' || navigator.webdriver;
+  try{ off = off || localStorage.getItem('yirmi-notrack') === '1'; }catch(e){}
+  if(off || !navigator.sendBeacon) return;
+  const URL_T = 'https://yirmi-bot.socialmediayirmirestoran.workers.dev/t';
+  const sid = Array.from(crypto.getRandomValues(new Uint8Array(12)), b => 'abcdefghijklmnopqrstuvwxyz0123456789'[b % 36]).join('');
+  let queue = [], depth = 0, active = 0, shownAt = document.hidden ? 0 : Date.now();
+  const send = body => { try{ navigator.sendBeacon(URL_T, JSON.stringify(Object.assign({sid}, body))); }catch(e){} };
+  send({pv: {src: q.get('src') || q.get('utm_source') || '', ref: document.referrer, w: innerWidth, lang: navigator.language}});
+
+  // Tıklanan yerin adı: ürün, kategori, rezervasyon, sosyal medya…; adı olmayan tıklamalar yalnızca ısı haritasına girer
+  const NAMES = [['[data-open]', el => 'urun:' + el.dataset.open], ['a.chip[data-cat]', el => 'kategori:' + el.dataset.cat],
+    ['#i-reserve, #side-reserve, .sd-ok.fill', () => 'rezervasyon'], ['#side-review, #rv-go, #rv-stars a, #rv-sum', () => 'google-yorum'],
+    ['#social-list a, #foot-social a', el => 'sosyal:' + (el.dataset.label || '')], ['#i-phone', () => 'telefon'], ['#i-address', () => 'yol-tarifi'],
+    ['#i-email', () => 'e-posta'], ['[data-poster-i], [data-posters-all]', () => 'duyurular'], ['[data-pop-go]', () => 'duyuru-dugmesi'],
+    ['[data-chef-link], #hero-chef', () => 'sef'], ['[data-search-open]', () => 'arama'], ['[data-ev]', () => 'etkinlik'],
+    ['#sd-badge', () => 'ozel-gun'], ['.foot-by a', () => 'devbatu'], ['#social-toggle', () => 'sosyal-menu'], ['.rv-card, [data-rvnav]', () => 'yorum-kartlari']];
+  document.addEventListener('click', e => {
+    let a = '';
+    for(const [sel, fn] of NAMES){ const el = e.target.closest(sel); if(el){ a = fn(el); break; } }
+    if(!a && e.target.closest('a, button')) a = 'diger';
+    // Açılır pencerelerdeki tıklamalar sayfa konumuna bağlı olmadığı için ısı haritasına girmez
+    const layer = e.target.closest('#sd-pop, .search, .sheet, .pst, [role="dialog"]');
+    queue.push({a, x: layer ? 0 : e.clientX / innerWidth, y: layer ? 0 : Math.round(e.pageY), w: layer ? 0 : innerWidth});
+    if(queue.length >= 20) flush();
+  }, true);
+  let st;
+  document.addEventListener('input', e => {
+    if(e.target.id !== 'search-input') return;
+    clearTimeout(st);
+    const v = e.target.value.trim().toLocaleLowerCase('tr').slice(0, 30);
+    if(v.length >= 2) st = setTimeout(() => queue.push({a: 'ara:' + v}), 1500);
+  });
+  addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight;
+    if(h) depth = Math.max(depth, Math.min(100, Math.round((scrollY + innerHeight) / h * 100)));
+  }, {passive: true});
+  function flush(end){
+    if(shownAt){ active += Date.now() - shownAt; shownAt = document.hidden ? 0 : Date.now(); }
+    if(!queue.length && !end) return;
+    send({ev: queue, end: {dur: active / 1000, depth}});
+    queue = [];
+  }
+  setInterval(() => { if(!document.hidden) flush(); }, 15000);
+  document.addEventListener('visibilitychange', () => { if(document.hidden) flush(true); else shownAt = Date.now(); });
+  addEventListener('pagehide', () => flush(true));
+})();
+</script>
+
 <!-- Özel günler (bayramlar, anma günleri, anneler günü…): takvim assets/core.js → SPECIAL_DAYS; yalnızca o gün (Türkiye saati) gösterilir.
      Önizleme: ?gun=11-10 (ay-gün) ya da ?gun=2027-03-09; ?ata=1 → 29 Ekim. Yönetim paneli → İşletme Bilgileri → Özel günler'den kapatılabilir. -->
 <style>
@@ -1481,6 +1538,7 @@ body.no-scroll .social{opacity:0;pointer-events:none}
 (() => {
   const C = window.YirmiCore;
   const q = new URLSearchParams(location.search), preview = q.get('gun') || (q.get('ata') === '1' ? '10-29' : '');
+  if(q.get('heat') === '1') return;
   let date = C.todayStr();
   if(preview) date = /^\d{2}-\d{2}$/.test(preview) ? date.slice(0, 4) + '-' + preview : preview;
   const IMG = 'assets/ataturk.jpg';

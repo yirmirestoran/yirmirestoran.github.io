@@ -288,6 +288,41 @@ h2{font-size:25px!important}
 .res-summary b{color:var(--text)}
 .res-summary .warn{background:#fdf3df;color:#8a6417}
 .res-switch{justify-content:space-between}
+/* İstatistikler */
+.st-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.st-head h2{margin:0}
+.st-live{font-size:12px;font-weight:700;color:var(--ok)}
+.st-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;min-width:0}
+.st-card h3{margin:0 0 10px;font-size:15px}
+.st-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:12px}
+.st-grid .st-card{margin-bottom:0}
+.st-grid+.st-grid,.st-grid+.st-card{margin-top:12px}
+.st-bars{display:flex;flex-direction:column;gap:6px}
+.st-bar{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) auto;gap:8px;align-items:center;font-size:13px}
+.st-bar .l{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.st-bar .b{height:10px;background:#f3eee6;border-radius:5px;overflow:hidden}
+.st-bar .b i{display:block;height:100%;background:var(--accent);border-radius:0 5px 5px 0}
+.st-bar .v{font-weight:800;text-align:right;white-space:nowrap}
+.st-bar .v small{font-weight:600;color:var(--muted)}
+.st-foot{margin:10px 0 0;font-size:12px}
+.st-svg{width:100%;height:auto;display:block}
+.st-svg .st-b{fill:var(--accent)}
+.st-svg g:hover .st-b{fill:#7d5a26}
+.st-svg .gr{stroke:#eee7db;stroke-width:1}
+.st-svg .ax{font-size:11px;fill:var(--muted)}
+.st-wk{display:grid;gap:3px;overflow-x:auto;font-size:11px}
+.st-wk .hh{text-align:center;color:var(--muted)}
+.st-wk .dd{color:var(--muted);font-weight:700;align-self:center}
+.st-wk .cell{height:24px;border-radius:4px;background:rgba(165,123,62,var(--a));box-shadow:inset 0 0 0 1px #f0eadf}
+.st-heat-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.st-heat-head h3{margin:0}
+.st-heat{max-height:78vh;overflow:auto;border:1px solid var(--line);border-radius:10px;background:#0b0907;margin-top:8px}
+.st-heat .hint{color:#c9bfae}
+.st-heat-in{position:relative;overflow:hidden;margin:0 auto}
+.st-heat-sc{position:absolute;left:0;top:0;transform-origin:0 0}
+.st-heat-sc iframe{border:0;display:block;pointer-events:none}
+.st-heat-sc canvas{position:absolute;left:0;top:0;pointer-events:none}
+.st-tip{position:fixed;z-index:200;background:#1c1610;color:#fff;font-size:12px;font-weight:600;padding:6px 9px;border-radius:7px;pointer-events:none;max-width:280px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:#faf8f4;gap:2px}
 .seg button{border:0;background:transparent;padding:8px 16px;border-radius:999px;font-weight:700;cursor:pointer;color:var(--muted)}
 .seg button.on{background:#2b2118;color:#ffd894}
@@ -756,7 +791,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
 </div>
 
 <div class="tabs">
-  <button class="tab active" data-tab="home">Genel Bakış</button>
+  <button class="tab active" data-tab="home">Genel Bakış</button><button class="tab" data-tab="stats">İstatistikler</button>
   <button class="tab" data-tab="res">Rezervasyon</button>
   <button class="tab" data-tab="chats">Sohbetler<span class="tab-badge hide" id="chats-badge"></span></button>
   <button class="tab" data-tab="sales">Satış &amp; Kâr</button>
@@ -886,6 +921,17 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   </div>
   <div class="panel" id="cal-day"></div>
   <div class="panel"><h2>Tüm etkinlik ve duyurular</h2><div id="ev-list"></div></div>
+</div>
+
+<!-- İSTATİSTİKLER -->
+<div class="page hide" id="tab-stats">
+  <div class="panel">
+    <div class="st-head"><h2>Ziyaretçi istatistikleri</h2><span class="st-live" id="st-live"></span><span style="flex:1"></span>
+      <div class="seg" id="st-range"><button type="button" data-d="1">Bugün</button><button type="button" data-d="7" class="on">7 gün</button><button type="button" data-d="30">30 gün</button><button type="button" data-d="90">90 gün</button></div>
+      <button class="btn sm" id="st-refresh">Yenile</button></div>
+    <div id="st-body"></div>
+  </div>
+  <div class="st-tip hide" id="st-tip" role="tooltip"></div>
 </div>
 
 <!-- ÖZEL GÜNLER -->
@@ -2894,7 +2940,8 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
 
   /* ---------- QR ---------- */
   function defaultMenuUrl(){
-    if(location.protocol.startsWith('http')) return location.origin + location.pathname.replace(/admin(\.html)?$/, '');
+    // ?src=qr: İstatistikler'de masadaki QR koddan gelenler ayrı görünür
+    if(location.protocol.startsWith('http')) return location.origin + location.pathname.replace(/admin(\.html)?$/, '') + '?src=qr';
     return '';
   }
   function makeQr(){
@@ -5487,14 +5534,200 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     window.open('https://wa.me/' + (p.length >= 11 ? p : '') + '?text=' + encodeURIComponent(ofText(ofCur)), '_blank', 'noopener');
   });
 
+  /* ---------- İstatistikler (menü ziyaretleri) ---------- */
+  // Menü sayfası ziyaretleri bot sunucusuna yollar (index.html → /t); burada /api/stats ile özetlenir.
+  // Bu tarayıcı yönetim panelini açtığı için menüye kendi girişleriniz sayılmaz.
+  try{ localStorage.setItem('yirmi-notrack', '1'); }catch(e){}
+  let stDays = 7, stData = null, stHeatDev = 'm', stBusy = false;
+  const stNum = n => (+n || 0).toLocaleString('tr-TR');
+  const stPct = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
+  const stDur = s => { s = Math.round(+s || 0); return s >= 60 ? Math.floor(s / 60) + ' dk ' + (s % 60) + ' sn' : s + ' sn'; };
+  // Tıklama adlarını okunur hâle getirir: urun:id → ürün adı, kategori:id → kategori adı …
+  const ST_ACTIONS = {rezervasyon: '📅 Rezervasyon', 'google-yorum': '★ Google yorum', telefon: '📞 Telefonla arama', 'yol-tarifi': '📍 Yol tarifi', 'e-posta': '✉ E-posta',
+    duyurular: '📣 Duyurular', 'duyuru-dugmesi': '📣 Duyuru düğmesi', sef: '👨‍🍳 Şefin hikâyesi', arama: '🔍 Arama açma', etkinlik: '🗓 Etkinlik', 'ozel-gun': '🇹🇷 Özel gün rozeti',
+    devbatu: 'by Devbatu', 'sosyal-menu': 'Sosyal medya menüsü', 'yorum-kartlari': 'Yorum kartları', diger: 'Diğer düğmeler'};
+  function stLabel(a){
+    const i = a.indexOf(':'), kind = i < 0 ? a : a.slice(0, i), id = i < 0 ? '' : a.slice(i + 1);
+    if(kind === 'urun'){ for(const c of state.categories) for(const it of c.items) if(it.id === id) return it.name; return 'Ürün (' + id + ')'; }
+    if(kind === 'kategori'){ const c = state.categories.find(x => x.id === id); return 'Kategori: ' + (c ? c.title : id); }
+    if(kind === 'sosyal') return '🔗 ' + (id || 'Sosyal medya');
+    if(kind === 'ara') return '“' + id + '”';
+    return ST_ACTIONS[a] || a;
+  }
+  async function loadStats(){
+    const body = $('#st-body');
+    if(!botOn()){ body.innerHTML = '<p class="hint">İstatistikler bot sunucusunda toplanır. <b>Güvenlik → WhatsApp / Instagram Botu</b> bölümünden botu bağlayın.</p>'; return; }
+    if(stBusy) return;
+    stBusy = true;
+    if(!stData) body.innerHTML = '<p class="hint">Yükleniyor…</p>';
+    try{ stData = await botApi('GET', '/api/stats?days=' + stDays); renderStats(); }
+    catch(e){
+      body.innerHTML = /Bulunamadı|404/.test(e.message)
+        ? '<p class="msg err">İstatistikler için Cloudflare\'deki bot kodu güncel değil. <code>bot/worker.js</code> dosyasını Cloudflare\'de güncelleyin (Edit code → yapıştır → Deploy); o andan sonraki ziyaretler burada görünür.</p>'
+        : '<p class="msg err">İstatistikler alınamadı: ' + esc(e.message) + '</p>';
+    }finally{ stBusy = false; }
+  }
+  // Yatay çubuk listesi (tek seri, değerler yazılı)
+  function stBars(title, rows, total, opts){
+    opts = opts || {};
+    const max = Math.max(1, ...rows.map(r => r.n));
+    return '<div class="st-card"><h3>' + title + '</h3>' + (rows.length ? '<div class="st-bars">' + rows.map(r =>
+      '<div class="st-bar" data-tip="' + esc(r.label + ': ' + stNum(r.n) + (opts.unit || '') + (r.tip ? ' · ' + r.tip : '')) + '"><span class="l">' + esc(r.label) + '</span>' +
+      '<span class="b"><i style="width:' + Math.max(2, r.n / max * 100) + '%"></i></span><span class="v">' + stNum(r.n) + (total ? ' <small>' + stPct(r.n, total) + '</small>' : '') + '</span></div>').join('') + '</div>'
+      : '<p class="hint">Henüz veri yok.</p>') + (opts.foot ? '<p class="hint st-foot">' + opts.foot + '</p>' : '') + '</div>';
+  }
+  function renderStats(){
+    const d = stData, t = d.totals, v = +t.visits || 0;
+    const acts = d.actions || [], find = k => acts.find(a => a.k === k) || {n: 0, s: 0};
+    const res = find('rezervasyon');
+    const tile = (label, val, sub) => '<div class="kpi"><small>' + label + '</small><b>' + val + '</b>' + (sub ? '<em>' + sub + '</em>' : '') + '</div>';
+    $('#st-live').textContent = d.live ? '● Son 5 dakikada ' + d.live + ' yeni ziyaret' : '';
+    let h = '<div class="kpis">' +
+      tile('Ziyaret', stNum(v), 'menünün açılma sayısı') +
+      tile('Tekil ziyaretçi', stNum(t.uniques), 'her gün ayrı sayılır') +
+      tile('Ortalama süre', t.dur ? stDur(t.dur) : '—', 'sayfada geçen süre') +
+      tile('Ne kadar aşağı indiler', t.depth ? Math.round(t.depth) + '%' : '—', 'sayfanın ortalama') +
+      tile('Bir yere tıklayan', stPct(+t.engaged || 0, v), stNum(t.engaged) + ' ziyaret') +
+      tile('Rezervasyona tıklayan', stPct(res.s, v), stNum(res.s) + ' ziyaret') + '</div>';
+    h += '<div class="st-card"><h3>' + (stDays === 1 ? 'Bugün saat saat ziyaret' : 'Günlük ziyaret') + '</h3>' + stTimeChart(d) + '</div>';
+    h += '<div class="st-card"><h3>Hangi gün ve saatte geliyorlar?</h3>' + stWeekHeat(d.byHour) + '</div>';
+    const rows = l => l.map(r => ({label: r.k || 'Bilinmiyor', n: r.n}));
+    h += '<div class="st-grid">' +
+      stBars('Nereden geldiler?', rows(d.sources), v, {foot: 'Masadaki QR koddan gelenler “QR kod” olarak görünür (QR Kod sekmesindeki kod). Instagram ve Facebook uygulama içinden açılınca tanınır; WhatsApp\'tan paylaşılan bağlantılar genelde “Doğrudan” görünür.'}) +
+      stBars('Cihaz', rows(d.devices), v) + stBars('İşletim sistemi', rows(d.os), v) + stBars('Şehir', rows(d.cities), v, {foot: 'Yaklaşık konum, internet bağlantısından tahmin edilir.'}) + '</div>';
+    const prod = acts.filter(a => a.k.startsWith('urun:')).slice(0, 12);
+    const other = acts.filter(a => !/^(urun|ara|kategori):/.test(a.k)).slice(0, 14);
+    const cats = acts.filter(a => a.k.startsWith('kategori:')).slice(0, 10);
+    const srch = acts.filter(a => a.k.startsWith('ara:')).slice(0, 12);
+    const act = l => l.map(a => ({label: stLabel(a.k), n: a.n, tip: a.s + ' farklı ziyarette'}));
+    h += '<div class="st-grid">' +
+      stBars('Neye tıkladılar?', act(other), 0, {unit: ' tıklama'}) +
+      stBars('En çok bakılan ürünler', act(prod), 0, {unit: ' kez açıldı'}) +
+      stBars('Kategori seçimleri', act(cats), 0, {unit: ' tıklama'}) +
+      stBars('Menüde ne aradılar?', act(srch), 0, {unit: ' arama'}) + '</div>';
+    h += '<div class="st-card"><div class="st-heat-head"><h3>Tıklama ısı haritası</h3><span style="flex:1"></span>' +
+      '<div class="seg" id="st-heat-dev"><button type="button" data-dev="m"' + (stHeatDev === 'm' ? ' class="on"' : '') + '>Telefon</button><button type="button" data-dev="d"' + (stHeatDev === 'd' ? ' class="on"' : '') + '>Bilgisayar</button></div></div>' +
+      '<p class="hint">Menüde nerelere dokunulduğu: koyu kırmızı en çok, sarı daha az. Açılır pencerelerdeki tıklamalar burada gösterilmez.</p><div class="st-heat" id="st-heat"></div></div>';
+    h += '<p class="hint">Kişisel veri tutulmaz: çerez yok, IP adresi saklanmaz; tekil ziyaretçi yalnızca aynı gün içinde ayırt edilir. Kayıtlar 120 gün saklanır. Bu tarayıcıdan menüye yaptığınız girişler sayılmaz.</p>';
+    $('#st-body').innerHTML = h;
+    renderHeat();
+  }
+  // Ziyaret çubukları: günlük (ya da bugün saatlik); tek seri, üzerine gelince ayrıntı
+  function stTimeChart(d){
+    let pts;
+    if(stDays === 1){
+      const byHr = {};
+      d.byHour.forEach(r => { byHr[r.hr] = (byHr[r.hr] || 0) + r.n; });
+      pts = Array.from({length: 24}, (_, hr) => ({label: String(hr).padStart(2, '0'), tip: String(hr).padStart(2, '0') + ':00 – ' + String(hr).padStart(2, '0') + ':59', v: byHr[hr] || 0}));
+    }else{
+      const map = Object.fromEntries(d.byDay.map(r => [r.day, r]));
+      pts = Array.from({length: stDays}, (_, i) => {
+        const day = shiftDay(d.from, i), r = map[day] || {v: 0, u: 0}, dt = new Date(Core.parseWall(day));
+        return {label: dt.getUTCDate() + '', tip: dt.toLocaleDateString('tr-TR', {day: 'numeric', month: 'long', weekday: 'long', timeZone: 'UTC'}) + ' · ' + r.u + ' tekil ziyaretçi', v: r.v};
+      });
+    }
+    const max = Math.max(1, ...pts.map(p => p.v)), W = 760, H = 170, pad = 28, bw = (W - pad) / pts.length, cw = Math.min(bw - 4, 34);
+    const step = Math.ceil(pts.length / 16), nice = Math.max(1, Math.ceil(max / 4));
+    let s = '<svg class="st-svg" viewBox="0 0 ' + W + ' ' + (H + 30) + '" role="img" aria-label="Ziyaret grafiği">';
+    for(let g = 0; g <= max; g += nice){ const y = H - g / max * (H - 10); s += '<line x1="' + pad + '" x2="' + W + '" y1="' + y + '" y2="' + y + '" class="gr"/><text x="' + (pad - 6) + '" y="' + (y + 4) + '" class="ax" text-anchor="end">' + g + '</text>'; }
+    pts.forEach((p, i) => {
+      const x = pad + i * bw, bh = p.v / max * (H - 10);
+      s += '<g data-tip="' + esc(p.tip + ': ' + p.v + ' ziyaret') + '"><rect x="' + x + '" y="0" width="' + bw + '" height="' + H + '" fill="transparent"/>' +
+        (p.v ? '<rect class="st-b" x="' + (x + (bw - cw) / 2) + '" y="' + (H - bh) + '" width="' + Math.max(1, cw) + '" height="' + bh + '" rx="' + Math.min(4, cw / 3) + '"/>' : '') + '</g>' +
+        (i % step === 0 ? '<text x="' + (x + bw / 2) + '" y="' + (H + 22) + '" class="ax" text-anchor="middle">' + p.label + '</text>' : '');
+    });
+    return s + '</svg>';
+  }
+  // Gün × saat ısı tablosu (tek renk, açıktan koyuya)
+  function stWeekHeat(rows){
+    if(!rows.length) return '<p class="hint">Henüz veri yok.</p>';
+    const hrs = rows.map(r => r.hr), lo = Math.min(...hrs), hi = Math.max(...hrs), grid = {};
+    rows.forEach(r => { grid[r.dow + ':' + r.hr] = r.n; });
+    const max = Math.max(1, ...rows.map(r => r.n)), order = [1, 2, 3, 4, 5, 6, 0];
+    let h = '<div class="st-wk" style="grid-template-columns:44px repeat(' + (hi - lo + 1) + ',minmax(18px,1fr))"><span></span>';
+    for(let hr = lo; hr <= hi; hr++) h += '<span class="hh">' + String(hr).padStart(2, '0') + '</span>';
+    order.forEach(dw => {
+      h += '<span class="dd">' + Core.DAYS[(dw + 6) % 7].s + '</span>';
+      for(let hr = lo; hr <= hi; hr++){
+        const n = grid[dw + ':' + hr] || 0;
+        h += '<span class="cell" style="--a:' + (n ? .12 + n / max * .88 : 0) + '" data-tip="' + ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'][dw] + ' ' + String(hr).padStart(2, '0') + ':00 · ' + n + ' ziyaret"></span>';
+      }
+    });
+    return h + '</div>';
+  }
+  // Tıklama ısı haritası: menü, ziyaretçinin ekran genişliğinde arka planda açılır, tıklamalar üzerine boyanır
+  function renderHeat(){
+    const box = $('#st-heat');
+    if(!box || !stData) return;
+    const mobile = stHeatDev === 'm', W = mobile ? 390 : 1280;
+    const pts = stData.heat.filter(p => p.w && (mobile ? p.w < 700 : p.w >= 700));
+    if(!pts.length){ box.innerHTML = '<p class="hint" style="padding:14px">Bu dönemde ' + (mobile ? 'telefondan' : 'bilgisayardan') + ' tıklama yok.</p>'; return; }
+    const scale = Math.min(1, (box.clientWidth - 2) / W);
+    box.innerHTML = '<div class="st-heat-in" style="width:' + W * scale + 'px"><div class="st-heat-sc" style="width:' + W + 'px;transform:scale(' + scale + ')">' +
+      '<iframe src="index.html?heat=1" style="width:' + W + 'px;height:2000px" tabindex="-1" aria-hidden="true"></iframe><canvas></canvas></div></div>' +
+      '<p class="hint" style="padding:6px 10px">' + stNum(pts.length) + ' tıklama · menü yükleniyor…</p>';
+    const fr = box.querySelector('iframe'), cv = box.querySelector('canvas'), wrap = box.querySelector('.st-heat-in');
+    fr.addEventListener('load', () => setTimeout(() => {
+      let H = 4000;
+      try{ H = Math.min(16000, fr.contentDocument.documentElement.scrollHeight); }catch(e){}
+      fr.style.height = H + 'px';
+      wrap.style.height = H * scale + 'px';
+      cv.width = W; cv.height = H;
+      const g = cv.getContext('2d');
+      pts.forEach(p => {
+        const x = p.x * W, y = p.y, r = mobile ? 26 : 34, gr = g.createRadialGradient(x, y, 0, x, y, r);
+        gr.addColorStop(0, 'rgba(0,0,0,.22)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+        g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2);
+      });
+      // Yoğunluk (saydamlık) açık sarıdan koyu kırmızıya boyanır
+      const pal = document.createElement('canvas').getContext('2d'), lg = pal.createLinearGradient(0, 0, 256, 0);
+      lg.addColorStop(0, '#ffe08a'); lg.addColorStop(.45, '#f59f00'); lg.addColorStop(.8, '#d9480f'); lg.addColorStop(1, '#9b1c1c');
+      pal.canvas.width = 256; pal.canvas.height = 1; pal.fillStyle = lg; pal.fillRect(0, 0, 256, 1);
+      const P = pal.getImageData(0, 0, 256, 1).data, img = g.getImageData(0, 0, W, H), px = img.data;
+      for(let i = 0; i < px.length; i += 4){
+        const a = px[i + 3];
+        if(!a) continue;
+        px[i] = P[a * 4]; px[i + 1] = P[a * 4 + 1]; px[i + 2] = P[a * 4 + 2]; px[i + 3] = Math.min(230, 60 + a * 1.4);
+      }
+      g.putImageData(img, 0, 0);
+      box.querySelector('p').textContent = stNum(pts.length) + ' tıklama · ' + (mobile ? 'telefon (390 px genişlik)' : 'bilgisayar (1280 px genişlik)') + ' görünümü';
+    }, 2500));
+  }
+  // Grafiklerin üzerine gelince küçük açıklama kutusu
+  document.addEventListener('mouseover', e => {
+    const el = e.target.closest && e.target.closest('#tab-stats [data-tip]'), tip = $('#st-tip');
+    if(!el){ tip.classList.add('hide'); return; }
+    tip.textContent = el.dataset.tip;
+    tip.classList.remove('hide');
+    const r = el.getBoundingClientRect();
+    tip.style.left = Math.max(8, Math.min(innerWidth - tip.offsetWidth - 8, r.left + r.width / 2 - tip.offsetWidth / 2)) + 'px';
+    tip.style.top = Math.max(8, r.top - tip.offsetHeight - 8) + 'px';
+  });
+  $('#st-range').addEventListener('click', e => {
+    const b = e.target.closest('button[data-d]');
+    if(!b) return;
+    stDays = +b.dataset.d;
+    document.querySelectorAll('#st-range button').forEach(x => x.classList.toggle('on', x === b));
+    loadStats();
+  });
+  $('#st-refresh').addEventListener('click', loadStats);
+  $('#st-body').addEventListener('click', e => {
+    const b = e.target.closest('#st-heat-dev button');
+    if(!b) return;
+    stHeatDev = b.dataset.dev;
+    document.querySelectorAll('#st-heat-dev button').forEach(x => x.classList.toggle('on', x === b));
+    renderHeat();
+  });
+
   /* ---------- Sekmeler ---------- */
   function showTab(name){
     try{ sessionStorage.setItem('yirmi-admin-sekme', name); }catch(e){}
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-    ['home','res','chats','sales','menu','chef','calendar','ann','campaigns','offer','days','site','bot','qr','security'].forEach(n => $('#tab-' + n).classList.toggle('hide', n !== name));
+    ['home','stats','res','chats','sales','menu','chef','calendar','ann','campaigns','offer','days','site','bot','qr','security'].forEach(n => $('#tab-' + n).classList.toggle('hide', n !== name));
     if(state && name === 'offer') renderOffer();
     if(state && name === 'days') renderSpecialDays();
     if(name === 'chats') csShowTab();
+    if(name === 'stats') loadStats();
     if(state && name === 'bot'){ renderBotCfg(); loadBotPause(); }
     if(state && name === 'ann') renderAnn();
     if(name === 'qr' && !$('#qr-url').value){ $('#qr-url').value = defaultMenuUrl(); if($('#qr-url').value) makeQr(); }

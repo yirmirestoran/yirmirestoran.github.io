@@ -32,7 +32,7 @@
  *   GRAPH_VERSION     (isteğe bağlı) Meta Graph API sürümü, varsayılan v23.0
  */
 
-const VERSION = '2026-11-08a';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
+const VERSION = '2026-11-15a';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
 const SESSION_MS = 30 * 60e3;          // bu kadar sessiz kalan sohbet baştan başlar
 const HUMAN_MS = 12 * 3600e3;          // "yetkili" istenince bot bu süre susar
 const WINDOW_MS = 23.5 * 3600e3;       // WhatsApp/Instagram 24 saat mesajlaşma penceresi (pay bırakılarak)
@@ -130,6 +130,7 @@ export default {
     try{
       if(url.pathname === '/webhook') return await webhook(req, url, env, ctx);
       if(url.pathname === '/wa') return await waRedirect(url, env);
+      if(url.pathname === '/t') return cors(env, await track(req, env));
       if(url.pathname.startsWith('/api/')){
         if(req.method === 'OPTIONS') return cors(env, new Response(null, {status: 204}));
         return cors(env, await api(req, url, env));
@@ -162,7 +163,12 @@ const SCHEMA = [
   // Sohbet geçmişi (yönetim panelindeki "Sohbetler" sekmesi için; 30 gün saklanır)
   'CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, k TEXT NOT NULL, dir TEXT NOT NULL, text TEXT NOT NULL, by TEXT, t INTEGER NOT NULL)',
   'CREATE INDEX IF NOT EXISTS messages_k ON messages (k, id)',
-  'CREATE TABLE IF NOT EXISTS chats (k TEXT PRIMARY KEY, last_t INTEGER NOT NULL, last_text TEXT, last_dir TEXT, unread INTEGER NOT NULL DEFAULT 0)'
+  'CREATE TABLE IF NOT EXISTS chats (k TEXT PRIMARY KEY, last_t INTEGER NOT NULL, last_text TEXT, last_dir TEXT, unread INTEGER NOT NULL DEFAULT 0)',
+  // Menü ziyaret istatistikleri (yönetim paneli → İstatistikler; 120 gün saklanır)
+  'CREATE TABLE IF NOT EXISTS visits (sid TEXT PRIMARY KEY, t INTEGER NOT NULL, day TEXT NOT NULL, hr INTEGER, dow INTEGER, vid TEXT, src TEXT, ref TEXT, dev TEXT, os TEXT, city TEXT, lang TEXT, dur INTEGER NOT NULL DEFAULT 0, depth INTEGER NOT NULL DEFAULT 0, clicks INTEGER NOT NULL DEFAULT 0)',
+  'CREATE INDEX IF NOT EXISTS visits_t ON visits (t)',
+  'CREATE TABLE IF NOT EXISTS clicks (id INTEGER PRIMARY KEY AUTOINCREMENT, sid TEXT NOT NULL, t INTEGER NOT NULL, a TEXT, x REAL, y INTEGER, w INTEGER)',
+  'CREATE INDEX IF NOT EXISTS clicks_t ON clicks (t)'
 ];
 let schemaReady = null;
 async function db(env){
@@ -216,6 +222,8 @@ async function daily(env){
     D.prepare('DELETE FROM relay WHERE updated < ?').bind(now - 30 * day),
     D.prepare('DELETE FROM messages WHERE t < ?').bind(now - 30 * day),
     D.prepare('DELETE FROM chats WHERE last_t < ?').bind(now - 30 * day),
+    D.prepare('DELETE FROM visits WHERE t < ?').bind(now - 120 * day),
+    D.prepare('DELETE FROM clicks WHERE t < ?').bind(now - 120 * day),
     D.prepare("DELETE FROM settings WHERE k LIKE 'flood:%'")
   ]);
   await refreshIgToken(env).catch(e => console.error('ig token', e && e.message || e));
@@ -622,7 +630,7 @@ async function greet(ctx, base){
   return {step: 'menu', d: {}, test: base && base.test};
 }
 async function infoText(env){
-  const site = await siteInfo(env), lines = ['📖 *Menümüz:* ' + siteUrl(env)];
+  const site = await siteInfo(env), lines = ['📖 *Menümüz:* ' + siteUrl(env) + '/?src=bot'];
   if(site.opening && site.closing) lines.push('🕕 *Çalışma saatleri:* ' + site.opening + ' – ' + site.closing);
   if(site.address) lines.push('📍 *Adres:* ' + site.address, '🗺 Yol tarifi: ' + (/^https?:\/\//.test(site.mapUrl || '') ? site.mapUrl : 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(site.address)));
   if(site.phone) lines.push('📞 ' + site.phone);
@@ -822,7 +830,7 @@ const ANSWERS = {
   },
   async request(ctx, s){
     const c = ctx.m.choice;
-    if(c === 'r:menu'){ say(ctx, '📖 Menümüz: ' + siteUrl(ctx.env)); return ask(ctx, s); }
+    if(c === 'r:menu'){ say(ctx, '📖 Menümüz: ' + siteUrl(ctx.env) + '/?src=bot'); return ask(ctx, s); }
     if(c === 'r:skip' || /^(gec|yok|hayir|yok tesekkurler|istemiyorum|gerek yok|-|bos)$/.test(ctx.t)) s.d.request = '';
     else if(c || ctx.t.length < 2) return reask(ctx, s, 'İsteğinizi yazabilir ya da *Geç*\'e dokunabilirsiniz.');
     else s.d.request = clean(ctx.m.text, 500);
@@ -1324,8 +1332,81 @@ async function api(req, url, env){
     case '/api/wa-confirm':
       if(!post) break;
       return apiWaConfirm(env, body);
+    case '/api/stats':
+      return json(await stats(env, +url.searchParams.get('days') || 7));
   }
   return json({error: 'Bulunamadı'}, 404);
+}
+
+/* ---------- Menü ziyaret istatistikleri ---------- */
+// Menü sayfası (index.html) ziyaret, tıklama ve kaydırma bilgisini /t adresine yollar. Çerez kullanılmaz, IP saklanmaz:
+// tekil ziyaretçi, IP + tarayıcı + gün + gizli anahtarın özetiyle (hash) yalnızca o gün içinde ayırt edilir.
+// Kayıtlar 120 gün tutulur (daily).
+const BOT_UA = /bot|crawl|spider|slurp|preview|headless|lighthouse|facebookexternalhit|whatsapp\/|telegram|discord|curl|wget|python|axios/i;
+const SRC_NAMES = {qr: 'QR kod', masa: 'QR kod', instagram: 'Instagram', ig: 'Instagram', facebook: 'Facebook', fb: 'Facebook', google: 'Google',
+  whatsapp: 'WhatsApp', wa: 'WhatsApp', bot: 'WhatsApp / Instagram botu', tiktok: 'TikTok', x: 'X (Twitter)', twitter: 'X (Twitter)'};
+function visitSource(src, ref, ua, own){
+  const s = String(src || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 30);
+  if(s) return SRC_NAMES[s] || s;
+  if(/Instagram/.test(ua)) return 'Instagram';
+  if(/FBAN|FBAV|FB_IAB/.test(ua)) return 'Facebook';
+  let host = '';
+  try{ host = new URL(ref).hostname.replace(/^www\./, ''); }catch(e){}
+  if(!host || host === own) return 'Doğrudan';
+  const known = [[/(^|\.)google\./, 'Google'], [/instagram\.com$/, 'Instagram'], [/(facebook\.com|fb\.com|fb\.me)$/, 'Facebook'], [/(wa\.me|whatsapp\.com)$/, 'WhatsApp'],
+    [/(t\.co|twitter\.com|x\.com)$/, 'X (Twitter)'], [/tiktok\.com$/, 'TikTok'], [/yandex\./, 'Yandex'], [/bing\.com$/, 'Bing'], [/(tripadvisor|yelp|foursquare)\./, 'Rehber siteleri']];
+  const k = known.find(([re]) => re.test(host));
+  return k ? k[1] : host.slice(0, 40);
+}
+const uaDevice = (ua, w) => /iPad|Tablet/i.test(ua) || (/Android/.test(ua) && !/Mobile/.test(ua)) ? 'Tablet' : /Mobi|iPhone|Android/i.test(ua) || (w && w < 700) ? 'Telefon' : 'Bilgisayar';
+const uaOs = ua => /iPhone|iPad|iPod/.test(ua) ? 'iOS' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows' : /Mac OS X/.test(ua) ? 'macOS' : /Linux/.test(ua) ? 'Linux' : 'Diğer';
+async function track(req, env){
+  if(req.method !== 'POST') return new Response(null, {status: 204});
+  const ua = req.headers.get('user-agent') || '';
+  if(BOT_UA.test(ua)) return new Response(null, {status: 204});
+  const raw = await req.text();
+  if(raw.length > 32000) return new Response(null, {status: 413});
+  let b;
+  try{ b = JSON.parse(raw); }catch(e){ return new Response(null, {status: 400}); }
+  const sid = String(b.sid || '');
+  if(!/^[a-z0-9]{8,24}$/.test(sid)) return new Response(null, {status: 400});
+  const D = await db(env), now = Date.now(), tr = new Date(now + TR_OFFSET * 60e3), num = (v, max) => Math.max(0, Math.min(max, Math.round(+v || 0)));
+  const ops = [];
+  if(b.pv){
+    const day = tr.toISOString().slice(0, 10), ip = req.headers.get('cf-connecting-ip') || '';
+    const vid = (await hmacHex(env.ADMIN_KEY || 'yirmi', enc(ip + '|' + ua + '|' + day))).slice(0, 16);
+    const own = new URL(siteUrl(env)).hostname, cf = req.cf || {};
+    ops.push(D.prepare('INSERT OR IGNORE INTO visits (sid, t, day, hr, dow, vid, src, ref, dev, os, city, lang) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+      .bind(sid, now, day, tr.getUTCHours(), tr.getUTCDay(), vid, visitSource(b.pv.src, b.pv.ref, ua, own), clean(b.pv.ref, 200),
+        uaDevice(ua, +b.pv.w), uaOs(ua), clean(cf.city || cf.country || '', 40), clean(b.pv.lang, 10)));
+  }
+  const ev = (Array.isArray(b.ev) ? b.ev : []).slice(0, 40);
+  ev.forEach(e => ops.push(D.prepare('INSERT INTO clicks (sid, t, a, x, y, w) VALUES (?, ?, ?, ?, ?, ?)')
+    .bind(sid, now, clean(e.a, 60), Math.max(0, Math.min(1, +e.x || 0)), num(e.y, 60000), num(e.w, 5000))));
+  if(ev.length) ops.push(D.prepare('UPDATE visits SET clicks = clicks + ? WHERE sid = ?').bind(ev.filter(e => e.a).length, sid));
+  if(b.end) ops.push(D.prepare('UPDATE visits SET dur = MAX(dur, ?), depth = MAX(depth, ?) WHERE sid = ?').bind(num(b.end.dur, 7200), num(b.end.depth, 100), sid));
+  if(ops.length) await D.batch(ops);
+  return new Response(null, {status: 204});
+}
+async function stats(env, days){
+  days = Math.max(1, Math.min(120, days));
+  const D = await db(env), now = Date.now(), tr = new Date(now + TR_OFFSET * 60e3);
+  const from = addDays(tr.toISOString().slice(0, 10), 1 - days), since = Date.parse(from + 'T00:00:00Z') - TR_OFFSET * 60e3;
+  const all = async (q, ...a) => (await D.prepare(q).bind(...a).all()).results;
+  const top = col => all('SELECT ' + col + ' AS k, COUNT(*) AS n FROM visits WHERE t >= ? GROUP BY ' + col + ' ORDER BY n DESC LIMIT 12', since);
+  const [tot] = await all('SELECT COUNT(*) AS visits, AVG(CASE WHEN dur > 0 THEN dur END) AS dur, AVG(CASE WHEN depth > 0 THEN depth END) AS depth, ' +
+    'SUM(CASE WHEN clicks > 0 THEN 1 ELSE 0 END) AS engaged FROM visits WHERE t >= ?', since);
+  const byDay = await all('SELECT day, COUNT(*) AS v, COUNT(DISTINCT vid) AS u FROM visits WHERE t >= ? GROUP BY day ORDER BY day', since);
+  return {
+    from, days, now,
+    totals: Object.assign(tot, {uniques: byDay.reduce((n, d) => n + d.u, 0)}),
+    byDay,
+    byHour: await all('SELECT dow, hr, COUNT(*) AS n FROM visits WHERE t >= ? GROUP BY dow, hr', since),
+    sources: await top('src'), devices: await top('dev'), os: await top('os'), cities: await top('city'),
+    actions: await all("SELECT a AS k, COUNT(*) AS n, COUNT(DISTINCT sid) AS s FROM clicks WHERE t >= ? AND a <> '' GROUP BY a ORDER BY n DESC LIMIT 150", since),
+    heat: await all('SELECT x, y, w FROM clicks WHERE t >= ? ORDER BY id DESC LIMIT 6000', since),
+    live: (await all('SELECT COUNT(*) AS n FROM visits WHERE t > ?', now - 5 * 60e3))[0].n
+  };
 }
 /* ---------- Panel: sohbetler ve durum ---------- */
 const CHAT_SELECT = 'SELECT ch.k, ch.last_t, ch.last_text, ch.last_dir, ch.unread, c.name, c.last_in, s.data AS sess, s.updated AS sess_t, r.code ' +
