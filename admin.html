@@ -5680,15 +5680,32 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       '<iframe src="index.html?heat=1" style="width:' + W + 'px;height:2000px" tabindex="-1" aria-hidden="true"></iframe><canvas></canvas></div></div>' +
       '<p class="hint" style="padding:6px 10px">' + stNum(pts.length) + ' tıklama · menü yükleniyor…</p>';
     const fr = box.querySelector('iframe'), cv = box.querySelector('canvas'), wrap = box.querySelector('.st-heat-in');
-    fr.addEventListener('load', () => setTimeout(() => {
-      let H = 4000;
-      try{ H = Math.min(16000, fr.contentDocument.documentElement.scrollHeight); }catch(e){}
+    // Menü ve fotoğrafları tam yüklenip sayfa yüksekliği oturunca çizilir (en fazla ~10 sn beklenir)
+    const settled = (doc, done) => {
+      let last = -1, same = 0, tries = 0;
+      (function check(){
+        const h = doc.documentElement.scrollHeight, imgs = [...doc.images].every(i => i.complete);
+        same = h === last ? same + 1 : 0; last = h;
+        fr.style.height = Math.min(16000, h) + 'px';
+        if((same >= 3 && imgs && doc.querySelector('[data-open]')) || ++tries > 33) done(); else setTimeout(check, 300);
+      })();
+    };
+    fr.addEventListener('load', () => settled(fr.contentDocument, () => {
+      const doc = fr.contentDocument, H = Math.min(16000, doc.documentElement.scrollHeight);
       fr.style.height = H + 'px';
       wrap.style.height = H * scale + 'px';
       cv.width = W; cv.height = H;
-      const g = cv.getContext('2d');
+      const g = cv.getContext('2d'), secs = {};
+      // Tıklama kaydedildiği bölüme göre yerleşir (bölüm bilgisi olmayan eski kayıtlar sayfa tepesine göre)
+      const yOf = p => {
+        if(p.s){
+          const el = secs[p.s] !== undefined ? secs[p.s] : (secs[p.s] = doc.getElementById(p.s));
+          if(el && el.offsetHeight){ const r = el.getBoundingClientRect(); return r.top + doc.defaultView.scrollY + (+p.f || 0) * r.height; }
+        }
+        return p.y;
+      };
       pts.forEach(p => {
-        const x = p.x * W, y = p.y, r = mobile ? 26 : 34, gr = g.createRadialGradient(x, y, 0, x, y, r);
+        const x = p.x * W, y = yOf(p), r = mobile ? 26 : 34, gr = g.createRadialGradient(x, y, 0, x, y, r);
         gr.addColorStop(0, 'rgba(0,0,0,.22)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
         g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2);
       });
@@ -5704,7 +5721,7 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
       }
       g.putImageData(img, 0, 0);
       box.querySelector('p').textContent = stNum(pts.length) + ' tıklama · ' + (mobile ? 'telefon (390 px genişlik)' : 'bilgisayar (1280 px genişlik)') + ' görünümü';
-    }, 2500));
+    }));
   }
   // Grafiklerin üzerine gelince küçük açıklama kutusu
   document.addEventListener('mouseover', e => {

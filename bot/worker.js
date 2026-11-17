@@ -32,7 +32,7 @@
  *   GRAPH_VERSION     (isteğe bağlı) Meta Graph API sürümü, varsayılan v23.0
  */
 
-const VERSION = '2026-11-15a';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
+const VERSION = '2026-11-17a';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
 const SESSION_MS = 30 * 60e3;          // bu kadar sessiz kalan sohbet baştan başlar
 const HUMAN_MS = 12 * 3600e3;          // "yetkili" istenince bot bu süre susar
 const WINDOW_MS = 23.5 * 3600e3;       // WhatsApp/Instagram 24 saat mesajlaşma penceresi (pay bırakılarak)
@@ -170,10 +170,17 @@ const SCHEMA = [
   'CREATE TABLE IF NOT EXISTS clicks (id INTEGER PRIMARY KEY AUTOINCREMENT, sid TEXT NOT NULL, t INTEGER NOT NULL, a TEXT, x REAL, y INTEGER, w INTEGER)',
   'CREATE INDEX IF NOT EXISTS clicks_t ON clicks (t)'
 ];
+// Var olan tablolara sonradan eklenen sütunlar (zaten varsa hata verir, yok sayılır)
+const MIGRATIONS = [
+  'ALTER TABLE clicks ADD COLUMN s TEXT',     // tıklanan bölümün kimliği (ısı haritası)
+  'ALTER TABLE clicks ADD COLUMN f REAL'      // bölümün yüzde kaçında tıklandı (0–1)
+];
 let schemaReady = null;
 async function db(env){
   if(!env.DB) throw new Error('D1 veritabanı bağlanmamış (binding adı DB olmalı)');
-  if(!schemaReady) schemaReady = env.DB.batch(SCHEMA.map(q => env.DB.prepare(q))).catch(e => { schemaReady = null; throw e; });
+  if(!schemaReady) schemaReady = env.DB.batch(SCHEMA.map(q => env.DB.prepare(q)))
+    .then(() => Promise.all(MIGRATIONS.map(q => env.DB.prepare(q).run().catch(() => {}))))
+    .catch(e => { schemaReady = null; throw e; });
   await schemaReady;
   return env.DB;
 }
@@ -1381,11 +1388,16 @@ async function track(req, env){
         uaDevice(ua, +b.pv.w), uaOs(ua), clean(cf.city || cf.country || '', 40), clean(b.pv.lang, 10)));
   }
   const ev = (Array.isArray(b.ev) ? b.ev : []).slice(0, 40);
-  ev.forEach(e => ops.push(D.prepare('INSERT INTO clicks (sid, t, a, x, y, w) VALUES (?, ?, ?, ?, ?, ?)')
-    .bind(sid, now, clean(e.a, 60), Math.max(0, Math.min(1, +e.x || 0)), num(e.y, 60000), num(e.w, 5000))));
   if(ev.length) ops.push(D.prepare('UPDATE visits SET clicks = clicks + ? WHERE sid = ?').bind(ev.filter(e => e.a).length, sid));
   if(b.end) ops.push(D.prepare('UPDATE visits SET dur = MAX(dur, ?), depth = MAX(depth, ?) WHERE sid = ?').bind(num(b.end.dur, 7200), num(b.end.depth, 100), sid));
-  if(ops.length) await D.batch(ops);
+  const clickOps = withSection => ev.map(e => withSection
+    ? D.prepare('INSERT INTO clicks (sid, t, a, x, y, w, s, f) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').bind(sid, now, clean(e.a, 60), Math.max(0, Math.min(1, +e.x || 0)),
+        num(e.y, 60000), num(e.w, 5000), e.s ? clean(e.s, 40) : null, e.s ? Math.max(0, Math.min(1, +e.f || 0)) : null)
+    : D.prepare('INSERT INTO clicks (sid, t, a, x, y, w) VALUES (?, ?, ?, ?, ?, ?)').bind(sid, now, clean(e.a, 60), Math.max(0, Math.min(1, +e.x || 0)), num(e.y, 60000), num(e.w, 5000)));
+  if(!ops.length && !ev.length) return new Response(null, {status: 204});
+  // Bölüm sütunları (s, f) henüz eklenemediyse tıklama eski biçimde kaydedilir
+  try{ await D.batch(ops.concat(clickOps(true))); }
+  catch(e){ if(!/column/i.test(e.message)) throw e; await D.batch(ops.concat(clickOps(false))); }
   return new Response(null, {status: 204});
 }
 async function stats(env, days){
@@ -1404,7 +1416,7 @@ async function stats(env, days){
     byHour: await all('SELECT dow, hr, COUNT(*) AS n FROM visits WHERE t >= ? GROUP BY dow, hr', since),
     sources: await top('src'), devices: await top('dev'), os: await top('os'), cities: await top('city'),
     actions: await all("SELECT a AS k, COUNT(*) AS n, COUNT(DISTINCT sid) AS s FROM clicks WHERE t >= ? AND a <> '' GROUP BY a ORDER BY n DESC LIMIT 150", since),
-    heat: await all('SELECT x, y, w FROM clicks WHERE t >= ? ORDER BY id DESC LIMIT 6000', since),
+    heat: await all('SELECT x, y, w, s, f FROM clicks WHERE t >= ? ORDER BY id DESC LIMIT 6000', since),
     live: (await all('SELECT COUNT(*) AS n FROM visits WHERE t > ?', now - 5 * 60e3))[0].n
   };
 }

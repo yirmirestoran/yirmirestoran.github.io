@@ -1465,7 +1465,16 @@ body.no-scroll .social{opacity:0;pointer-events:none}
     if(!a && e.target.closest('a, button')) a = 'diger';
     // Açılır pencerelerdeki tıklamalar sayfa konumuna bağlı olmadığı için ısı haritasına girmez
     const layer = e.target.closest('#sd-pop, .search, .sheet, .pst, [role="dialog"]');
-    queue.push({a, x: layer ? 0 : e.clientX / innerWidth, y: layer ? 0 : Math.round(e.pageY), w: layer ? 0 : innerWidth});
+    const c = {a, x: layer ? 0 : e.clientX / innerWidth, y: layer ? 0 : Math.round(e.pageY), w: layer ? 0 : innerWidth};
+    // Ekran genişliğine göre fotoğraflar ve bölümler farklı yükseklikte olur; tıklama en yakın kimlikli bölüme göre de kaydedilir
+    // (s: bölüm, f: bölümün yüzde kaçında), ısı haritası onu kendi ekranında aynı bölüme yerleştirir
+    for(let el = layer ? null : e.target; el && el !== document.body; el = el.parentElement){
+      if(!el.id || el.offsetHeight < 30) continue;
+      const r = el.getBoundingClientRect();
+      c.s = el.id.slice(0, 40); c.f = Math.round(Math.max(0, Math.min(1, (e.clientY - r.top) / r.height)) * 1000) / 1000;
+      break;
+    }
+    queue.push(c);
     if(queue.length >= 20) flush();
   }, true);
   let st;
