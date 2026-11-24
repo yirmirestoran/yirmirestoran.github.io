@@ -32,7 +32,7 @@
  *   GRAPH_VERSION     (isteğe bağlı) Meta Graph API sürümü, varsayılan v23.0
  */
 
-const VERSION = '2026-11-17a';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
+const VERSION = '2026-11-24a';          // Cloudflare'deki kodun güncel olup olmadığını anlamak için (ana sayfada görünür)
 const SESSION_MS = 30 * 60e3;          // bu kadar sessiz kalan sohbet baştan başlar
 const HUMAN_MS = 12 * 3600e3;          // "yetkili" istenince bot bu süre susar
 const WINDOW_MS = 23.5 * 3600e3;       // WhatsApp/Instagram 24 saat mesajlaşma penceresi (pay bırakılarak)
@@ -1415,7 +1415,7 @@ async function stats(env, days){
     byDay,
     byHour: await all('SELECT dow, hr, COUNT(*) AS n FROM visits WHERE t >= ? GROUP BY dow, hr', since),
     sources: await top('src'), devices: await top('dev'), os: await top('os'), cities: await top('city'),
-    actions: await all("SELECT a AS k, COUNT(*) AS n, COUNT(DISTINCT sid) AS s FROM clicks WHERE t >= ? AND a <> '' GROUP BY a ORDER BY n DESC LIMIT 150", since),
+    actions: await all("SELECT a AS k, COUNT(*) AS n, COUNT(DISTINCT sid) AS s FROM clicks WHERE t >= ? AND a <> '' GROUP BY a ORDER BY n DESC LIMIT 1000", since),
     heat: await all('SELECT x, y, w, s, f FROM clicks WHERE t >= ? ORDER BY id DESC LIMIT 6000', since),
     live: (await all('SELECT COUNT(*) AS n FROM visits WHERE t > ?', now - 5 * 60e3))[0].n
   };

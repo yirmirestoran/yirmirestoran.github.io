@@ -304,6 +304,9 @@ h2{font-size:25px!important}
 .st-bar .b i{display:block;height:100%;background:var(--accent);border-radius:0 5px 5px 0}
 .st-bar .v{font-weight:800;text-align:right;white-space:nowrap}
 .st-bar .v small{font-weight:600;color:var(--muted)}
+.st-bar.more{display:none}
+.st-card.open .st-bar.more{display:grid}
+.st-more{margin-top:10px}
 .st-foot{margin:10px 0 0;font-size:12px}
 .st-svg{width:100%;height:auto;display:block}
 .st-svg .st-b{fill:var(--accent)}
@@ -5583,10 +5586,12 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   // Yatay çubuk listesi (tek seri, değerler yazılı)
   function stBars(title, rows, total, opts){
     opts = opts || {};
-    const max = Math.max(1, ...rows.map(r => r.n));
-    return '<div class="st-card"><h3>' + title + '</h3>' + (rows.length ? '<div class="st-bars">' + rows.map(r =>
-      '<div class="st-bar" data-tip="' + esc(r.label + ': ' + stNum(r.n) + (opts.unit || '') + (r.tip ? ' · ' + r.tip : '')) + '"><span class="l">' + esc(r.label) + '</span>' +
-      '<span class="b"><i style="width:' + Math.max(2, r.n / max * 100) + '%"></i></span><span class="v">' + stNum(r.n) + (total ? ' <small>' + stPct(r.n, total) + '</small>' : '') + '</span></div>').join('') + '</div>'
+    const max = Math.max(1, ...rows.map(r => r.n)), lim = opts.limit || rows.length, more = rows.length - lim;
+    // Uzun listelerde ilk "limit" satır görünür, kalanı "Tümünü göster" ile açılır
+    return '<div class="st-card"><h3>' + title + '</h3>' + (rows.length ? '<div class="st-bars">' + rows.map((r, i) =>
+      '<div class="st-bar' + (i >= lim ? ' more' : '') + '" data-tip="' + esc(r.label + ': ' + stNum(r.n) + (opts.unit || '') + (r.tip ? ' · ' + r.tip : '')) + '"><span class="l">' + esc(r.label) + '</span>' +
+      '<span class="b">' + (r.n ? '<i style="width:' + Math.max(2, r.n / max * 100) + '%"></i>' : '') + '</span><span class="v">' + stNum(r.n) + (total ? ' <small>' + stPct(r.n, total) + '</small>' : '') + '</span></div>').join('') + '</div>' +
+        (more > 0 ? '<button type="button" class="btn sm st-more" data-more="' + more + '">Tümünü göster (' + more + ' daha)</button>' : '')
       : '<p class="hint">Henüz veri yok.</p>') + (opts.foot ? '<p class="hint st-foot">' + opts.foot + '</p>' : '') + '</div>';
   }
   function renderStats(){
@@ -5608,16 +5613,21 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
     h += '<div class="st-grid">' +
       stBars('Nereden geldiler?', rows(d.sources), v, {foot: 'Masadaki QR koddan gelenler “QR kod” olarak görünür (QR Kod sekmesindeki kod). Instagram ve Facebook uygulama içinden açılınca tanınır; WhatsApp\'tan paylaşılan bağlantılar genelde “Doğrudan” görünür.'}) +
       stBars('Cihaz', rows(d.devices), v) + stBars('İşletim sistemi', rows(d.os), v) + stBars('Şehir', rows(d.cities), v, {foot: 'Yaklaşık konum, internet bağlantısından tahmin edilir.'}) + '</div>';
-    const prod = acts.filter(a => a.k.startsWith('urun:')).slice(0, 12);
-    const other = acts.filter(a => !/^(urun|ara|kategori):/.test(a.k)).slice(0, 14);
-    const cats = acts.filter(a => a.k.startsWith('kategori:')).slice(0, 10);
-    const srch = acts.filter(a => a.k.startsWith('ara:')).slice(0, 12);
     const act = l => l.map(a => ({label: stLabel(a.k), n: a.n, tip: a.s + ' farklı ziyarette'}));
+    const other = act(acts.filter(a => !/^(urun|ara|kategori):/.test(a.k)));
+    const srch = act(acts.filter(a => a.k.startsWith('ara:')));
+    // Ürün ve kategoride menüdeki her şey listelenir; hiç bakılmayanlar 0 ile en sonda
+    const seen = Object.fromEntries(acts.map(a => [a.k, a]));
+    const allOf = (prefix, list, name) => list.map(x => ({x, a: seen[prefix + x.id] || {n: 0, s: 0}}))
+      .sort((p, q) => q.a.n - p.a.n || name(p.x).localeCompare(name(q.x), 'tr'))
+      .map(({x, a}) => ({label: name(x), n: a.n, tip: a.n ? a.s + ' farklı ziyarette' : 'hiç açılmadı'}));
+    const items = state.categories.flatMap(c => c.items.map(it => Object.assign({}, it, {cat: c.title})));
+    const prod = allOf('urun:', items, it => it.name), cats = allOf('kategori:', state.categories, c => c.title);
     h += '<div class="st-grid">' +
-      stBars('Neye tıkladılar?', act(other), 0, {unit: ' tıklama'}) +
-      stBars('En çok bakılan ürünler', act(prod), 0, {unit: ' kez açıldı'}) +
-      stBars('Kategori seçimleri', act(cats), 0, {unit: ' tıklama'}) +
-      stBars('Menüde ne aradılar?', act(srch), 0, {unit: ' arama'}) + '</div>';
+      stBars('Neye tıkladılar?', other, 0, {unit: ' tıklama', limit: 14}) +
+      stBars('En çok bakılan ürünler', prod, 0, {unit: ' kez açıldı', limit: 12, foot: 'Menüdeki tüm ürünler: en çok açılandan en aza, hiç açılmayanlar 0 ile en sonda.'}) +
+      stBars('Kategori seçimleri', cats, 0, {unit: ' tıklama', limit: 12}) +
+      stBars('Menüde ne aradılar?', srch, 0, {unit: ' arama', limit: 12}) + '</div>';
     h += '<div class="st-card"><div class="st-heat-head"><h3>Tıklama ısı haritası</h3><span style="flex:1"></span>' +
       '<div class="seg" id="st-heat-dev"><button type="button" data-dev="m"' + (stHeatDev === 'm' ? ' class="on"' : '') + '>Telefon</button><button type="button" data-dev="d"' + (stHeatDev === 'd' ? ' class="on"' : '') + '>Bilgisayar</button></div></div>' +
       '<p class="hint">Menüde nerelere dokunulduğu: koyu kırmızı en çok, sarı daha az. Açılır pencerelerdeki tıklamalar burada gösterilmez.</p><div class="st-heat" id="st-heat"></div></div>';
@@ -5742,6 +5752,12 @@ body.locked{background-color:#a8844f;background-image:radial-gradient(70% 55% at
   });
   $('#st-refresh').addEventListener('click', loadStats);
   $('#st-body').addEventListener('click', e => {
+    const m = e.target.closest('.st-more');
+    if(m){
+      const open = m.closest('.st-card').classList.toggle('open');
+      m.textContent = open ? 'Daha az göster' : 'Tümünü göster (' + m.dataset.more + ' daha)';
+      return;
+    }
     const b = e.target.closest('#st-heat-dev button');
     if(!b) return;
     stHeatDev = b.dataset.dev;
