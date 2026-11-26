@@ -873,6 +873,46 @@
           "allergens": [],
           "traceWarning": "",
           "id": "raki--yeni-urun-7"
+        },
+        {
+          "name": "Sarı Zeybek 20 Cl ",
+          "price": "1.275 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-8"
+        },
+        {
+          "name": "Sarı Zeybek 35 Cl ",
+          "price": "2.000",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-9"
+        },
+        {
+          "name": "Sarı Zeybek 50 Cl ",
+          "price": "2.475 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-10"
+        },
+        {
+          "name": "Sarı Zeybek 70 CL ",
+          "price": "3.400 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-11"
         }
       ]
     }
