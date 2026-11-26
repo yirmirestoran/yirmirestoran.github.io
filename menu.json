@@ -993,6 +993,26 @@
           "allergens": [],
           "traceWarning": "",
           "id": "raki--yeni-urun-19"
+        },
+        {
+          "name": "Tek Rakı ",
+          "price": "450 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-20"
+        },
+        {
+          "name": "Duble Rakı ",
+          "price": "700 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-21"
         }
       ]
     }
