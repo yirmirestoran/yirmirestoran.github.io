@@ -797,6 +797,24 @@
       ],
       "layout": "list",
       "cover": "images/kapak-alkolsuz-icecekler-mur3e0wg.jpg"
+    },
+    {
+      "id": "raki",
+      "title": "RAKI",
+      "subtitle": "",
+      "collage": [],
+      "items": [
+        {
+          "name": "Yeni Seri 35 Cl",
+          "price": "1600",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun"
+        }
+      ]
     }
   ],
   "campaigns": [],
