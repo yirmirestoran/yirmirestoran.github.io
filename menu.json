@@ -1073,7 +1073,7 @@
           "id": "sarap--yeni-urun-5"
         },
         {
-          "name": "Selection Narince-Emir",
+          "name": "Selection Narince-Emir 75 CL ",
           "price": "2.750 TL",
           "description": "",
           "calories": "",
@@ -1081,6 +1081,26 @@
           "allergens": [],
           "traceWarning": "",
           "id": "sarap--yeni-urun-6"
+        },
+        {
+          "name": "Sarafin Öküzgözü 75 CL ",
+          "price": "3.500 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "sarap--yeni-urun-7"
+        },
+        {
+          "name": "L Cabarnet Merlot 75 CL ",
+          "price": "3.500 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "sarap--yeni-urun-8"
         }
       ]
     }
