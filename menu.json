@@ -806,7 +806,7 @@
       "items": [
         {
           "name": "Yeni Seri 35 Cl",
-          "price": "1600",
+          "price": "1.600 TL",
           "description": "",
           "calories": "",
           "calorieEstimated": true,
@@ -816,7 +816,7 @@
         },
         {
           "name": "Yeni Seri 50 Cl",
-          "price": "2100",
+          "price": "2.100 TL",
           "description": "",
           "calories": "",
           "calorieEstimated": true,
@@ -826,13 +826,53 @@
         },
         {
           "name": "Tekirdağ Yaş Üzüm 35 Cl",
-          "price": "1550",
+          "price": "1.550 TL",
           "description": "",
           "calories": "",
           "calorieEstimated": true,
           "allergens": [],
           "traceWarning": "",
           "id": "raki--yeni-urun-3"
+        },
+        {
+          "name": "Beylerbeyi Göbek 20 Cl",
+          "price": "1.175 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-4"
+        },
+        {
+          "name": "Beylerbeyi Göbek 35 Cl ",
+          "price": "1.750 TL ",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-5"
+        },
+        {
+          "name": "Beylerbeyi Göbek 50 Cl ",
+          "price": "2.275 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-6"
+        },
+        {
+          "name": "Beylerbeyi Göbek 70 CL ",
+          "price": "3.100 TL ",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-7"
         }
       ]
     }
