@@ -1101,6 +1101,26 @@
           "allergens": [],
           "traceWarning": "",
           "id": "sarap--yeni-urun-8"
+        },
+        {
+          "name": "Vinis Beyaz 75 CL ",
+          "price": "1.500 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "sarap--yeni-urun-9"
+        },
+        {
+          "name": "Vinis Rose 75 CL ",
+          "price": "1.500 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "sarap--yeni-urun-10"
         }
       ]
     }
