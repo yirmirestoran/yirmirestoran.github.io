@@ -953,6 +953,36 @@
           "allergens": [],
           "traceWarning": "",
           "id": "raki--yeni-urun-15"
+        },
+        {
+          "name": "Mercan Göbek 35 Cl ",
+          "price": "1.850 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-16"
+        },
+        {
+          "name": "Mercan Göbek 50 Cl ",
+          "price": "2.400 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-17"
+        },
+        {
+          "name": "Mercan Göbek 70 CL ",
+          "price": "3.000",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-18"
         }
       ]
     }
