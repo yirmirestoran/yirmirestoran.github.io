@@ -1015,6 +1015,74 @@
           "id": "raki--yeni-urun-21"
         }
       ]
+    },
+    {
+      "id": "sarap",
+      "title": "Şarap",
+      "subtitle": "",
+      "collage": [],
+      "items": [
+        {
+          "name": "Hanchalar Rose 75 CL",
+          "price": "1.500 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "sarap--yeni-urun"
+        },
+        {
+          "name": "Hanchalar Syrah Fıçılı 75 CL ",
+          "price": "2.400 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "sarap--yeni-urun-2"
+        },
+        {
+          "name": "Hanchalar 9 Tat 50 CL",
+          "price": "1.800",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "sarap--yeni-urun-3"
+        },
+        {
+          "name": "Nodus Chardonnay 75 CL ",
+          "price": "3.250",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "sarap--yeni-urun-4"
+        },
+        {
+          "name": "Artı Sauvignon Blanc 75 CL ",
+          "price": "2.000 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "sarap--yeni-urun-5"
+        },
+        {
+          "name": "Selection Narince-Emir",
+          "price": "2.750 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "sarap--yeni-urun-6"
+        }
+      ]
     }
   ],
   "campaigns": [],
