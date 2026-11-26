@@ -913,6 +913,46 @@
           "allergens": [],
           "traceWarning": "",
           "id": "raki--yeni-urun-11"
+        },
+        {
+          "name": "Efe Gold 20 Cl ",
+          "price": "1.150 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-12"
+        },
+        {
+          "name": "Efe Gold 35 Cl ",
+          "price": "1.700",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-13"
+        },
+        {
+          "name": "Efe Gold 50 Cl ",
+          "price": "2.100 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-14"
+        },
+        {
+          "name": "Efe Gold 70 CL ",
+          "price": "2.850 TL",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-15"
         }
       ]
     }
