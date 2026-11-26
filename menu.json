@@ -813,6 +813,16 @@
           "allergens": [],
           "traceWarning": "",
           "id": "raki--yeni-urun"
+        },
+        {
+          "name": "Yeni Seri 50 Cl",
+          "price": "2100",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-2"
         }
       ]
     }
