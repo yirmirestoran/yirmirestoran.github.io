@@ -1061,7 +1061,8 @@
           "calorieEstimated": true,
           "allergens": [],
           "traceWarning": "",
-          "id": "sarap--yeni-urun"
+          "id": "sarap--yeni-urun",
+          "image": "images/hanchalar-rose-75-cl-mwxznl84.jpg"
         },
         {
           "name": "Hanchalar Syrah Fıçılı 75 CL ",
@@ -1071,7 +1072,8 @@
           "calorieEstimated": true,
           "allergens": [],
           "traceWarning": "",
-          "id": "sarap--yeni-urun-2"
+          "id": "sarap--yeni-urun-2",
+          "image": "images/hanchalar-syrah-ficili-75-cl-mwxznv5k.jpg"
         },
         {
           "name": "Hanchalar 9 Tat 50 CL",
@@ -1153,7 +1155,8 @@
           "traceWarning": "",
           "id": "sarap--yeni-urun-10"
         }
-      ]
+      ],
+      "cover": "images/kapak-sarap-mwxznarp.jpg"
     }
   ],
   "campaigns": [],
