@@ -823,6 +823,16 @@
           "allergens": [],
           "traceWarning": "",
           "id": "raki--yeni-urun-2"
+        },
+        {
+          "name": "Tekirdağ Yaş Üzüm 35 Cl",
+          "price": "1550",
+          "description": "",
+          "calories": "",
+          "calorieEstimated": true,
+          "allergens": [],
+          "traceWarning": "",
+          "id": "raki--yeni-urun-3"
         }
       ]
     }
